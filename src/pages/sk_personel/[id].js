@@ -23,24 +23,21 @@ const SKPersonelForm = () => {
 
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
-    console.log("SK Personnel ID:", id);
-    if (id) {
-      const fetchComplaints = async () => {
-        try {
-          const response = await axios.get(`http://127.0.0.1:8000/assigned-reports/${id}`);
-          
-          // Filter out complaints with status 'dismissed' or 'resolved'
-          const filteredComplaints = response.data.retrieved_data?.filter(complaint => 
-            complaint.status !== 'dismissed' && complaint.status !== 'resolved'
-          ) || [];
+    if (!id) return;
   
-          setComplaints(filteredComplaints);
-        } catch (error) {
-          console.error('Error fetching complaints:', error);
-        }
-      };
-      fetchComplaints();
-    }
+    const fetchComplaints = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/assigned-reports/${id}`);
+        setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+      }
+    };
+  
+    fetchComplaints();
+    const interval = setInterval(fetchComplaints, 5000); // Fetch every 5 seconds
+  
+    return () => clearInterval(interval);
   }, [id]);
   
   // Handle ticket image selection
@@ -91,7 +88,7 @@ const SKPersonelForm = () => {
       alert(`Extracted Ticket Number: ${extractedTicketNumber}`);
   
       // Fetch SK personnel details
-      const skPersonnel = await fetchSKPersonnel(personnelId); 
+      const skPersonnel = await fetchSKPersonnel(personnelId);
       if (!skPersonnel) {
         alert("Failed to fetch SK personnel details.");
         return;
@@ -102,19 +99,27 @@ const SKPersonelForm = () => {
         resolution,
         ticket_number: extractedTicketNumber,
         resolved_by: skPersonnel.id,
-        resolved_by_name: skPersonnel.fullname, // Send resolved by name
+        resolved_by_name: skPersonnel.fullname,
       });
   
-      console.log('Complaint resolved:', response.data);
+      console.log("Complaint resolved:", response.data);
   
-      // Update UI by removing the resolved complaint from the list
-      setComplaints(complaints.filter(c => c.id !== complaintId));
+      // Find the complaint and update ticket count in UI
+      setComplaints((prevComplaints) =>
+        prevComplaints.map((c) =>
+          c.franchise_plate_no === response.data.franchise_plate_no
+            ? { ...c, ticket_count: response.data.ticket_count } // Update ticket count
+            : c
+        )
+      );
+  
       alert("Complaint resolved successfully!");
     } catch (error) {
       console.error("Error during resolution:", error);
       alert("An error occurred while resolving the complaint.");
     }
   };
+  
   
   const dismissComplaint = async (complaintId, personnelId) => {
     const reason = prompt("Enter reason for dismissal:");

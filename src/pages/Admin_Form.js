@@ -630,6 +630,7 @@ const handleShowResolvedComplaints = () => {
                                             <Typography><strong>Name:</strong> {complaint.driver_info.driver_name}</Typography>
                                             <Typography><strong>Association:</strong> {complaint.driver_info.association}</Typography>
                                             <Typography><strong>Address:</strong> {complaint.driver_info.address}</Typography>
+                                            <Typography><strong>Ticket Count:</strong> {complaint.driver_info.ticket_count}</Typography>
                                         </>
                                         
                                     )} 

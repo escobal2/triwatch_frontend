@@ -108,7 +108,10 @@ const IssuedTickets = () => {
                     <Typography paragraph>
                       <strong>Ticket Number:</strong> {ticket.ticket_number}
                     </Typography>
-
+                    <Typography paragraph>
+                      <strong>Franchise Plate Number:</strong> {ticket.franchise_plate_no}
+                    </Typography>
+                    
                     <Box sx={{ marginTop: 'auto' }}>
                       <Button
                         variant="contained"
