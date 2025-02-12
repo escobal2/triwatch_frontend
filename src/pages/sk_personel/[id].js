@@ -4,6 +4,7 @@ import { ExitToApp } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Tesseract from "tesseract.js";
+import API_BASE_URL from '@/config/apiConfig';
 import axios from 'axios';
 
 const SKPersonelForm = () => {
@@ -27,7 +28,7 @@ const SKPersonelForm = () => {
   
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/assigned-reports/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${id}`);
         setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -56,7 +57,7 @@ const SKPersonelForm = () => {
       return null;
     }
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/sk_personnel/${personnelId}`);
+      const response = await axios.get(`${API_BASE_URL}/sk_personnel/${personnelId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching SK personnel:", error.response?.data || error.message);
@@ -95,7 +96,7 @@ const SKPersonelForm = () => {
       }
   
       // Send resolution details along with SK personnel name
-      const response = await axios.post(`http://127.0.0.1:8000/add-resolution/${complaintId}`, {
+      const response = await axios.post(`${API_BASE_URL}/add-resolution/${complaintId}`, {
         resolution,
         ticket_number: extractedTicketNumber,
         resolved_by: skPersonnel.id,
@@ -137,7 +138,7 @@ const SKPersonelForm = () => {
     }
   
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/dismiss-complaint/${complaintId}`, {
+      const response = await axios.post(`${API_BASE_URL}/dismiss-complaint/${complaintId}`, {
         dismiss_reason: reason,
         dismissed_by: skPersonnel.id, // Send ID
         dismissed_by_name: skPersonnel.fullname, // Send Name
