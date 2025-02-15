@@ -65,7 +65,7 @@ const EmergencyComplaints = () => {
         if (complaintId && message) {
             try {
                 const response = await axios.post(
-                    `http://127.0.0.1:8000/notify-emergency-complainant/${complaintId}`,
+                    `${API_BASE_URL}/notify-emergency-complainant/${complaintId}`,
                     { message }
                 );
                 if (response.data?.message === 'Notification sent successfully!') {
@@ -88,7 +88,7 @@ const EmergencyComplaints = () => {
 
     const handleArchiveComplaint = async (complaintId) => {
         try {
-            const response = await axios.post(`http://127.0.0.1:8000/archive-emergency-complaint/${complaintId}`);
+            const response = await axios.post(`${API_BASE_URL}/archive-emergency-complaint/${complaintId}`);
             if (response.status === 200) {
                 setSuccessMessageArchive("Complaint successfully archived.");
                 setErrorMessage(null);
