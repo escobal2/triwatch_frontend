@@ -75,7 +75,7 @@ const CommuterForm = () => {
       try {
         const commuterId = 1; // Replace with the commuter's ID
         const response = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
-        setCommuterName(response.data.fullname); // Update to match your backend's field for the name
+        setCommuterName(response.data.name); // Update to match your backend's field for the name
       } catch (error) {
         console.error(error);
         setCommuterName('Unknown');
