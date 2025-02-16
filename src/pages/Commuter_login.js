@@ -12,19 +12,20 @@ const CommuterLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Sending the username and password to the backend
+  
     try {
       const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
         username,
         password,
       });
-
+  
       if (response.status === 200) {
-        // On successful login, redirect to Commuter_Form
-        router.push('/Commuterform');
+        const commuter = response.data; // Ensure the response includes `id` and `name`
+        console.log("Commuter data from API:", commuter);
+        
+        sessionStorage.setItem('commuter', JSON.stringify(commuter)); // Store commuter data
+        router.push('/Commuterform'); // Redirect
       } else {
-        // On failure, show error message
         setErrorMessage(response.data.message || 'Invalid username or password');
       }
     } catch (error) {

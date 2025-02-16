@@ -67,27 +67,47 @@ const EmergencyButton = styled(StyledButton)({
 const CommuterForm = () => {
   const [commuterName, setCommuterName] = useState('Loading...');
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [commuterId, setCommuterId] = useState(null);
+  const [commuter, setCommuter] = useState({ id: null, name: '' });
   const isMobile = useMediaQuery('(max-width:600px)');
   const router = useRouter();
   const { id } = router.query; // Get commuter ID from URL
 
   useEffect(() => {
-    if (!id) return; // Wait for ID to be available
+    // Retrieve commuter data from sessionStorage
+    const storedCommuter = sessionStorage.getItem('commuter');
+    if (storedCommuter) {
+      const parsedCommuter = JSON.parse(storedCommuter);
+      console.log("Retrieved from sessionStorage:", parsedCommuter);
+      setCommuter(parsedCommuter);
+      setCommuterId(parsedCommuter.id); // Assuming commuter object has an `id`
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!commuterId) {
+      console.warn("No commuterId found!");
+      return;
+    }
 
     const fetchCommuterData = async () => {
       try {
-        console.log("Fetching commuter data for ID:", id); // Debugging line
-        const response = await axios.get(`${API_BASE_URL}/commuter/${id}`);
-        console.log("API Response:", response.data); // Debugging line
+        console.log(`Fetching data for ID: ${commuterId}`);
+        const response = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
+        console.log("API Response:", response.data);
         setCommuterName(response.data.name);
       } catch (error) {
-        console.error("Error fetching commuter data:", error);
+        console.error("API Error:", error);
         setCommuterName("Unknown");
       }
     };
 
     fetchCommuterData();
-  }, [id]); // Re-run effect when ID changes
+  }, [commuterId]);
+
+  
+  
+  
 
   const handleDrawerOpen = () => setOpenDrawer(true);
   const handleDrawerClose = () => setOpenDrawer(false);
@@ -118,7 +138,7 @@ const CommuterForm = () => {
           variant="h6"
           sx={{ marginBottom: 2, color: '#000', fontWeight: 'bold', fontFamily: 'Times New Roman, Times, serif' }}
         >
-          Welcome, {commuterName}
+        Welcome, {commuterName || 'Guest'}
         </Typography>
 
         <div
