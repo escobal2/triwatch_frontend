@@ -21,17 +21,37 @@ import API_BASE_URL from '@/config/apiConfig';
 const CreateCommuterAccount = () => {
   const router = useRouter();
   const [commuterData, setCommuterData] = useState({
-    name: '', // Changed from 'name' to 'fullname'
-    contactnum: '', // Ensuring only one contactnum exists
+    name: '',
+    contactnum: '',
     username: '',
     password: '',
-    validId: null, // Store the uploaded file
+    validId: null,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null); // Store reCAPTCHA response
+  const [captchaValue, setCaptchaValue] = useState(null);
+
+  // Function to handle contact number formatting
+  const handleContactNumberChange = (e) => {
+    let value = e.target.value;
+
+    // If the input starts with "0", replace it with "+63"
+    if (value.startsWith('0')) {
+      value = '+63' + value.slice(1);
+    }
+
+    // Limit input to 13 characters (including "+63")
+    if (value.length > 13) {
+      value = value.slice(0, 13);
+    }
+
+    setCommuterData((prevData) => ({
+      ...prevData,
+      contactnum: value,
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,7 +61,7 @@ const CreateCommuterAccount = () => {
   const handleFileChange = (e) => {
     setCommuterData((prevData) => ({
       ...prevData,
-      validId: e.target.files[0], // Store uploaded file
+      validId: e.target.files[0],
     }));
   };
 
@@ -61,14 +81,14 @@ const CreateCommuterAccount = () => {
     }
 
     const formData = new FormData();
-    formData.append('name', commuterData.name); // Changed 'name' to 'fullname'
-    formData.append('contactnum', commuterData.contactnum); // Ensure contact number is correctly added
+    formData.append('name', commuterData.name);
+    formData.append('contactnum', commuterData.contactnum);
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
-    formData.append('g-recaptcha-response', captchaValue); // Ensure it's being sent
+    formData.append('g-recaptcha-response', captchaValue);
 
-    console.log("Sending data:", Object.fromEntries(formData)); // Log request data
+    console.log("Sending data:", Object.fromEntries(formData));
 
     try {
       const response = await axios.post(`${API_BASE_URL}/commuter_create_account`, formData, {
@@ -108,7 +128,14 @@ const CreateCommuterAccount = () => {
                 <TextField fullWidth label="Full Name" name="name" value={commuterData.name} onChange={handleChange} required />
               </Grid>
               <Grid item xs={12}>
-                <TextField fullWidth label="Contact Number" name="contactnum" value={commuterData.contactnum} onChange={handleChange} required />
+                <TextField 
+                  fullWidth 
+                  label="Contact Number" 
+                  name="contactnum" 
+                  value={commuterData.contactnum} 
+                  onChange={handleContactNumberChange} 
+                  required 
+                />
               </Grid>
               <Grid item xs={12}>
                 <TextField fullWidth label="Username" name="username" value={commuterData.username} onChange={handleChange} required />
