@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">triwatch</string>
+    <string name="title_activity_main">triwatch</string>
+    <string name="package_name">com.triwatch.app</string>
+    <string name="custom_url_scheme">com.triwatch.app</string>
+</resources>

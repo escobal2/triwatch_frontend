@@ -52,24 +52,25 @@ const CreateCommuterAccount = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     if (!captchaValue) {
       alert('Please verify the reCAPTCHA');
       setLoading(false);
       return;
     }
-
+  
     try {
       const formData = new FormData();
       formData.append('name', commuterData.fullname);
       formData.append('username', commuterData.username);
       formData.append('password', commuterData.password);
       formData.append('valid_id', commuterData.validId); // Attach the file
-
+      formData.append('g-recaptcha-response', captchaValue); // 🔥 Add this line
+  
       const response = await axios.post(`${API_BASE_URL}/commuter_create_account`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
+  
       if (response.status === 201) {
         setDialogOpen(true);
         setCommuterData({ fullname: '', username: '', password: '', validId: null });
@@ -84,6 +85,7 @@ const CreateCommuterAccount = () => {
       setLoading(false);
     }
   };
+  
 
   const handleDialogClose = () => {
     setDialogOpen(false);

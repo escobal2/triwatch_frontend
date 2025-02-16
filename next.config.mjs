@@ -1,9 +1,14 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  output: 'export', // Enables static export
   images: {
-    domains: ['127.0.0.1', 'localhost'], // Include other hostnames if necessary
-  },
+    unoptimized: true, // Disables the Image Optimization API
+}
+,trailingSlash: true, // Add trailing slashes for better static compatibility
+env: {
+  TZ: 'Asia/Manila',
+},
 };
 
 export default nextConfig;
