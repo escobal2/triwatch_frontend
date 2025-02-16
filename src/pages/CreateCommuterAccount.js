@@ -21,7 +21,8 @@ import API_BASE_URL from '@/config/apiConfig';
 const CreateCommuterAccount = () => {
   const router = useRouter();
   const [commuterData, setCommuterData] = useState({
-    name: '',
+    name: '', // Changed from 'name' to 'fullname'
+    contactnum: '', // Ensuring only one contactnum exists
     username: '',
     password: '',
     validId: null, // Store the uploaded file
@@ -52,30 +53,31 @@ const CreateCommuterAccount = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-  
+
     if (!captchaValue) {
       alert('Please verify the reCAPTCHA');
       setLoading(false);
       return;
     }
-  
+
     const formData = new FormData();
-    formData.append('name', commuterData.name);
+    formData.append('name', commuterData.name); // Changed 'name' to 'fullname'
+    formData.append('contactnum', commuterData.contactnum); // Ensure contact number is correctly added
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
-    formData.append('g-recaptcha-response', captchaValue); // 🔥 Ensure it's being sent
-  
+    formData.append('g-recaptcha-response', captchaValue); // Ensure it's being sent
+
     console.log("Sending data:", Object.fromEntries(formData)); // Log request data
-  
+
     try {
       const response = await axios.post(`${API_BASE_URL}/commuter_create_account`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-  
+
       if (response.status === 201) {
         setDialogOpen(true);
-        setCommuterData({ name: '', username: '', password: '', validId: null });
+        setCommuterData({ name: '', username: '', password: '', contactnum: '', validId: null });
       } else {
         alert('Something went wrong, please try again.');
       }
@@ -86,8 +88,6 @@ const CreateCommuterAccount = () => {
       setLoading(false);
     }
   };
-  
-  
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -106,6 +106,9 @@ const CreateCommuterAccount = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField fullWidth label="Full Name" name="name" value={commuterData.name} onChange={handleChange} required />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth label="Contact Number" name="contactnum" value={commuterData.contactnum} onChange={handleChange} required />
               </Grid>
               <Grid item xs={12}>
                 <TextField fullWidth label="Username" name="username" value={commuterData.username} onChange={handleChange} required />

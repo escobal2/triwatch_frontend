@@ -53,6 +53,8 @@ const ReportForm = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
+    commuterName: "",
+    commuterContact: "",
     fullName: "",
     contactNumber: "",
     category: "",
@@ -73,6 +75,12 @@ const ReportForm = () => {
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(null);
   const [lat, setLat] = useState(null);
+  const [commuter, setCommuter] = useState(null);
+  const [commuterId, setCommuterId] = useState(null);
+  const [commuterName, setCommuterName] = useState("");
+  const [commuterContact, setCommuterContact] = useState("");
+
+
 
   // Initialize Mapbox on mount and use Geolocation API for current location
   useEffect(() => {
@@ -149,6 +157,56 @@ const ReportForm = () => {
     });
   };
 
+  useEffect(() => {
+    const storedCommuter = sessionStorage.getItem("commuter");
+    if (storedCommuter) {
+      const parsedCommuter = JSON.parse(storedCommuter);
+      console.log("Retrieved from sessionStorage:", parsedCommuter);
+
+      setCommuterId(parsedCommuter?.id || null);
+      
+      // Populate form fields with stored data
+      setFormData({
+        fullName: parsedCommuter?.name?.trim() || "Unknown",
+        contactNumber: parsedCommuter?.contactnum?.trim() || "N/A",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!commuterId) {
+      console.warn("No commuterId found!");
+      return;
+    }
+
+    const fetchCommuterData = async () => {
+      try {
+        console.log(`Fetching data for ID: ${commuterId}`);
+        const { data } = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
+        console.log("API Response:", data);
+
+        // Update form fields with fetched data
+        setFormData({
+          fullName: data?.name || "Unknown",
+          contactNumber: data?.contactnum || "N/A",
+        });
+      } catch (error) {
+        console.error("API Error:", error);
+        setFormData({
+          fullName: (response.data?.name || "Unknown").trim(),
+          contactNumber: (response.data?.contactnum || "N/A").trim(),
+        });
+      }
+    };
+
+    fetchCommuterData();
+  }, [commuterId]);
+
+  
+  
+  
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
@@ -168,6 +226,8 @@ const ReportForm = () => {
 
         setSubmissionStatus("success");
         setFormData({
+          commuterName: "",
+          commuterContact: "",
           fullName: "",
           contactNumber: "",
           category: "",
@@ -218,31 +278,24 @@ const ReportForm = () => {
         <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: 4 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
+            <TextField
                 fullWidth
                 label="Full Name"
                 variant="outlined"
-                name="fullName"
+                name="name"
                 value={formData.fullName}
-                onChange={handleChange}
-                error={Boolean(formErrors.fullName)}
-                helperText={formErrors.fullName}
+                disabled // Make it non-editable
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+            <TextField
                 fullWidth
                 label="Contact Number"
                 variant="outlined"
                 type="tel"
                 name="contactNumber"
                 value={formData.contactNumber}
-                onChange={handleContactNumberChange}
-                error={Boolean(formErrors.contactNumber)}
-                helperText={formErrors.contactNumber}
-                inputProps={{
-                  maxLength: 13,
-                }}
+                disabled // Make it non-editable
               />
             </Grid>
             <Grid item xs={12}>
