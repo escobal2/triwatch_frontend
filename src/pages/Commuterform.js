@@ -69,13 +69,15 @@ const CommuterForm = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const isMobile = useMediaQuery('(max-width:600px)');
   const router = useRouter();
+  const { id } = router.query; // Get commuter ID from URL
 
   useEffect(() => {
+    if (!id) return; // Wait for ID to be available
+
     const fetchCommuterData = async () => {
       try {
-        const commuterId = 1; // Replace with the commuter's ID
-        const response = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
-        setCommuterName(response.data.name); // Update to match your backend's field for the name
+        const response = await axios.get(`${API_BASE_URL}/commuter/${id}`);
+        setCommuterName(response.data.name); // Make sure this matches your DB field
       } catch (error) {
         console.error(error);
         setCommuterName('Unknown');
@@ -83,7 +85,7 @@ const CommuterForm = () => {
     };
 
     fetchCommuterData();
-  }, []);
+  }, [id]); // Re-run effect when ID changes
 
   const handleDrawerOpen = () => setOpenDrawer(true);
   const handleDrawerClose = () => setOpenDrawer(false);
