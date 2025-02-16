@@ -132,29 +132,33 @@ const AdminForm = () => {
         setMessage(event.target.value);
     };
     const sendSMSNotification = async () => {
-        if (complaintId && message) {
-            try {
-                const response = await axios.post(
-                    `${API_BASE_URL}/notify-complainant/${complaintId}`,
-                    { message }
-                );
-                if (response.data?.message === 'Notification sent successfully!') {
-                    console.log("SMS sent successfully!");
-                    setSuccessMessageSMS("SMS sent successfully!");
-                    setOpenDialog(false); // Close the dialog after success
-                } else {
-                    console.error("Failed to send SMS:", response.data.message);
-                    setSuccessMessageSMS("Failed to send SMS");
-                }
-            } catch (error) {
-                console.error("Error sending SMS:", error.response?.data || error.message);
-                setSuccessMessageSMS("Error sending SMS");
-            }
-        } else {
+        if (!complaintId || !message) {
             console.error("Missing complaintId or message");
             setSuccessMessageSMS("Missing complaintId or message");
+            return;
+        }
+    
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/notify-complainant/${complaintId}`,
+                { message }
+            );
+    
+            // Check if the response has success=true
+            if (response.data?.success) {
+                console.log("SMS sent successfully!");
+                setSuccessMessageSMS("SMS sent successfully!");
+                setOpenDialog(false); // Close the dialog after success
+            } else {
+                console.error("Failed to send SMS:", response.data?.message);
+                setSuccessMessageSMS(`Failed to send SMS: ${response.data?.message}`);
+            }
+        } catch (error) {
+            console.error("Error sending SMS:", error.response?.data || error.message);
+            setSuccessMessageSMS(`Error sending SMS: ${error.response?.data?.message || error.message}`);
         }
     };
+    
     
     
     const fetchArchivedComplaints = useCallback(async () => {
