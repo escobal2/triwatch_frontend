@@ -21,7 +21,7 @@ import API_BASE_URL from '@/config/apiConfig';
 const CreateCommuterAccount = () => {
   const router = useRouter();
   const [commuterData, setCommuterData] = useState({
-    fullname: '',
+    name: '',
     username: '',
     password: '',
     validId: null, // Store the uploaded file
@@ -60,7 +60,7 @@ const CreateCommuterAccount = () => {
     }
   
     const formData = new FormData();
-    formData.append('name', commuterData.fullname);
+    formData.append('name', commuterData.name);
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
@@ -75,7 +75,7 @@ const CreateCommuterAccount = () => {
   
       if (response.status === 201) {
         setDialogOpen(true);
-        setCommuterData({ fullname: '', username: '', password: '', validId: null });
+        setCommuterData({ name: '', username: '', password: '', validId: null });
       } else {
         alert('Something went wrong, please try again.');
       }
@@ -105,7 +105,7 @@ const CreateCommuterAccount = () => {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <TextField fullWidth label="Full Name" name="fullname" value={commuterData.fullname} onChange={handleChange} required />
+                <TextField fullWidth label="Full Name" name="name" value={commuterData.name} onChange={handleChange} required />
               </Grid>
               <Grid item xs={12}>
                 <TextField fullWidth label="Username" name="username" value={commuterData.username} onChange={handleChange} required />
