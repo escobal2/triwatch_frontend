@@ -79,7 +79,7 @@ const CommuterForm = () => {
         console.log("Fetching commuter data for ID:", id); // Debugging line
         const response = await axios.get(`${API_BASE_URL}/commuter/${id}`);
         console.log("API Response:", response.data); // Debugging line
-        setCommuterName(response.data.fullname);
+        setCommuterName(response.data.name);
       } catch (error) {
         console.error("Error fetching commuter data:", error);
         setCommuterName("Unknown");
