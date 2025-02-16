@@ -6,7 +6,7 @@
     "dev": "next dev",
     "start": "npm start",
     "lint": "next lint",
-    "build": "next build && next export"
+    "build": "next build"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.1",
