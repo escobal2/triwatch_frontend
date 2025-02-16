@@ -59,14 +59,16 @@ const CreateCommuterAccount = () => {
       return;
     }
   
-    try {
-      const formData = new FormData();
-      formData.append('name', commuterData.fullname);
-      formData.append('username', commuterData.username);
-      formData.append('password', commuterData.password);
-      formData.append('valid_id', commuterData.validId); // Attach the file
-      formData.append('g-recaptcha-response', captchaValue); // 🔥 Add this line
+    const formData = new FormData();
+    formData.append('name', commuterData.fullname);
+    formData.append('username', commuterData.username);
+    formData.append('password', commuterData.password);
+    formData.append('valid_id', commuterData.validId);
+    formData.append('g-recaptcha-response', captchaValue); // 🔥 Ensure it's being sent
   
+    console.log("Sending data:", Object.fromEntries(formData)); // Log request data
+  
+    try {
       const response = await axios.post(`${API_BASE_URL}/commuter_create_account`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -78,13 +80,13 @@ const CreateCommuterAccount = () => {
         alert('Something went wrong, please try again.');
       }
     } catch (error) {
-      console.error('Error creating commuter account:', error.response || error.message);
+      console.error('Error creating commuter account:', error.response?.data || error.message);
       setError(error.response?.data?.message || 'An error occurred while creating the account.');
-      alert(`Error: ${error.response?.data?.message || 'Please try again later.'}`);
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   const handleDialogClose = () => {
