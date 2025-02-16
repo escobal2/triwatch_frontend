@@ -76,11 +76,13 @@ const CommuterForm = () => {
 
     const fetchCommuterData = async () => {
       try {
+        console.log("Fetching commuter data for ID:", id); // Debugging line
         const response = await axios.get(`${API_BASE_URL}/commuter/${id}`);
-        setCommuterName(response.data.name); // Make sure this matches your DB field
+        console.log("API Response:", response.data); // Debugging line
+        setCommuterName(response.data.name);
       } catch (error) {
-        console.error(error);
-        setCommuterName('Unknown');
+        console.error("Error fetching commuter data:", error);
+        setCommuterName("Unknown");
       }
     };
 
