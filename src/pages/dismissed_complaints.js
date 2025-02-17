@@ -44,7 +44,7 @@ const DismissedComplaints = () => {
     }
   }, []);
 
- useEffect(() => {
+  useEffect(() => {
     fetchDismissedComplaints(timeframe); // ✅ Pass timeframe when fetching
     const interval = setInterval(() => fetchDismissedComplaints(timeframe), 2000); // ✅ Refresh with new timeframe
     return () => clearInterval(interval);
@@ -88,49 +88,59 @@ const DismissedComplaints = () => {
           </Typography>
         ) : (
           dismissedComplaints.length > 0 ? (
-            dismissedComplaints.map((complaint) => (
-              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px',
-                    backgroundColor: 'white',
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Complaint ID: {complaint.id}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Dismissed Reason:</strong> {complaint.dismiss_reason}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Dismissed By:</strong> {complaint.dismissed_by_name}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Dismissed At:</strong> {formatDateTime(complaint.dismissed_at)}
-                    </Typography>
+            dismissedComplaints.map((complaint) => {
+              const driverInfo = complaint.driver_info ? JSON.parse(complaint.driver_info) : {};
 
-                    <Box sx={{ marginTop: 'auto' }}>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        sx={{
-                          marginTop: 2,
-                          backgroundColor: '#F44336',
-                          '&:hover': { backgroundColor: '#D32F2F' },
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
+              return (
+                <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                      borderRadius: '12px',
+                      backgroundColor: 'white',
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        Complaint ID: {complaint.id}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Dismissed Reason:</strong> {complaint.dismiss_reason}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Dismissed By:</strong> {complaint.dismissed_by_name}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Dismissed At:</strong> {formatDateTime(complaint.dismissed_at)}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
+                      </Typography>
+
+                      {/* Driver Information */}
+                      {driverInfo.driver_name && (
+                        <>
+                          <Divider sx={{ marginY: 2 }} />
+                          <Typography variant="subtitle1">🚖 Driver Information</Typography>
+                          <Typography paragraph>
+                            <strong>Name:</strong> {driverInfo.driver_name}
+                          </Typography>
+                          <Typography paragraph>
+                            <strong>Association:</strong> {driverInfo.association}
+                          </Typography>
+                          <Typography paragraph>
+                            <strong>Address:</strong> {driverInfo.address}
+                          </Typography>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })
           ) : (
             <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
               No dismissed complaints available for this timeframe.

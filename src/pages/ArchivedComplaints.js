@@ -31,12 +31,11 @@ const ArchivedComplaints = () => {
                         <Card>
                             <CardContent>
                                 <Typography variant="h6" color="#FF6A00" gutterBottom><strong>Complaint {complaint.id}</strong></Typography>
-                                <Typography variant="body2"><strong>Name: </strong>{complaint.fullname}</Typography>
-                                <Typography variant="body2"><strong>Contact Number: </strong>{complaint.contactnum}</Typography>
+                                <Typography variant="body2"><strong>Name: </strong>{complaint.fullName}</Typography>
+                                <Typography variant="body2"><strong>Contact Number: </strong>{complaint.contactNumber}</Typography>
                                 <Typography variant="body2"><strong>Catergory: </strong>{complaint.category}</Typography>
-                                <Typography variant="body2"><strong>Date: </strong>{complaint.date}</Typography>
-                                <Typography variant="body2"><strong>Details: </strong>{complaint.details}</Typography>
-                                <Typography variant="body2"><strong>Assigned To: </strong>{complaint.assigned_to_name}</Typography>
+                                <Typography variant="body2"><strong>Date: </strong>{complaint.incident_datetime}</Typography>
+                                <Typography variant="body2"><strong>Details: </strong>{complaint.complaintDetails}</Typography>
                                 {complaint.file_url && <a href={complaint.file_url}>View File</a>}
                             </CardContent>
                         </Card>

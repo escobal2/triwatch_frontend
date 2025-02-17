@@ -7,6 +7,7 @@ const ResolvedComplaints = () => {
   const [resolvedComplaints, setResolvedComplaints] = useState([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [timeframe, setTimeframe] = useState('daily'); // Default to daily timeframe
 
   // Date formatting function
@@ -49,7 +50,6 @@ const ResolvedComplaints = () => {
     return () => clearInterval(interval);
   }, [fetchResolvedComplaints, timeframe]); // ✅ Add timeframe as dependency
 
-
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -59,6 +59,11 @@ const ResolvedComplaints = () => {
       {errorMessage && (
         <Alert severity="error" sx={{ marginBottom: 2 }}>
           {errorMessage}
+        </Alert>
+      )}
+      {successMessage && (
+        <Alert severity="success" sx={{ marginBottom: 2 }}>
+          {successMessage}
         </Alert>
       )}
 
@@ -83,49 +88,58 @@ const ResolvedComplaints = () => {
           </Typography>
         ) : (
           resolvedComplaints.length > 0 ? (
-            resolvedComplaints.map((complaint) => (
-              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                    borderRadius: '12px',
-                    backgroundColor: 'white',
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Complaint ID: {complaint.id}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Resolved By:</strong> {complaint.resolved_by_name}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Resolved At:</strong> {formatDateTime(complaint.resolved_at)}
-                    </Typography>
-                    <Typography paragraph>
-                      <strong>Resolution:</strong> {complaint.resolution}
-                    </Typography>
+            resolvedComplaints.map((complaint) => {
+              const driverInfo = complaint.driver_info ? JSON.parse(complaint.driver_info) : {};
+              return (
+                <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                      borderRadius: '12px',
+                      backgroundColor: 'white',
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        Complaint ID: {complaint.id}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Resolved By:</strong> {complaint.resolved_by_name}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Resolved At:</strong> {formatDateTime(complaint.resolved_at)}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Resolution:</strong> {complaint.resolution}
+                      </Typography>
+                      <Typography paragraph>
+                        <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
+                      </Typography>
 
-                    <Box sx={{ marginTop: 'auto' }}>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        sx={{
-                          marginTop: 2,
-                          backgroundColor: '#4CAF50',
-                          '&:hover': { backgroundColor: '#388E3C' },
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
+                      {/* Driver Information */}
+                      {driverInfo.driver_name && (
+                        <>
+                          <Divider sx={{ marginY: 2 }} />
+                          <Typography variant="subtitle1">🚖 Driver Information</Typography>
+                          <Typography paragraph>
+                            <strong>Name:</strong> {driverInfo.driver_name}
+                          </Typography>
+                          <Typography paragraph>
+                            <strong>Association:</strong> {driverInfo.association}
+                          </Typography>
+                          <Typography paragraph>
+                            <strong>Address:</strong> {driverInfo.address}
+                          </Typography>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })
           ) : (
             <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
               No resolved complaints available for this timeframe.
