@@ -9,32 +9,32 @@ const DismissedComplaints = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [timeframe, setTimeframe] = useState('daily'); // Default to daily timeframe
+  const [includeArchived, setIncludeArchived] = useState(false); // Toggle archived data
 
   // Date formatting function
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const options = {
+    return date.toLocaleString(undefined, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    };
-    return date.toLocaleString(undefined, options);
+    });
   };
 
-  // Fetch dismissed complaints function
-  const fetchDismissedComplaints = useCallback(async (timeframe) => {
+  // Fetch dismissed complaints (including archived)
+  const fetchDismissedComplaints = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/dismissed-reports`, {
         params: {
-          timeframe: timeframe, // Pass timeframe parameter to filter data
+          timeframe: timeframe,
+          include_archived: includeArchived, // Fetch archived complaints if enabled
         },
       });
 
-      console.log('Fetched Dismissed Complaints:', response.data.dismissed_complaints); // Log the entire response
-
+      console.log('Fetched Dismissed Complaints:', response.data.dismissed_complaints);
       setDismissedComplaints(response.data.dismissed_complaints);
     } catch (error) {
       console.error('Error fetching dismissed complaints:', error);
@@ -42,18 +42,18 @@ const DismissedComplaints = () => {
     } finally {
       setLoadingReports(false);
     }
-  }, []);
+  }, [timeframe, includeArchived]);
 
   useEffect(() => {
-    fetchDismissedComplaints(timeframe); // ✅ Pass timeframe when fetching
-    const interval = setInterval(() => fetchDismissedComplaints(timeframe), 2000); // ✅ Refresh with new timeframe
+    fetchDismissedComplaints();
+    const interval = setInterval(() => fetchDismissedComplaints(), 2000);
     return () => clearInterval(interval);
-  }, [fetchDismissedComplaints, timeframe]); // ✅ Add timeframe as dependency
+  }, [fetchDismissedComplaints]);
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
       <Typography variant="h4" gutterBottom>
-        ❌ Dismissed Complaints
+        ❌ Dismissed Complaints (Active & Archived)
       </Typography>
 
       {errorMessage && (
@@ -67,14 +67,14 @@ const DismissedComplaints = () => {
         </Alert>
       )}
 
+      {/* Timeframe & Archive Toggle */}
       <Grid container spacing={3}>
-        {/* Timeframe Filter */}
         <Grid item xs={12}>
           {['daily', 'weekly', 'monthly'].map((time) => (
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
-              onClick={() => setTimeframe(time)} // Just update timeframe, useEffect will handle fetching
+              onClick={() => setTimeframe(time)}
               sx={{ marginRight: 2 }}
             >
               {time.charAt(0).toUpperCase() + time.slice(1)}
@@ -90,6 +90,7 @@ const DismissedComplaints = () => {
           dismissedComplaints.length > 0 ? (
             dismissedComplaints.map((complaint) => {
               const driverInfo = complaint.driver_info ? JSON.parse(complaint.driver_info) : {};
+              const isArchived = complaint.archived_at !== null; // Check if complaint is archived
 
               return (
                 <Grid item xs={12} sm={6} md={4} key={complaint.id}>
@@ -98,14 +99,14 @@ const DismissedComplaints = () => {
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                      borderRadius: '12px',
-                      backgroundColor: 'white',
+                      boxShadow: 3,
+                      borderRadius: 2,
+                      backgroundColor: isArchived ? '#f5f5f5' : 'white', // Grey background for archived complaints
                     }}
                   >
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        Complaint ID: {complaint.id}
+                        Complaint ID: {complaint.id} {isArchived}
                       </Typography>
                       <Typography paragraph>
                         <strong>Dismissed Reason:</strong> {complaint.dismiss_reason}

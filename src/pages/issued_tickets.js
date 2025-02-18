@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Card, CardContent, Typography, Button, Grid, Box, Divider, Alert } from '@mui/material';
+import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert } from '@mui/material';
 import axios from 'axios';
 import API_BASE_URL from '@/config/apiConfig';
 
@@ -7,29 +7,28 @@ const IssuedTickets = () => {
   const [issuedTickets, setIssuedTickets] = useState([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [timeframe, setTimeframe] = useState('daily'); // Default to daily timeframe
+  const [timeframe, setTimeframe] = useState('daily'); // Default timeframe
 
-  // Date formatting function
+  // Format date function
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const options = {
+    return date.toLocaleString(undefined, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    };
-    return date.toLocaleString(undefined, options);
+    });
   };
 
-  // Fetch issued tickets function
+  // Fetch issued tickets (including archived)
   const fetchIssuedTickets = useCallback(async (timeframe) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/issued-tickets`, {
-        params: { timeframe }, // Pass timeframe parameter to filter data
-      });
+        params: { timeframe, include_archived: true }, // Add this
+    });
+
       console.log('Fetched Issued Tickets:', response.data.issued_tickets);
       setIssuedTickets(response.data.issued_tickets);
     } catch (error) {
@@ -49,12 +48,10 @@ const IssuedTickets = () => {
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
       <Typography variant="h4" gutterBottom>
-        🎫 Issued Tickets
+        🎫 Issued Tickets (Active & Archived)
       </Typography>
 
       {errorMessage && <Alert severity="error" sx={{ marginBottom: 2 }}>{errorMessage}</Alert>}
-
-      {successMessage && <Alert severity="success" sx={{ marginBottom: 2 }}>{successMessage}</Alert>}
 
       <Grid container spacing={3}>
         {/* Timeframe Filter */}
@@ -63,7 +60,7 @@ const IssuedTickets = () => {
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
-              onClick={() => setTimeframe(time)} // Just update timeframe, useEffect will handle fetching
+              onClick={() => setTimeframe(time)}
               sx={{ marginRight: 2 }}
             >
               {time.charAt(0).toUpperCase() + time.slice(1)}
@@ -79,13 +76,23 @@ const IssuedTickets = () => {
           issuedTickets.length > 0 ? (
             issuedTickets.map((ticket) => {
               const driverInfo = ticket.driver_info ? JSON.parse(ticket.driver_info) : {};
+              const isArchived = ticket.archived_at !== null; // Check if ticket is archived
 
               return (
                 <Grid item xs={12} sm={6} md={4} key={ticket.id}>
-                  <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 3, borderRadius: 2 }}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: 3,
+                      borderRadius: 2,
+                      backgroundColor: isArchived ? '#f5f5f5' : 'white', // Grey background for archived tickets
+                    }}
+                  >
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        Ticket ID: {ticket.id}
+                        Ticket ID: {ticket.id} {isArchived}
                       </Typography>
                       <Typography paragraph>
                         <strong>Issued By:</strong> {ticket.resolved_by_name}

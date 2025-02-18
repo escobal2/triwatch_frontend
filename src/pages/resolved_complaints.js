@@ -24,16 +24,17 @@ const ResolvedComplaints = () => {
     return date.toLocaleString(undefined, options);
   };
 
-  // Fetch resolved complaints function
+  // Fetch resolved complaints including archived ones
   const fetchResolvedComplaints = useCallback(async (timeframe) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/resolved-reports`, {
         params: {
           timeframe: timeframe, // Pass timeframe parameter to filter data
+          include_archived: true, // Include archived complaints
         },
       });
 
-      console.log('Fetched Resolved Complaints:', response.data.resolved_complaints); // Log the entire response
+      console.log('Fetched Resolved Complaints:', response.data.resolved_complaints);
 
       setResolvedComplaints(response.data.resolved_complaints);
     } catch (error) {
@@ -45,15 +46,15 @@ const ResolvedComplaints = () => {
   }, []);
 
   useEffect(() => {
-    fetchResolvedComplaints(timeframe); // ✅ Pass timeframe when fetching
-    const interval = setInterval(() => fetchResolvedComplaints(timeframe), 5000); // ✅ Refresh with new timeframe
+    fetchResolvedComplaints(timeframe);
+    const interval = setInterval(() => fetchResolvedComplaints(timeframe), 5000);
     return () => clearInterval(interval);
-  }, [fetchResolvedComplaints, timeframe]); // ✅ Add timeframe as dependency
+  }, [fetchResolvedComplaints, timeframe]);
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
       <Typography variant="h4" gutterBottom>
-        🧾 Resolved Complaints
+        🧾 Resolved Complaints (Including Archived)
       </Typography>
 
       {errorMessage && (
@@ -68,13 +69,12 @@ const ResolvedComplaints = () => {
       )}
 
       <Grid container spacing={3}>
-        {/* Timeframe Filter */}
         <Grid item xs={12}>
           {['daily', 'weekly', 'monthly'].map((time) => (
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
-              onClick={() => setTimeframe(time)} // Just update timeframe, useEffect will handle fetching
+              onClick={() => setTimeframe(time)}
               sx={{ marginRight: 2 }}
             >
               {time.charAt(0).toUpperCase() + time.slice(1)}
@@ -119,7 +119,6 @@ const ResolvedComplaints = () => {
                         <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
                       </Typography>
 
-                      {/* Driver Information */}
                       {driverInfo.driver_name && (
                         <>
                           <Divider sx={{ marginY: 2 }} />
