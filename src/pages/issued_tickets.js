@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert } from '@mui/material';
+import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 import API_BASE_URL from '@/config/apiConfig';
 
@@ -8,6 +8,8 @@ const IssuedTickets = () => {
   const [loadingReports, setLoadingReports] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [timeframe, setTimeframe] = useState('daily'); // Default timeframe
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default: current month
+  const [firstLoad, setFirstLoad] = useState(true); // Track first load
 
   // Format date function
   const formatDateTime = (dateString) => {
@@ -23,27 +25,42 @@ const IssuedTickets = () => {
   };
 
   // Fetch issued tickets (including archived)
-  const fetchIssuedTickets = useCallback(async (timeframe) => {
+  const fetchIssuedTickets = useCallback(async (selectedTimeframe, month = null) => {
+    if (firstLoad) setLoadingReports(true); // Only show loading on first load
+
+    setErrorMessage(null);
+
     try {
-      const response = await axios.get(`${API_BASE_URL}/issued-tickets`, {
-        params: { timeframe, include_archived: true }, // Add this
-    });
+      const params = { timeframe: selectedTimeframe, include_archived: true };
+      if (selectedTimeframe === 'specific_month') {
+        params.month = month; // Send selected month to backend
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/issued-tickets`, { params });
 
       console.log('Fetched Issued Tickets:', response.data.issued_tickets);
-      setIssuedTickets(response.data.issued_tickets);
+
+      // Parse driver_info JSON string before setting state
+      const parsedTickets = response.data.issued_tickets.map((ticket) => ({
+        ...ticket,
+        driver_info: ticket.driver_info ? JSON.parse(ticket.driver_info) : null, // Parse only if exists
+      }));
+
+      setIssuedTickets(parsedTickets);
     } catch (error) {
       console.error('Error fetching issued tickets:', error);
       setErrorMessage('Failed to fetch issued tickets.');
     } finally {
       setLoadingReports(false);
+      setFirstLoad(false); // Disable first load after initial fetch
     }
-  }, []);
+  }, [firstLoad]);
 
   useEffect(() => {
-    fetchIssuedTickets(timeframe);
-    const interval = setInterval(() => fetchIssuedTickets(timeframe), 5000);
+    fetchIssuedTickets(timeframe, selectedMonth);
+    const interval = setInterval(() => fetchIssuedTickets(timeframe, selectedMonth), 5000);
     return () => clearInterval(interval);
-  }, [fetchIssuedTickets, timeframe]);
+  }, [fetchIssuedTickets, timeframe, selectedMonth]);
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
@@ -56,81 +73,90 @@ const IssuedTickets = () => {
       <Grid container spacing={3}>
         {/* Timeframe Filter */}
         <Grid item xs={12}>
-          {['daily', 'weekly', 'monthly'].map((time) => (
+          {['daily', 'weekly', 'specific_month'].map((time) => (
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
               onClick={() => setTimeframe(time)}
               sx={{ marginRight: 2 }}
             >
-              {time.charAt(0).toUpperCase() + time.slice(1)}
+              {time.replace('_', ' ').charAt(0).toUpperCase() + time.replace('_', ' ').slice(1)}
             </Button>
           ))}
         </Grid>
 
+        {/* Month Selector (Only shown when 'specific_month' is selected) */}
+        {timeframe === 'specific_month' && (
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Select Month</InputLabel>
+              <Select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                {[
+                  'January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'
+                ].map((month, index) => (
+                  <MenuItem key={index + 1} value={index + 1}>
+                    {month}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        )}
+
+        {/* Show loading only during first load */}
         {loadingReports ? (
           <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
             Loading issued tickets...
           </Typography>
         ) : (
           issuedTickets.length > 0 ? (
-            issuedTickets.map((ticket) => {
-              const driverInfo = ticket.driver_info ? JSON.parse(ticket.driver_info) : {};
-              const isArchived = ticket.archived_at !== null; // Check if ticket is archived
+            issuedTickets.map((complaint) => (
+              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 3, borderRadius: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Complaint ID: {complaint.id}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolved By:</strong> {complaint.resolved_by_name}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolved At:</strong> {formatDateTime(complaint.resolved_at)}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolution:</strong> {complaint.resolution}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
+                    </Typography>
 
-              return (
-                <Grid item xs={12} sm={6} md={4} key={ticket.id}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      boxShadow: 3,
-                      borderRadius: 2,
-                      backgroundColor: isArchived ? '#f5f5f5' : 'white', // Grey background for archived tickets
-                    }}
-                  >
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        Ticket ID: {ticket.id} {isArchived}
-                      </Typography>
-                      <Typography paragraph>
-                        <strong>Issued By:</strong> {ticket.resolved_by_name}
-                      </Typography>
-                      <Typography paragraph>
-                        <strong>Issued At:</strong> {formatDateTime(ticket.resolved_at)}
-                      </Typography>
-                      <Typography paragraph>
-                        <strong>Ticket Number:</strong> {ticket.ticket_number}
-                      </Typography>
-                      <Typography paragraph>
-                        <strong>Franchise Plate Number:</strong> {ticket.franchise_plate_no}
-                      </Typography>
-
-                      {/* Driver Information */}
-                      {driverInfo.driver_name && (
-                        <>
-                          <Divider sx={{ marginY: 2 }} />
-                          <Typography variant="subtitle1">🚖 Driver Information</Typography>
-                          <Typography paragraph>
-                            <strong>Name:</strong> {driverInfo.driver_name}
-                          </Typography>
-                          <Typography paragraph>
-                            <strong>Association:</strong> {driverInfo.association}
-                          </Typography>
-                          <Typography paragraph>
-                            <strong>Address:</strong> {driverInfo.address}
-                          </Typography>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })
+                    {/* Driver Information Section */}
+                    {complaint.driver_info && (
+                      <>
+                        <Divider sx={{ marginY: 2 }} />
+                        <Typography variant="subtitle1">🚖 Driver Information</Typography>
+                        <Typography paragraph>
+                          <strong>Name:</strong> {complaint.driver_info.driver_name}
+                        </Typography>
+                        <Typography paragraph>
+                          <strong>Association:</strong> {complaint.driver_info.association}
+                        </Typography>
+                        <Typography paragraph>
+                          <strong>Address:</strong> {complaint.driver_info.address}
+                        </Typography>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
           ) : (
             <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
-              No issued tickets available for this timeframe.
+              No issued tickets available.
             </Typography>
           )
         )}

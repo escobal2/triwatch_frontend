@@ -12,6 +12,7 @@ const CommuterLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(""); // Clear previous errors
   
     try {
       const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
@@ -20,21 +21,25 @@ const CommuterLogin = () => {
       });
   
       if (response.status === 200) {
-        const commuter = response.data; // Ensure the response includes `id` and `name`
+        const commuter = response.data; // Ensure response includes `id`, `name`, and `verified`
         console.log("Commuter data from API:", commuter);
-        
+  
+        if (!commuter.verified) {
+          setErrorMessage("Your account is pending admin approval. Please wait for verification.");
+          return;
+        }
+  
         sessionStorage.setItem('commuter', JSON.stringify(commuter)); // Store commuter data
-        router.push('/Commuterform'); // Redirect
-      } else {
-        setErrorMessage(response.data.message || 'Invalid username or password');
+        router.push('/Commuterform'); // Redirect to form
       }
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.message || 'An error occurred. Please try again later.'
+        error.response?.data?.message || 'Invalid username or password'
       );
       console.error(error);
     }
   };
+  
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

@@ -42,12 +42,22 @@ const RootContainer = styled('div')(({ isMobile }) => ({
   height: '100vh',
 }));
 
-const StyledButton = styled(Button)({
+const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: '#FF6A00',
   color: 'white',
-  padding: '10px 20px',
+  padding: '10px 40px',
   marginTop: '20px',
-});
+  transition: 'background-color 0.3s ease',
+  '&:hover': {
+    backgroundColor: '#E65C00', // Darker shade on hover
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    padding: '10px',
+  },
+}));
+
+
 
 const EmergencyReports = () => {
   const isMobile = useMediaQuery('(max-width:600px)');

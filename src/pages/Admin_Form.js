@@ -18,6 +18,7 @@ import EmergencyComplaints from './Emergencycomplaints';
 import IssuedTickets from './issued_tickets';
 import ResolvedComplaints from './resolved_complaints';
 import DismissedComplaints from './dismissed_complaints';
+import VerifyCommuterAccs from './verifycommuteraccs';
 import ArchivedEmergencyComplaints from './ArchivedEmergencycomplaints'; 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import API_BASE_URL from '@/config/apiConfig';
@@ -43,6 +44,7 @@ const AdminForm = () => {
     const [showEmergencyComplaints, setShowEmergencyComplaints] = useState(false);
     const [emergencyComplaints] = useState([]);
     const [archivedEmergencyComplaints] = useState([]);
+    const [verifycommuteraccs] =useState([]);
     const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
     const [loadingReports, setLoadingReports] = useState(true);
     const [successMessageSMS, setSuccessMessageSMS] = useState('');
@@ -60,6 +62,7 @@ const AdminForm = () => {
     const [showIssuedTickets, setShowIssuedTickets] = useState(false);
     const [showResolvedComplaints, setShowResolvedComplaints] = useState(false);
     const [showDismissedComplaints, setShowDismissedComplaints] = useState(false);
+    const [showVerifyCommuterAccs, setShowVerifyCommuterAccs] =useState(false);
     const router = useRouter();
 
 
@@ -298,7 +301,22 @@ const fetchIssuedTickets = async () => {
         console.error("Error fetching issued tickets:", error);
     }
 };
+const handleShowVerifyCommuterAccs = () => {
+    setShowVerifyCommuterAccs(true)
+    setShowArchivedEmergencyComplaints(false);
+    setShowComplaints(false);
+    setShowEmergencyComplaints(false);
+    setShowPersonnelForm(false);
+    setShowPersonnelList(false);
+    setShowArchivedComplaints(false);
+    setShowCategoryButtons(false);
+    setShowIssuedTickets(false);
+    setShowDismissedComplaints(false);
+    setShowResolvedComplaints(false);
+};
+
 const handleShowArchivedEmergencyComplaints = () => {
+    setShowVerifyCommuterAccs(false)
     setShowArchivedEmergencyComplaints(true);
     setShowComplaints(false);
     setShowEmergencyComplaints(false);
@@ -312,6 +330,7 @@ const handleShowArchivedEmergencyComplaints = () => {
 };
 
 const handleShowPersonnelForm = () => {
+    setShowVerifyCommuterAccs(false)
     setShowPersonnelForm(true);
     setShowPersonnelList(false);
     setShowComplaints(false);
@@ -325,6 +344,7 @@ const handleShowPersonnelForm = () => {
 };
 
 const handleShowPersonnelList = () => {
+    setShowVerifyCommuterAccs(false)
     setShowPersonnelList(true);
     setShowPersonnelForm(false);
     setShowComplaints(false);
@@ -338,6 +358,7 @@ const handleShowPersonnelList = () => {
 };
 
 const handleComplaintsClick = (event) => {
+    setShowVerifyCommuterAccs(false)
     setShowComplaints(true);
     setComplaintsAnchorEl(event.currentTarget);
     setShowPersonnelForm(false);
@@ -351,6 +372,7 @@ const handleComplaintsClick = (event) => {
 };
 
 const handleShowEmergencyComplaints = () => {
+    setShowVerifyCommuterAccs(false)
     setShowComplaints(false);
     setShowArchivedComplaints(false);
     setShowPersonnelForm(false);
@@ -364,6 +386,7 @@ const handleShowEmergencyComplaints = () => {
 };
 
 const handleShowArchivedComplaints = () => {
+    setShowVerifyCommuterAccs(false)
     setShowArchivedComplaints(true);
     setShowComplaints(false);
     setShowPersonnelForm(false);
@@ -378,6 +401,7 @@ const handleShowArchivedComplaints = () => {
 
 // Handler for Issued Tickets
 const handleShowIssuedTickets = () => {
+    setShowVerifyCommuterAccs(false)
     setShowIssuedTickets(true);
     setShowComplaints(false);
     setShowPersonnelForm(false);
@@ -392,6 +416,7 @@ const handleShowIssuedTickets = () => {
 
 // Handler for Dismissed Complaints
 const handleShowDismissedComplaints = () => {
+    setShowVerifyCommuterAccs(false)
     setShowDismissedComplaints(true);
     setShowIssuedTickets(false);
     setShowComplaints(false);
@@ -406,6 +431,7 @@ const handleShowDismissedComplaints = () => {
 
 // Handler for Resolved Complaints
 const handleShowResolvedComplaints = () => {
+    setShowVerifyCommuterAccs(false)
     setShowResolvedComplaints(true);
     setShowIssuedTickets(false);
     setShowComplaints(false);
@@ -586,6 +612,15 @@ const handleShowResolvedComplaints = () => {
             </Button>
 
             <Button
+                startIcon={<PeopleIcon />}
+                sx={{ width: '80%', justifyContent: 'flex-start', marginBottom: 2, backgroundColor: '#FFA726', color: '#FFFFFF', textTransform: 'none', '&:hover': { backgroundColor: '#FB8C00' }, }}
+                onClick={handleShowVerifyCommuterAccs}
+            >
+                Verify Commuter Accounts
+            </Button>
+
+
+            <Button
                 startIcon={<LogoutIcon />}
                 sx={{
                     width: '80%', justifyContent: 'flex-start', backgroundColor: '#FFA726', color: '#FFFFFF', textTransform: 'none', marginBottom: 2, '&:hover': { backgroundColor: '#FB8C00' }, position: 'sticky', bottom: 0, marginTop: 'auto',
@@ -682,7 +717,9 @@ const handleShowResolvedComplaints = () => {
                         </Grid>
                     ))
             )}
-
+                        {showVerifyCommuterAccs && (
+                            <VerifyCommuterAccs VerifyCommuterAccs={verifycommuteraccs} />
+                        )}
                         {/* Archived Emergency Complaints */}
                         {showArchivedEmergencyComplaints && (
                             <ArchivedEmergencyComplaints archivedEmergencyComplaints={archivedEmergencyComplaints} />

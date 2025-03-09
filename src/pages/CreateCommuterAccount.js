@@ -31,26 +31,19 @@ const CreateCommuterAccount = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
 
   // Function to handle contact number formatting
   const handleContactNumberChange = (e) => {
     let value = e.target.value;
-
-    // If the input starts with "0", replace it with "+63"
     if (value.startsWith('0')) {
       value = '+63' + value.slice(1);
     }
-
-    // Limit input to 13 characters (including "+63")
     if (value.length > 13) {
       value = value.slice(0, 13);
     }
-
-    setCommuterData((prevData) => ({
-      ...prevData,
-      contactnum: value,
-    }));
+    setCommuterData((prevData) => ({ ...prevData, contactnum: value }));
   };
 
   const handleChange = (e) => {
@@ -111,7 +104,12 @@ const CreateCommuterAccount = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-    router.push('/Commuter_login');
+    setVerificationDialogOpen(true); // Show verification message after closing success dialog
+  };
+
+  const handleVerificationClose = () => {
+    setVerificationDialogOpen(false);
+    router.push('/Commuter_login'); // Redirect to login page after acknowledgment
   };
 
   return (
@@ -163,18 +161,28 @@ const CreateCommuterAccount = () => {
         </CardContent>
       </Card>
 
-      {/* Dialog */}
+      {/* Success Dialog */}
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Account Created Successfully</DialogTitle>
         <DialogContent>
-          <Typography>Proceed to Login?</Typography>
+          <Typography>Your account has been created. Please wait while the admin verifies your account.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="primary" variant="contained">
-            Yes
+            OK
           </Button>
-          <Button onClick={() => setDialogOpen(false)} color="secondary" variant="outlined">
-            No
+        </DialogActions>
+      </Dialog>
+
+      {/* Verification Pending Dialog */}
+      <Dialog open={verificationDialogOpen} onClose={handleVerificationClose}>
+        <DialogTitle>Verification in Progress</DialogTitle>
+        <DialogContent>
+          <Typography>Your account is currently under verification. You will receive a text message once your account is approved.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleVerificationClose} color="primary" variant="contained">
+            Got it
           </Button>
         </DialogActions>
       </Dialog>

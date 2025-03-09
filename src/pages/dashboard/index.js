@@ -52,27 +52,41 @@ const RightPanel = styled('div')(({ isMobile }) => ({
 const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: '#FF6A00',
   color: 'white',
-  width: '100%', // Full-width on mobile and defined parent containers
-  maxWidth: '130px', // Maximum width to control size on larger screens
-  height: '50px', // Fixed height for consistent sizing
+  width: '100%',
+  maxWidth: '130px',
+  height: '50px',
   margin: '10px 0',
-  textTransform: 'none', // Prevent text from being uppercase
+  textTransform: 'none',
+  transition: 'background-color 0.3s ease',
+  '&:hover': {
+    backgroundColor: '#E65C00', // Darker orange on hover
+  },
   [theme.breakpoints.down('sm')]: {
-    maxWidth: '50%', // Full width on small screens
+    maxWidth: '50%',
   },
 }));
 
 const CreateCommuterAccount = styled(StyledButton)({
   backgroundColor: '#1976D2', // Blue for commuter login
+  '&:hover': {
+    backgroundColor: '#1565C0', // Darker blue on hover
+  },
 });
+
 const EmergencyButton = styled(StyledButton)({
-  backgroundColor: '#D32F2F', // Emergency color
-  width: '100%',
+  backgroundColor: '#D32F2F', // Red for emergency
+  '&:hover': {
+    backgroundColor: '#B71C1C', // Darker red on hover
+  },
 });
 
 const LoginButton = styled(StyledButton)({
-  backgroundColor: '#449c46', // Blue for commuter login
+  backgroundColor: '#449c46', // Green for commuter login
+  '&:hover': {
+    backgroundColor: '#357a38', // Darker green on hover
+  },
 });
+
 
 const WelcomePage = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
