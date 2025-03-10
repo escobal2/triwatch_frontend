@@ -148,7 +148,7 @@ const CreateCommuterAccount = () => {
                 <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} required />
               </Grid>
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <ReCAPTCHA sitekey="6LcE5c4qAAAAAHsHCBKBMBxSWghIM6NkTd9mgobL" onChange={handleCaptchaChange} />
+                <ReCAPTCHA sitekey="6Le5MvAqAAAAAKtoMVjkdjwumXnJNx4YpwThs_Ms" onChange={handleCaptchaChange} />
               </Grid>
               <Grid item xs={12}>
                 <Button type="submit" variant="contained" fullWidth sx={{ backgroundColor: '#FF6A00', '&:hover': { backgroundColor: '#FF6A00' } }} disabled={loading}>
