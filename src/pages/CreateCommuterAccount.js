@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-// import ReCAPTCHA from 'react-google-recaptcha'; // ❌ Commented out reCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha'; // ❌ Commented out reCAPTCHA
 import {
   Container,
   Card,
@@ -32,7 +32,7 @@ const CreateCommuterAccount = () => {
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
-  // const [captchaValue, setCaptchaValue] = useState(null); // ❌ Commented out reCAPTCHA state
+  const [captchaValue, setCaptchaValue] = useState(null); // ❌ Commented out reCAPTCHA state
 
   const handleContactNumberChange = (e) => {
     let value = e.target.value;
@@ -57,20 +57,20 @@ const CreateCommuterAccount = () => {
     }));
   };
 
-  // const handleCaptchaChange = (value) => {
-  //   setCaptchaValue(value);
-  // }; // ❌ Commented out reCAPTCHA handler
+  const handleCaptchaChange = (value) => {
+  setCaptchaValue(value);
+   }; //❌ Commented out reCAPTCHA handler
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // if (!captchaValue) {
-    //   alert('Please verify the reCAPTCHA');
-    //   setLoading(false);
-    //   return;
-    // } // ❌ Commented out reCAPTCHA validation
+    if (!captchaValue) {
+    alert('Please verify the reCAPTCHA');
+    setLoading(false);
+    return;
+    } // ❌ Commented out reCAPTCHA validation
 
     const formData = new FormData();
     formData.append('name', commuterData.name);
@@ -78,7 +78,7 @@ const CreateCommuterAccount = () => {
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
-    // formData.append('g-recaptcha-response', captchaValue); // ❌ Commented out reCAPTCHA field
+    formData.append('g-recaptcha-response', captchaValue); // ❌ Commented out reCAPTCHA field
 
     console.log("Sending data:", Object.fromEntries(formData));
 
@@ -148,9 +148,9 @@ const CreateCommuterAccount = () => {
               </Grid>
 
               {/* ❌ Removed reCAPTCHA component */}
-              {/* <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+              {<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <ReCAPTCHA sitekey="6LcE5c4qAAAAAHsHCBKBMBxSWghIM6NkTd9mgobL" onChange={handleCaptchaChange} />
-              </Grid> */}
+              </Grid> }
 
               <Grid item xs={12}>
                 <Button type="submit" variant="contained" fullWidth sx={{ backgroundColor: '#FF6A00', '&:hover': { backgroundColor: '#FF6A00' } }} disabled={loading}>
