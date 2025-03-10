@@ -69,7 +69,7 @@ const VerifyCommuterAccs = () => {
                   <strong>Valid ID:</strong>
                 </Typography>
                 <img 
-  src={`${API_BASE_URL}/image/${commuter.valid_id_path.replace('valid_ids/', '')}`} 
+  src={`${API_BASE_URL}/storage/valid_ids/${commuter.valid_id_path}`} 
   width="200px" 
   alt="Valid ID" 
   style={{ marginTop: "10px", borderRadius: "8px" }} 
