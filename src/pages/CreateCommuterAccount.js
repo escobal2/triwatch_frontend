@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import ReCAPTCHA from 'react-google-recaptcha'; // Import reCAPTCHA
+// import ReCAPTCHA from 'react-google-recaptcha'; // ❌ Commented out reCAPTCHA
 import {
   Container,
   Card,
@@ -32,9 +32,8 @@ const CreateCommuterAccount = () => {
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
+  // const [captchaValue, setCaptchaValue] = useState(null); // ❌ Commented out reCAPTCHA state
 
-  // Function to handle contact number formatting
   const handleContactNumberChange = (e) => {
     let value = e.target.value;
     if (value.startsWith('0')) {
@@ -58,20 +57,20 @@ const CreateCommuterAccount = () => {
     }));
   };
 
-  const handleCaptchaChange = (value) => {
-    setCaptchaValue(value);
-  };
+  // const handleCaptchaChange = (value) => {
+  //   setCaptchaValue(value);
+  // }; // ❌ Commented out reCAPTCHA handler
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (!captchaValue) {
-      alert('Please verify the reCAPTCHA');
-      setLoading(false);
-      return;
-    }
+    // if (!captchaValue) {
+    //   alert('Please verify the reCAPTCHA');
+    //   setLoading(false);
+    //   return;
+    // } // ❌ Commented out reCAPTCHA validation
 
     const formData = new FormData();
     formData.append('name', commuterData.name);
@@ -79,7 +78,7 @@ const CreateCommuterAccount = () => {
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
-    formData.append('g-recaptcha-response', captchaValue);
+    // formData.append('g-recaptcha-response', captchaValue); // ❌ Commented out reCAPTCHA field
 
     console.log("Sending data:", Object.fromEntries(formData));
 
@@ -104,12 +103,12 @@ const CreateCommuterAccount = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-    setVerificationDialogOpen(true); // Show verification message after closing success dialog
+    setVerificationDialogOpen(true);
   };
 
   const handleVerificationClose = () => {
     setVerificationDialogOpen(false);
-    router.push('/Commuter_login'); // Redirect to login page after acknowledgment
+    router.push('/Commuter_login');
   };
 
   return (
@@ -147,9 +146,12 @@ const CreateCommuterAccount = () => {
                 </Typography>
                 <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} required />
               </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+
+              {/* ❌ Removed reCAPTCHA component */}
+              {/* <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <ReCAPTCHA sitekey="6LcE5c4qAAAAAHsHCBKBMBxSWghIM6NkTd9mgobL" onChange={handleCaptchaChange} />
-              </Grid>
+              </Grid> */}
+
               <Grid item xs={12}>
                 <Button type="submit" variant="contained" fullWidth sx={{ backgroundColor: '#FF6A00', '&:hover': { backgroundColor: '#FF6A00' } }} disabled={loading}>
                   {loading ? 'Creating Account...' : 'Create Account'}
