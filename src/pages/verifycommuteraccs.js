@@ -68,11 +68,15 @@ const VerifyCommuterAccs = () => {
                 <Typography variant="body2">
                   <strong>Valid ID:</strong>
                 </Typography>
-                <img src={`${API_BASE_URL}/storage/valid_ids/${commuter.valid_id_path}`} 
+                console.log("Image URL:", `${API_BASE_URL}/storage/valid_ids/${commuter.valid_id_path}`);
+
+                <img 
+                  src={`${API_BASE_URL}/storage/valid_ids/${commuter.valid_id_path}`} 
                   width="200px" 
                   alt="Valid ID" 
                   style={{ marginTop: "10px", borderRadius: "8px" }} 
                 />
+
                 <br />
                 <Button 
                   onClick={() => approveCommuter(commuter.id)} 
