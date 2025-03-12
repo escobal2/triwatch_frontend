@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Grid, Card, CardContent, Typography, Button } from "@mui/material";
+import { Grid, Card, CardContent, Typography, Button, Box } from "@mui/material";
 import API_BASE_URL from "@/config/apiConfig";
 
 const VerifyCommuterAccs = () => {
@@ -29,6 +29,7 @@ const VerifyCommuterAccs = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
+  // ✅ Approve Function
   const approveCommuter = async (id) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/approve_account/${id}`);
@@ -36,6 +37,23 @@ const VerifyCommuterAccs = () => {
       setPendingAccounts((prev) => prev.filter((acc) => acc.id !== id));
     } catch (err) {
       alert("Error approving commuter. Please try again.");
+    }
+  };
+
+  // ✅ Disapprove Function
+  const disapproveCommuter = async (id) => {
+    const confirmDisapproval = window.confirm(
+      "Are you sure you want to disapprove this commuter? This action cannot be undone."
+    );
+
+    if (!confirmDisapproval) return;
+
+    try {
+      const res = await axios.delete(`${API_BASE_URL}/commuter/${id}/disapprove`);
+      alert(res.data.message);
+      setPendingAccounts((prev) => prev.filter((acc) => acc.id !== id));
+    } catch (err) {
+      alert("Error disapproving commuter. Please try again.");
     }
   };
 
@@ -69,20 +87,27 @@ const VerifyCommuterAccs = () => {
                   <strong>Valid ID:</strong>
                 </Typography>
                 <img 
-  src={`${API_BASE_URL}/storage/${commuter.valid_id_path}`} 
-  width="200px" 
-  alt="Valid ID" 
-  style={{ marginTop: "10px", borderRadius: "8px" }} 
-/>
-                <br />
-                <Button 
-                  onClick={() => approveCommuter(commuter.id)} 
-                  variant="contained" 
-                  color="primary" 
-                  sx={{ mt: 2 }}
-                >
-                  Approve
-                </Button>
+                  src={`${API_BASE_URL}/storage/${commuter.valid_id_path}`} 
+                  width="200px" 
+                  alt="Valid ID" 
+                  style={{ marginTop: "10px", borderRadius: "8px" }} 
+                />
+                <Box mt={2} display="flex" justifyContent="space-between">
+                  <Button 
+                    onClick={() => approveCommuter(commuter.id)} 
+                    variant="contained" 
+                    color="primary"
+                  >
+                    Approve
+                  </Button>
+                  <Button 
+                    onClick={() => disapproveCommuter(commuter.id)} 
+                    variant="contained" 
+                    color="error"
+                  >
+                    Disapprove
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
