@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   server: {
     url: "https://triwatch.online",
     cleartext: true,
-    allowNavigation: ["triwatch.online", "*.triwatch.online"], // ✅ Ensures navigation stays inside WebView
+    allowNavigation: ["triwatch.online", "*.triwatch.online",  "api.mapbox.com"], // ✅ Ensures navigation stays inside WebView
   },
   android: {
     webContentsDebuggingEnabled: true,
