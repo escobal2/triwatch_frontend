@@ -105,7 +105,7 @@ const WelcomePage = () => {
       {/* Left Panel */}
       <LeftPanel isMobile={isMobile}>
         <Image src="/images/sklogo3.png" alt="Logo" width={150} height={150} />
-        <Image src="/images/SK3.png" alt="Logo" width={150} height={120} />
+        <Image src="/images/triwatch1.png" alt="Logo" width={250} height={90} />
         <Typography  variant="h5" sx={{ marginTop: 2, color: '#e6e9ea', fontWeight: 'bold', fontFamily: 'Times New Roman, Times, serif' }}>
         Online Reporting System
         </Typography>
