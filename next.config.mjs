@@ -9,7 +9,7 @@ const nextConfig = {
     TZ: "Asia/Manila",
   },
   experimental: {
-    appDir: true, // Ensure Next.js uses the new App Router (if applicable)
+    appDir: true,
   },
   async headers() {
     return [
@@ -18,7 +18,11 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self' 'unsafe-inline' 'unsafe-eval';",
+            value: "default-src 'self'; " + 
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' api.mapbox.com; " +
+                   "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
+                   "img-src 'self' data: blob: https://*; " +
+                   "connect-src 'self' https://triwatch.site api.mapbox.com;",
           },
         ],
       },
