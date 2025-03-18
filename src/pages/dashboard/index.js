@@ -139,29 +139,26 @@ const WelcomePage = () => {
         </div>
       </RightPanel>
 
-      {/* Drawer Menu */}
-      <Drawer anchor="right" open={openDrawer} onClose={handleDrawerClose}>
-        <List>
-          <ListItem button>
-            <Link href="/Admin_Login" passHref>
-              <ListItemText>
-                <StyledButton variant="contained" color="primary">
-                  Login as Admin
-                </StyledButton>
-              </ListItemText>
-            </Link>
-          </ListItem>
-          <ListItem button>
-            <Link href="/sk_personel_login" passHref>
-              <ListItemText>
-                <StyledButton variant="contained" color="primary">
-                  Login as SK Personnel
-                </StyledButton>
-              </ListItemText>
-            </Link>
-          </ListItem>
-        </List>
-      </Drawer>
+ {/* Drawer Menu */}
+<Drawer anchor="right" open={openDrawer} onClose={handleDrawerClose}>
+  <List sx={{ width: isMobile ? '70vw' : '250px', padding: '10px' }}>
+    <ListItem sx={{ justifyContent: 'flex-start', paddingLeft: '20px' }}>
+      <Link href="/Admin_Login" passHref>
+        <StyledButton sx={{ width: '180px', fontSize: '14px', padding: '10px' }}>
+          Login as Admin
+        </StyledButton>
+      </Link>
+    </ListItem>
+    <ListItem sx={{ justifyContent: 'flex-start', paddingLeft: '20px' }}>
+      <Link href="/sk_personel_login" passHref>
+        <StyledButton sx={{ width: '180px', fontSize: '14px', padding: '10px' }}>
+          Login as Taskforce
+        </StyledButton>
+      </Link>
+    </ListItem>
+  </List>
+</Drawer>
+
     </RootContainer>
   );
 };

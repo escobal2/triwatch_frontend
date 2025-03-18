@@ -1,12 +1,28 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Enables static export
+  output: "export",
   images: {
-    unoptimized: true, // Disables the Image Optimization API
-  }, // <-- Corrected closing bracket placement
-  trailingSlash: true, // Add trailing slashes for better static compatibility
+    unoptimized: true,
+  },
+  trailingSlash: true,
   env: {
-    TZ: 'Asia/Manila',
+    TZ: "Asia/Manila",
+  },
+  experimental: {
+    appDir: true, // Ensure Next.js uses the new App Router (if applicable)
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self' 'unsafe-inline' 'unsafe-eval';",
+          },
+        ],
+      },
+    ];
   },
 };
 
