@@ -19,9 +19,10 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: "default-src 'self'; " + 
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' api.mapbox.com; " +
-                   "worker-src 'self' blob:; " +  // ✅ Allow Web Workers
-                   "child-src 'self' blob:; " +   // ✅ Allow Web Workers in WebView
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' api.mapbox.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; " +
+                   "frame-src 'self' https://www.google.com/recaptcha/; " +  // ✅ Allow reCAPTCHA iframe
+                   "worker-src 'self' blob:; " +  
+                   "child-src 'self' blob:; " +   
                    "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
                    "img-src 'self' data: blob: https://*; " +
                    "connect-src 'self' https://triwatch.site api.mapbox.com;",
