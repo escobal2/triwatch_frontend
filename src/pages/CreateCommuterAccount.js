@@ -149,7 +149,7 @@ const CreateCommuterAccount = () => {
 
               {/* ❌ Removed reCAPTCHA component */}
               {<Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <ReCAPTCHA sitekey="6Le5MvAqAAAAAKtoMVjkdjwumXnJNx4YpwThs_Ms" onChange={handleCaptchaChange} />
+                <ReCAPTCHA sitekey="6LcE5c4qAAAAAHsHCBKBMBxSWghIM6NkTd9mgobL" onChange={handleCaptchaChange} />
               </Grid> }
 
               <Grid item xs={12}>
