@@ -154,7 +154,7 @@ const EmergencyReports = () => {
       <CssBaseline />
       <LeftPanel isMobile={isMobile}>
         <Image src="/images/sklogo3.png" alt="Logo" width={150} height={150} />
-        <Image src="/images/SK3.png" alt="Logo" width={120} height={120} />
+        <Image src="/images/triwatch1.png" alt="Logo" width={250} height={90} />
         <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 2 }}>
           Seguridad Kaayusan Katranquiloan asin Kauswagan
         </Typography>
