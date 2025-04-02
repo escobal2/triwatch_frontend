@@ -131,6 +131,9 @@ const IssuedTickets = () => {
                       <strong>Resolution:</strong> {complaint.resolution}
                     </Typography>
                     <Typography paragraph>
+                      <strong>Ticket Number:</strong> {complaint.ticket_number}
+                    </Typography>
+                    <Typography paragraph>
                       <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
                     </Typography>
 
