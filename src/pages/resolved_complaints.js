@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert, MenuItem, Select, FormControl, InputLabel, TextField } from '@mui/material';
 import axios from 'axios';
 import API_BASE_URL from '@/config/apiConfig';
 
@@ -8,7 +8,9 @@ const ResolvedComplaints = () => {
   const [loadingReports, setLoadingReports] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [timeframe, setTimeframe] = useState('daily'); // Default timeframe
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default to current month
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default: current month
+  const [startDate, setStartDate] = useState(''); // Start of the week (Monday)
+  const [endDate, setEndDate] = useState(''); // End of the week (Sunday)
   const [firstLoad, setFirstLoad] = useState(true); // Track first load
 
   // Format date function
@@ -24,23 +26,24 @@ const ResolvedComplaints = () => {
     });
   };
 
-  // Fetch resolved complaints (including archived)
-  const fetchResolvedComplaints = useCallback(async (selectedTimeframe, month = null) => {
+  // Fetch resolved complaints
+  const fetchResolvedComplaints = useCallback(async (selectedTimeframe, month = null, start = null, end = null) => {
     if (firstLoad) setLoadingReports(true); // Show loading only on first load
-
     setErrorMessage(null);
 
     try {
       const params = { timeframe: selectedTimeframe, include_archived: true };
       if (selectedTimeframe === 'specific_month') {
         params.month = month; // Send selected month to backend
+      } else if (selectedTimeframe === 'specific_week' && start && end) {
+        params.start_date = start; // Send start date (Monday)
+        params.end_date = end; // Send end date (Sunday)
       }
 
       const response = await axios.get(`${API_BASE_URL}/resolved-reports`, { params });
 
       console.log('Fetched Resolved Complaints:', response.data.resolved_complaints);
 
-      // Parse driver_info JSON string before setting state
       const parsedComplaints = response.data.resolved_complaints.map((complaint) => ({
         ...complaint,
         driver_info: complaint.driver_info ? JSON.parse(complaint.driver_info) : null, // Parse only if exists
@@ -57,10 +60,10 @@ const ResolvedComplaints = () => {
   }, [firstLoad]);
 
   useEffect(() => {
-    fetchResolvedComplaints(timeframe, selectedMonth);
-    const interval = setInterval(() => fetchResolvedComplaints(timeframe, selectedMonth), 5000);
+    fetchResolvedComplaints(timeframe, selectedMonth, startDate, endDate);
+    const interval = setInterval(() => fetchResolvedComplaints(timeframe, selectedMonth, startDate, endDate), 5000);
     return () => clearInterval(interval);
-  }, [fetchResolvedComplaints, timeframe, selectedMonth]);
+  }, [fetchResolvedComplaints, timeframe, selectedMonth, startDate, endDate]);
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
@@ -73,7 +76,7 @@ const ResolvedComplaints = () => {
       <Grid container spacing={3}>
         {/* Timeframe Filter */}
         <Grid item xs={12}>
-          {['daily', 'weekly', 'specific_month'].map((time) => (
+          {['daily', 'specific_week', 'specific_month'].map((time) => (
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
@@ -84,6 +87,32 @@ const ResolvedComplaints = () => {
             </Button>
           ))}
         </Grid>
+
+        {/* Specific Week Selector (Only shown when 'specific_week' is selected) */}
+        {timeframe === 'specific_week' && (
+          <>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Start Date (Monday)"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="End Date (Sunday)"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+          </>
+        )}
 
         {/* Month Selector (Only shown when 'specific_month' is selected) */}
         {timeframe === 'specific_month' && (
@@ -134,7 +163,6 @@ const ResolvedComplaints = () => {
                       <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
                     </Typography>
 
-                    {/* Driver Information Section */}
                     {complaint.driver_info && (
                       <>
                         <Divider sx={{ marginY: 2 }} />
@@ -163,6 +191,6 @@ const ResolvedComplaints = () => {
       </Grid>
     </Container>
   );
-}
+};
 
 export default ResolvedComplaints;
