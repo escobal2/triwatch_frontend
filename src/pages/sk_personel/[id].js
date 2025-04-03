@@ -161,7 +161,7 @@ const SKPersonelForm = () => {
   
 
   return (
-    <Container maxWidth="md" sx={{ paddingTop: 4 }}>
+    <Container maxWidth="lg" sx={{ paddingTop: 4 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <Typography variant="h5">Assigned Complaints for SK Personnel </Typography>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -171,7 +171,7 @@ const SKPersonelForm = () => {
       </div>
       <Grid container spacing={3}>
         {complaints.map(complaint => (
-          <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={complaint.id}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', borderRadius: '12px', backgroundColor: 'white' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Complaint {complaint.id}</Typography>
