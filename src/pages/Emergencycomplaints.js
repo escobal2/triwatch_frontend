@@ -1,229 +1,337 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Button, Grid, Box, Divider, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Snackbar, Alert } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { 
+  Card, CardContent, Typography, Button, Grid, Box, Divider, 
+  CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, 
+  TextField, Snackbar, Alert 
+} from '@mui/material';
 import axios from 'axios';
 import Image from 'next/image';
 import API_BASE_URL from '@/config/apiConfig';
 
 const EmergencyComplaints = () => {
     const [emergencyComplaints, setEmergencyComplaints] = useState([]);
-    const [successMessageArchive, setSuccessMessageArchive] = useState(null);   
-    const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
-    const [successMessageSMS, setSuccessMessageSMS] = useState('');
-    const [openDialog, setOpenDialog] = useState(false);
-    const [message, setMessage] = useState("");
-    const [complaintId, setComplaintId] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(null);
-    const [errorMessage, setErrorMessage] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [selectedComplaintId, setSelectedComplaintId] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+    
+    // Dialog states
+    const [dialogState, setDialogState] = useState({
+        smsDialog: {
+            open: false,
+            complaintId: null,
+            message: ''
+        },
+        archiveDialog: {
+            open: false,
+            complaintId: null
+        }
+    });
 
-    const fetchEmergencyComplaints = async () => {
+    const fetchEmergencyComplaints = useCallback(async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/emergencycomplaints`);
             setEmergencyComplaints(response.data.retrieved_data);
         } catch (error) {
             console.error("Error fetching emergency complaints:", error);
+            showNotification("Failed to load emergency complaints", "error");
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchEmergencyComplaints();
-        const interval = setInterval(()=>{
-            fetchEmergencyComplaints();
-        }, 2000);
-
+        const interval = setInterval(fetchEmergencyComplaints, 10000); // Polling every 10 seconds instead of 2
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchEmergencyComplaints]);
 
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-    }
-
-    const handleMessageChange = (event) => {
-        setMessage(event.target.value);
-    };
-
-    const confirmArchiveComplaint = (complaintId) => {
-        setSuccessMessage(null);
-        setSelectedComplaintId(complaintId);
-        setOpenArchiveDialog(true); // Open confirmation dialog
-    };
-
-    const handleNotifyClick = (id) => {
-        setComplaintId(id); // Set the complaintId when Notify button is clicked
-        setOpenDialog(true); // Open the dialog
+    // Notification handler
+    const showNotification = (message, severity = 'success') => {
+        setNotification({
+            open: true,
+            message,
+            severity
+        });
     };
 
     const closeNotification = () => {
-        setSuccessMessageArchive(null);
-        setSuccessMessageSMS(null);
+        setNotification(prev => ({ ...prev, open: false }));
     };
 
-    const sendSMSNotification = async () => {
-        if (complaintId && message) {
-            try {
-                const response = await axios.post(
-                    `${API_BASE_URL}/notify-emergency-complainant/${complaintId}`,
-                    { message }
-                );
-                if (response.data?.message === 'Notification sent successfully!') {
-                    console.log("SMS sent successfully!");
-                    setSuccessMessageSMS("SMS sent successfully!");
-                    setOpenDialog(false); // Close the dialog after success
-                } else {
-                    console.error("Failed to send SMS:", response.data.message);
-                    setSuccessMessageSMS("Failed to send SMS");
-                }
-            } catch (error) {
-                console.error("Error sending SMS:", error.response?.data || error.message);
-                setSuccessMessageSMS("Error sending SMS");
+    // SMS Dialog handlers
+    const openSmsDialog = (complaintId) => {
+        setDialogState(prev => ({
+            ...prev,
+            smsDialog: {
+                open: true,
+                complaintId,
+                message: ''
             }
-        } else {
-            console.error("Missing complaintId or message");
-            setSuccessMessageSMS("Missing complaintId or message");
+        }));
+    };
+
+    const closeSmsDialog = () => {
+        setDialogState(prev => ({
+            ...prev,
+            smsDialog: {
+                ...prev.smsDialog,
+                open: false
+            }
+        }));
+    };
+
+    const handleSmsMessageChange = (event) => {
+        setDialogState(prev => ({
+            ...prev,
+            smsDialog: {
+                ...prev.smsDialog,
+                message: event.target.value
+            }
+        }));
+    };
+
+    const sendSmsNotification = async () => {
+        const { complaintId, message } = dialogState.smsDialog;
+        
+        if (!complaintId || !message.trim()) {
+            showNotification("Please enter a message", "error");
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/notify-emergency-complainant/${complaintId}`,
+                { message }
+            );
+            
+            if (response.data?.message === 'Notification sent successfully!') {
+                showNotification("SMS notification sent successfully");
+                closeSmsDialog();
+            } else {
+                showNotification("Failed to send SMS notification", "error");
+            }
+        } catch (error) {
+            console.error("Error sending SMS:", error);
+            showNotification(`Error sending SMS: ${error.response?.data?.message || error.message}`, "error");
         }
     };
 
-    const handleArchiveComplaint = async (complaintId) => {
+    // Archive Dialog handlers
+    const openArchiveDialog = (complaintId) => {
+        setDialogState(prev => ({
+            ...prev,
+            archiveDialog: {
+                open: true,
+                complaintId
+            }
+        }));
+    };
+
+    const closeArchiveDialog = () => {
+        setDialogState(prev => ({
+            ...prev,
+            archiveDialog: {
+                ...prev.archiveDialog,
+                open: false
+            }
+        }));
+    };
+
+    const handleArchiveComplaint = async () => {
+        const { complaintId } = dialogState.archiveDialog;
+        
         try {
             const response = await axios.post(`${API_BASE_URL}/archive-emergency-complaint/${complaintId}`);
+            
             if (response.status === 200) {
-                setSuccessMessageArchive("Complaint successfully archived.");
-                setErrorMessage(null);
-                // Refresh the complaints list after archiving
-                fetchReports();
-                fetchArchivedComplaints();
+                showNotification("Complaint successfully archived");
+                fetchEmergencyComplaints();
             } else {
-                setErrorMessage("Error archiving complaint.");
+                showNotification("Error archiving complaint", "error");
             }
         } catch (error) {
             console.error("Error archiving complaint:", error);
-            setErrorMessage("Error archiving complaint. Please try again.");
+            showNotification("Error archiving complaint. Please try again.", "error");
         } finally {
-            setOpenArchiveDialog(false); // Close confirmation dialog
+            closeArchiveDialog();
         }
     };
 
+    if (isLoading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
-        <Grid container spacing={3}>
-            {emergencyComplaints.length === 0 ? (
-                <Typography variant="body1" sx={{ marginTop: 3 }}>
-                    No emergency complaints found.
-                </Typography>
-            ) : (
-                emergencyComplaints.map((complaint) => (
-                    <Grid item xs={12} sm={6} md={4} key={complaint.id}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6" color="#FF6A00" gutterBottom>
-                                    <strong>Emergency Complaint {complaint.id}</strong>
+        <>
+            <Typography variant="h5" component="h1" gutterBottom>
+                Emergency Complaints
+            </Typography>
+            
+            <Grid container spacing={3}>
+                {emergencyComplaints.length === 0 ? (
+                    <Grid item xs={12}>
+                        <Card sx={{ backgroundColor: '#f5f5f5' }}>
+                            <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                                <Typography variant="body1">
+                                    No emergency complaints found.
                                 </Typography>
-                                <Divider sx={{ marginBottom: 1 }} />
-                                <Typography><strong>Name:</strong> {complaint.fullName}</Typography>
-                                <Typography><strong>Contact Number:</strong> {complaint.contactNumber}</Typography>
-                                <Typography><strong>Category:</strong> {complaint.category}</Typography>
-                                <Typography><strong>Incident Date and Time:</strong> {complaint.incident_datetime}</Typography>
-                                <Typography><strong>Location:</strong> {complaint.location}</Typography>
-                                <Typography><strong>Details:</strong> {complaint.complaintDetails}</Typography>
-                                <Typography><strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}</Typography>
-                                <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'space-between' }}>
-                                <Button
-                                            variant="contained"
-                                            onClick={() => handleNotifyClick(complaint.id)}
-                                            sx={{ backgroundColor: '#fcdf03', borderRadius: '20px', padding: '3px 10px', '&:hover': { backgroundColor: '#fcdf03' } }}
-                                        >
-                                            Notify
-                                        </Button>
-                                     <Button
-                                            onClick={() => confirmArchiveComplaint(complaint.id)} // Call confirmArchiveComplaint here
-                                            variant="contained"
-                                            sx={{ backgroundColor: '#0384fc', borderRadius: '20px', padding: '5px 15px', '&:hover': { backgroundColor: '#0384fc' } }}
-                                        >
-                                            Archive
-                                        </Button>
-                                </Box>
                             </CardContent>
                         </Card>
                     </Grid>
-                ))
-            )}
+                ) : (
+                    emergencyComplaints.map((complaint) => (
+                        <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+                            <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography variant="h6" color="error" gutterBottom>
+                                        <strong>Emergency Complaint #{complaint.id}</strong>
+                                    </Typography>
+                                    <Divider sx={{ marginBottom: 2 }} />
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="body1"><strong>Name:</strong> {complaint.fullName}</Typography>
+                                        <Typography variant="body1"><strong>Contact:</strong> {complaint.contactNumber}</Typography>
+                                    </Box>
+                                    
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Category:</strong> {complaint.category}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Incident Date:</strong> {complaint.incident_datetime}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Location:</strong> {complaint.location}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Franchise Plate:</strong> {complaint.franchise_plate_no}</Typography>
+                                    
+                                    <Typography variant="subtitle2" sx={{ mt: 2, mb: 0.5 }}><strong>Details:</strong></Typography>
+                                    <Typography variant="body2" sx={{ 
+                                        backgroundColor: '#f8f8f8', 
+                                        p: 1.5, 
+                                        borderRadius: 1,
+                                        maxHeight: '100px',
+                                        overflow: 'auto'
+                                    }}>
+                                        {complaint.complaintDetails}
+                                    </Typography>
+                                </CardContent>
+                                
+                                <Divider />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
+                                    <Button
+                                        onClick={() => openSmsDialog(complaint.id)}
+                                        variant="contained"
+                                        sx={{ 
+                                            backgroundColor: '#fcdf03', 
+                                            color: '#000',
+                                            borderRadius: '20px', 
+                                            px: 2,
+                                            '&:hover': { backgroundColor: '#e6cc03' } 
+                                        }}
+                                    >
+                                        Notify
+                                    </Button>
+                                    <Button
+                                        onClick={() => openArchiveDialog(complaint.id)}
+                                        variant="contained"
+                                        sx={{ 
+                                            backgroundColor: '#0384fc', 
+                                            borderRadius: '20px', 
+                                            px: 2,
+                                            '&:hover': { backgroundColor: '#0270d7' } 
+                                        }}
+                                    >
+                                        Archive
+                                    </Button>
+                                </Box>
+                            </Card>
+                        </Grid>
+                    ))
+                )}
+            </Grid>
 
-              {/* Dialog for sending notifications */}
-              <Dialog open={openDialog} onClose={handleCloseDialog}>
-    <DialogTitle>Send Notification</DialogTitle>
-    <DialogContent>
-        <TextField
-            autoFocus
-            margin="dense"
-            label="Message"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={message}
-            onChange={handleMessageChange}
-        />
-    </DialogContent>
-    <DialogActions>
-        <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-        </Button>
-        <Button onClick={sendSMSNotification} color="primary">
-            Send
-        </Button>
-    </DialogActions>
-</Dialog>
+            {/* SMS Notification Dialog */}
+            <Dialog 
+                open={dialogState.smsDialog.open} 
+                onClose={closeSmsDialog}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>Send SMS Notification</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Message"
+                        type="text"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        variant="outlined"
+                        value={dialogState.smsDialog.message}
+                        onChange={handleSmsMessageChange}
+                        placeholder="Enter your notification message here..."
+                    />
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={closeSmsDialog} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={sendSmsNotification} 
+                        variant="contained" 
+                        color="primary"
+                        disabled={!dialogState.smsDialog.message.trim()}
+                    >
+                        Send
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-                             {/* Dialog for sending notifications */}
-                             <Dialog open={openDialog} onClose={handleCloseDialog}>
-    <DialogTitle>Send Notification</DialogTitle>
-    <DialogContent>
-        <TextField
-            autoFocus
-            margin="dense"
-            label="Message"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={message}
-            onChange={handleMessageChange}
-        />
-    </DialogContent>
-    <DialogActions>
-        <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-        </Button>
-        <Button onClick={sendSMSNotification} color="primary">
-            Send
-        </Button>
-    </DialogActions>
-</Dialog>
+            {/* Archive Confirmation Dialog */}
+            <Dialog 
+                open={dialogState.archiveDialog.open} 
+                onClose={closeArchiveDialog}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Confirm Archive</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to archive this emergency complaint? 
+                        This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={closeArchiveDialog} color="inherit">Cancel</Button>
+                    <Button 
+                        onClick={handleArchiveComplaint} 
+                        variant="contained" 
+                        color="primary"
+                    >
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-             {/* Archive Complaint Dialog */}
-<Dialog open={openArchiveDialog} onClose={() => setOpenArchiveDialog(false)}>
-    <DialogTitle>Confirm Archive</DialogTitle>
-    <DialogContent>
-        <Typography>Are you sure you want to archive this complaint?</Typography>
-        {successMessageArchive && (
-            <Alert severity="success" sx={{ marginTop: 2 }}>
-                {successMessageArchive}
-            </Alert>
-        )}
-    </DialogContent>
-    <DialogActions>
-        <Button onClick={() => setOpenArchiveDialog(false)} color="secondary">Cancel</Button>
-        <Button onClick={() => handleArchiveComplaint(selectedComplaintId)} color="primary">Confirm</Button>
-    </DialogActions>
-</Dialog>
-<Snackbar
-                open={!!successMessageArchive || !!successMessageSMS }
+            {/* Notification Snackbar */}
+            <Snackbar
+                open={notification.open}
                 autoHideDuration={4000}
                 onClose={closeNotification}
-                message={successMessageArchive || successMessageSMS}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            />
-        </Grid>
+            >
+                <Alert 
+                    onClose={closeNotification} 
+                    severity={notification.severity} 
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
+        </>
     );
 };
 

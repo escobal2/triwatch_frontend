@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Typography, TextField, Button, Grid, CssBaseline, Paper, MenuItem, Select, FormControl, InputLabel, Box, Dialog, DialogActions, DialogContent, DialogTitle, Alert } from "@mui/material";
+import { Typography, TextField, Button, Grid, MenuItem, Select, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle, Alert } from "@mui/material";
 import { styled } from '@mui/system';
 import Image from 'next/image';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -9,51 +9,143 @@ import API_BASE_URL from '@/config/apiConfig';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const LeftPanel = styled('div')(({ isMobile }) => ({
-  backgroundColor: '#FF6A00',
-  color: 'white',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '20px',
-  width: isMobile ? '100%' : '50%',
-  height: isMobile ? 'auto' : '100vh',
-}));
-
-const RightPanel = styled(Paper)(({ isMobile }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '20px',
-  width: isMobile ? '100%' : '50%',
-  height: isMobile ? 'auto' : '100vh',
-  marginTop: isMobile ? '20px' : '0',
-}));
-
-const RootContainer = styled('div')(({ isMobile }) => ({
-  display: 'flex',
-  flexDirection: isMobile ? 'column' : 'row',
+const RootContainer = styled('div')({
   width: '100vw',
-  height: '100vh',
-}));
+  height: '100%',
+  minHeight: '100vh',
+  position: 'relative',
+  overflow: 'hidden',
+});
 
-const StyledButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#FF6A00',
+const BackgroundImage = styled('div')({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundImage: 'url("/images/citystreet.jpg")',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  zIndex: 0,
+});
+
+const BlueOverlay = styled('div')({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundColor: 'rgba(0, 72, 103, 0.8)',
+  zIndex: 1,
+});
+
+const ContentContainer = styled('div')({
+  position: 'relative',
+  zIndex: 2,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: '100%',
+  minHeight: '100vh',
+  padding: '20px',
+  boxSizing: 'border-box',
   color: 'white',
-  padding: '10px 40px',
+});
+
+const LogoContainer = styled('div')({
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '30px',
+  marginBottom: '20px',
   marginTop: '20px',
-  transition: 'background-color 0.3s ease',
-  '&:hover': {
-    backgroundColor: '#E65C00', // Darker shade on hover
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    padding: '10px',
-  },
+});
+
+const StyledLogo = styled('div')({
+  backgroundColor: 'white',
+  borderRadius: '50%',
+  padding: '5px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '80px',
+  height: '80px',
+});
+
+const HeaderText = styled(Typography)({
+  fontSize: '20px',
+  fontWeight: 'bold',
+  marginBottom: '10px',
+  color: 'white',
+  textAlign: 'center',
+});
+
+const FormContainer = styled('div')(({ isMobile }) => ({
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: '8px',
+  padding: '30px',
+  width: isMobile ? '95%' : '60%',
+  maxWidth: '800px',
+  marginTop: '20px',
+  marginBottom: '40px',
 }));
 
+const StyledTextField = styled(TextField)({
+  marginBottom: '16px',
+  '& .MuiInputLabel-root': {
+    color: '#004867',
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#004867',
+    },
+    '&:hover fieldset': {
+      borderColor: '#004867',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#004867',
+    },
+  },
+});
+
+const StyledFormControl = styled(FormControl)({
+  marginBottom: '16px',
+  width: '100%',
+  '& .MuiInputLabel-root': {
+    color: '#004867',
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#004867',
+    },
+    '&:hover fieldset': {
+      borderColor: '#004867',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#004867',
+    },
+  },
+});
+
+const MapContainer = styled('div')({
+  width: '100%',
+  height: '300px',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  marginBottom: '16px',
+});
+
+const SubmitButton = styled(Button)({
+  backgroundColor: '#D32F2F',
+  color: 'white',
+  padding: '12px 30px',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  marginTop: '20px',
+  '&:hover': {
+    backgroundColor: '#B71C1C',
+  },
+});
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoidG9tbXkyIiwiYSI6ImNtNmY4N25iYzAyZTgybXNjeGd2MnIzdTgifQ.wkAA0YApaQvYxq_gdVlNpA';
 
@@ -62,8 +154,6 @@ const ReportForm = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    commuterName: "",
-    commuterContact: "",
     fullName: "",
     contactNumber: "",
     category: "",
@@ -71,36 +161,25 @@ const ReportForm = () => {
     incident_datetime: "",
     location: "",
     franchise_plate_no: "",
-    latitude: "",  // Add this
+    latitude: "",
     longitude: "",
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-
-  // Mapbox Ref
-  const mapContainer = useRef(null);
-  const [map, setMap] = useState(null);
   const [lng, setLng] = useState(null);
   const [lat, setLat] = useState(null);
-  const [commuter, setCommuter] = useState(null);
   const [commuterId, setCommuterId] = useState(null);
-  const [commuterName, setCommuterName] = useState("");
-  const [commuterContact, setCommuterContact] = useState("");
 
-
-
-  // Initialize Mapbox on mount and use Geolocation API for current location
+  // Initialize map and user location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
-
-          console.log("User Location:", userLat, userLng); // Debugging
-
+          
           setLat(userLat);
           setLng(userLng);
 
@@ -120,15 +199,52 @@ const ReportForm = () => {
     }
   }, []);
 
+  // Load commuter data from session storage
+  useEffect(() => {
+    const storedCommuter = sessionStorage.getItem("commuter");
+    if (storedCommuter) {
+      const parsedCommuter = JSON.parse(storedCommuter);
+      setCommuterId(parsedCommuter?.id || null);
+      
+      // Pre-fill form with stored commuter data
+      setFormData(prev => ({
+        ...prev,
+        fullName: parsedCommuter?.name?.trim() || "Unknown",
+        contactNumber: parsedCommuter?.contactnum?.trim() || "N/A",
+      }));
+    }
+  }, []);
+
+  // Fetch commuter data from API if needed
+  useEffect(() => {
+    if (!commuterId) return;
+
+    const fetchCommuterData = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
+        
+        setFormData(prev => ({
+          ...prev,
+          fullName: data?.name || "Unknown",
+          contactNumber: data?.contactnum || "N/A",
+        }));
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    fetchCommuterData();
+  }, [commuterId]);
+
   const handleMapClick = (e) => {
-    const { lng, lat } = e.lngLat;
-    setLng(lng);
-    setLat(lat);
+    const { lng: newLng, lat: newLat } = e.lngLat;
+    setLng(newLng);
+    setLat(newLat);
     setFormData({
       ...formData,
-      latitude: lat,
-      longitude: lng,
-      location: `Longitude: ${lng}, Latitude: ${lat}`,
+      latitude: newLat,
+      longitude: newLng,
+      location: `Longitude: ${newLng}, Latitude: ${newLat}`,
     });
   };
 
@@ -144,109 +260,35 @@ const ReportForm = () => {
     });
   };
 
-  const handleContactNumberChange = (e) => {
-    let value = e.target.value;
-
-    if (value.startsWith('0')) {
-      value = '+63' + value.slice(1);
-    }
-
-    if (value.length > 13) {
-      value = value.slice(0, 13);
-    }
-
-    setFormData({
-      ...formData,
-      contactNumber: value,
-    });
-
-    setFormErrors({
-      ...formErrors,
-      contactNumber: "",
-    });
-  };
-
-  useEffect(() => {
-    const storedCommuter = sessionStorage.getItem("commuter");
-    if (storedCommuter) {
-      const parsedCommuter = JSON.parse(storedCommuter);
-      console.log("Retrieved from sessionStorage:", parsedCommuter);
-
-      setCommuterId(parsedCommuter?.id || null);
-      
-      // Populate form fields with stored data
-      setFormData({
-        fullName: parsedCommuter?.name?.trim() || "Unknown",
-        contactNumber: parsedCommuter?.contactnum?.trim() || "N/A",
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!commuterId) {
-      console.warn("No commuterId found!");
-      return;
-    }
-
-    const fetchCommuterData = async () => {
-      try {
-        console.log(`Fetching data for ID: ${commuterId}`);
-        const { data } = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
-        console.log("API Response:", data);
-
-        // Update form fields with fetched data
-        setFormData({
-          fullName: data?.name || "Unknown",
-          contactNumber: data?.contactnum || "N/A",
-        });
-      } catch (error) {
-        console.error("API Error:", error);
-        setFormData({
-          fullName: (response.data?.name || "Unknown").trim(),
-          contactNumber: (response.data?.contactnum || "N/A").trim(),
-        });
-      }
-    };
-
-    fetchCommuterData();
-  }, [commuterId]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
 
-    if (!formData.fullName.trim()) errors.fullName = "Full Name is required";
-    if (!formData.contactNumber.trim()) errors.contactNumber = "Contact Number is required";
+    // Validate form fields
     if (!formData.category.trim()) errors.category = "Category is required";
-    if (!formData.complaintDetails.trim()) errors.complaintDetails = "Details of Complaint are required";
-    if (!formData.incident_datetime) errors.incident_datetime = "Incident Date and Time is required";
-    if (!formData.location.trim()) errors.location = "Location is required";
-    if (!formData.franchise_plate_no.trim()) errors.franchise_plate_no = "Franchise Plate Number is required";
+    if (!formData.complaintDetails.trim()) errors.complaintDetails = "Details of complaint are required";
+    if (!formData.incident_datetime) errors.incident_datetime = "Incident date and time is required";
+    if (!formData.franchise_plate_no.trim()) errors.franchise_plate_no = "Franchise plate number is required";
     if (!formData.latitude || !formData.longitude) errors.location = "Please select a location on the map";
 
     if (Object.keys(errors).length === 0) {
       try {
-        const res = await axios.post(`${API_BASE_URL}/add_report`, formData);
-
+        await axios.post(`${API_BASE_URL}/add_report`, formData);
         setSubmissionStatus("success");
+        setOpenDialog(true);
+        
+        // Reset form
         setFormData({
-          commuterName: "",
-          commuterContact: "",
-          fullName: "",
-          contactNumber: "",
+          ...formData,
           category: "",
           complaintDetails: "",
           incident_datetime: "",
           location: "",
           franchise_plate_no: "",
-          latitude: "",
-          longitude: "",
         });
-
-        setOpenDialog(true);
       } catch (error) {
         console.error("Error submitting report:", error);
-        alert("Failed to submit report.");
+        setSubmissionStatus("error");
       }
     } else {
       setFormErrors(errors);
@@ -259,144 +301,195 @@ const ReportForm = () => {
   };
 
   return (
-    <RootContainer isMobile={isMobile}>
-      <CssBaseline />
-
-      <LeftPanel isMobile={isMobile}>
-        <Image src="/images/sklogo3.png" alt="Logo" width={150} height={150} />
-        <Image src="/images/SK3.png" alt="Logo" width={120} height={120} />
-        <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 2 }}>
-          Seguridad Kaayusan Katranquiloan asin Kauswagan
+    <RootContainer>
+      <BackgroundImage />
+      <BlueOverlay />
+      <ContentContainer>
+        <HeaderText variant="h6">
+          Seguridad Kaayusan Katranguilohan Kauswagan
+        </HeaderText>
+        
+        <LogoContainer>
+          <StyledLogo>
+            <Image src="/images/sklogo3.png" alt="Transport Logo" width={80} height={80} />
+          </StyledLogo>
+          <StyledLogo>
+            <Image src="/images/cityseal1.png" alt="City Seal" width={80} height={80} />
+          </StyledLogo>
+        </LogoContainer>
+        
+        <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', marginBottom: '20px' }}>
+          INCIDENT REPORT FORM
         </Typography>
-      </LeftPanel>
 
-      <RightPanel elevation={3} isMobile={isMobile}>
-        <Typography component="h1" variant="h5">
-          Report Form
-        </Typography>
-        {submissionStatus === "success" && (
-          <Alert severity="success" sx={{ marginTop: 2 }}>
-            Form submitted successfully!
-          </Alert>
-        )}
-        <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: 4 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-            <TextField
-                fullWidth
-                label="Full Name"
-                variant="outlined"
-                name="name"
-                value={formData.fullName}
-                disabled // Make it non-editable
-              />
-            </Grid>
-            <Grid item xs={12}>
-            <TextField
-                fullWidth
-                label="Contact Number"
-                variant="outlined"
-                type="tel"
-                name="contactNumber"
-                value={formData.contactNumber}
-                disabled // Make it non-editable
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel id="category-label">Category</InputLabel>
-                <Select
-                  labelId="category-label"
-                  id="category"
-                  name="category"
-                  value={formData.category}
+        <FormContainer isMobile={isMobile}>
+          {submissionStatus === "success" && (
+            <Alert severity="success" sx={{ marginBottom: 2 }}>
+              Form submitted successfully!
+            </Alert>
+          )}
+          {submissionStatus === "error" && (
+            <Alert severity="error" sx={{ marginBottom: 2 }}>
+              Failed to submit report. Please try again.
+            </Alert>
+          )}
+          
+          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Full Name"
+                  variant="outlined"
+                  name="fullName"
+                  value={formData.fullName}
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Contact Number"
+                  variant="outlined"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <StyledFormControl variant="outlined">
+                  <InputLabel id="category-label">Category</InputLabel>
+                  <Select
+                    labelId="category-label"
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    label="Category"
+                    error={Boolean(formErrors.category)}
+                  >
+                    <MenuItem value="">Select Category</MenuItem>
+                    <MenuItem value="Overcharging">Overcharging</MenuItem>
+                    <MenuItem value="Assault">Assault</MenuItem>
+                    <MenuItem value="Lost Belonging">Lost Belonging</MenuItem>
+                  </Select>
+                  {formErrors.category && (
+                    <Typography color="error" variant="caption">
+                      {formErrors.category}
+                    </Typography>
+                  )}
+                </StyledFormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Incident Date and Time"
+                  variant="outlined"
+                  type="datetime-local"
+                  name="incident_datetime"
+                  value={formData.incident_datetime}
                   onChange={handleChange}
-                  label="Category"
-                  error={Boolean(formErrors.category)}
-                >
-                  <MenuItem value="">Select Category</MenuItem>
-                  <MenuItem value="Overcharging">Overcharging</MenuItem>
-                  <MenuItem value="Assault">Assault</MenuItem>
-                  <MenuItem value="Lost Belonging">Lost Belonging</MenuItem>
-                </Select>
-              </FormControl>
+                  error={Boolean(formErrors.incident_datetime)}
+                  helperText={formErrors.incident_datetime}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <StyledTextField
+                  fullWidth
+                  label="Franchise Plate Number"
+                  variant="outlined"
+                  name="franchise_plate_no"
+                  value={formData.franchise_plate_no}
+                  onChange={handleChange}
+                  error={Boolean(formErrors.franchise_plate_no)}
+                  helperText={formErrors.franchise_plate_no}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="body1" sx={{ color: '#004867', marginBottom: '8px' }}>
+                  Click on the map to select incident location:
+                </Typography>
+                <MapContainer>
+                  {lat !== null && lng !== null ? (
+                    <Map
+                      initialViewState={{
+                        longitude: lng,
+                        latitude: lat,
+                        zoom: 14,
+                      }}
+                      style={{ width: "100%", height: "100%" }}
+                      mapStyle="mapbox://styles/mapbox/streets-v11"
+                      mapboxAccessToken={MAPBOX_TOKEN}
+                      onClick={handleMapClick}
+                    >
+                      <Marker longitude={lng} latitude={lat} color="red" />
+                    </Map>
+                  ) : (
+                    <Typography align="center" sx={{ padding: '20px' }}>Loading map...</Typography>
+                  )}
+                </MapContainer>
+                {formErrors.location && (
+                  <Typography color="error" variant="caption">
+                    {formErrors.location}
+                  </Typography>
+                )}
+              </Grid>
+              <Grid item xs={12}>
+                <StyledTextField
+                  fullWidth
+                  label="Complaint Details"
+                  variant="outlined"
+                  name="complaintDetails"
+                  value={formData.complaintDetails}
+                  onChange={handleChange}
+                  multiline
+                  rows={4}
+                  error={Boolean(formErrors.complaintDetails)}
+                  helperText={formErrors.complaintDetails}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Incident Date and Time"
-                variant="outlined"
-                type="datetime-local"
-                name="incident_datetime"
-                value={formData.incident_datetime}
-                onChange={handleChange}
-                error={Boolean(formErrors.incident_datetime)}
-                helperText={formErrors.incident_datetime}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>Click on the map to select a location:</Typography>
-              {lat !== null && lng !== null ? (
-        <Map
-          initialViewState={{
-            longitude: lng,
-            latitude: lat,
-            zoom: 14,
-          }}
-          style={{ width: "100%", height: "300px" }}
-          mapStyle="mapbox://styles/mapbox/streets-v11"
-          mapboxAccessToken={MAPBOX_TOKEN}
-          onClick={handleMapClick}
-        >
-          <Marker longitude={lng} latitude={lat} color="red" />
-        </Map>
-      ) : (
-        <p>Loading map...</p>
-      )}
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Franchise Plate Number"
-                variant="outlined"
-                name="franchise_plate_no"
-                value={formData.franchise_plate_no}
-                onChange={handleChange}
-                error={Boolean(formErrors.franchise_plate_no)}
-                helperText={formErrors.franchise_plate_no}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Complaint Details"
-                variant="outlined"
-                name="complaintDetails"
-                value={formData.complaintDetails}
-                onChange={handleChange}
-                multiline
-                rows={4}
-                error={Boolean(formErrors.complaintDetails)}
-                helperText={formErrors.complaintDetails}
-              />
-            </Grid>
-          </Grid>
-          <StyledButton type="submit">Submit Report</StyledButton>
-        </form>
-      </RightPanel>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <SubmitButton type="submit" variant="contained">
+                Submit Report
+              </SubmitButton>
+            </div>
+          </form>
+        </FormContainer>
+      </ContentContainer>
 
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Report Submitted</DialogTitle>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleDialogClose}
+        PaperProps={{
+          style: {
+            borderRadius: '8px',
+            padding: '10px',
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: '#004867', fontWeight: 'bold' }}>Report Submitted</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Your report has been successfully submitted!
+            Your incident report has been successfully submitted. The authorities will review your report and take appropriate action.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">Close</Button>
+          <Button 
+            onClick={handleDialogClose} 
+            sx={{ 
+              backgroundColor: '#004867', 
+              color: 'white',
+              '&:hover': {
+                backgroundColor: '#003652',
+              }
+            }}
+          >
+            Return to Dashboard
+          </Button>
         </DialogActions>
       </Dialog>
     </RootContainer>
