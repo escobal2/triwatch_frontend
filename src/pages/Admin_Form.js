@@ -111,20 +111,7 @@ const AdminDashboard = () => {
   }, [fetchDriverDetails]);
 
   // Consolidated data fetching function
-  const fetchAllData = useCallback(async () => {
-    try {
-      await Promise.all([
-        fetchReports(),
-        fetchArchivedComplaints(),
-        fetchPersonnelList(),
-        fetchResolvedComplaints(),
-        fetchDismissedComplaints(),
-        fetchIssuedTickets()
-      ]);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }, [fetchReports]);
+ 
 
   // Simplified data fetching functions
   const fetchArchivedComplaints = useCallback(async () => {
@@ -280,10 +267,24 @@ const AdminDashboard = () => {
 
   // Effect Hook for data fetching
   useEffect(() => {
-    fetchAllData();
-    const interval = setInterval(fetchAllData, 5000);
-    return () => clearInterval(interval);
-  }, [fetchAllData]);
+    fetchPersonnelList();
+    fetchArchivedComplaints();
+    fetchReports();
+    fetchIssuedTickets();
+    fetchResolvedComplaints();
+    fetchDismissedComplaints();
+
+
+        const interval = setInterval(()=>{
+            fetchReports();
+            fetchArchivedComplaints();
+            fetchPersonnelList();
+        }, 2000);
+
+        return () => clearInterval(interval);
+
+        
+}, []);
 
   // Component for Complaint Card - redesigned for better responsiveness
   const ComplaintCard = ({ complaint }) => (
