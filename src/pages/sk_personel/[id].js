@@ -515,20 +515,24 @@ const SKPersonelForm = () => {
                     justifyContent: 'space-between', 
                     mt: 2 
                   }}>
-                    <Button 
-                      variant="contained" 
-                      color="success" 
-                      startIcon={<CheckCircle />}
-                      onClick={() => resolveComplaint(complaint.id, id)}
-                      sx={{ 
-                        flex: 1, 
-                        mr: isMobile ? 0 : 1,
-                        py: isMobile ? 1 : 'initial'
-                      }}
-                      aria-label={`Resolve complaint ${complaint.id}`}
-                    >
-                      Resolve
-                    </Button>
+                    {/* Only show the Resolve button when an image is uploaded for this complaint */}
+                    {image && selectedComplaintId === complaint.id && (
+                      <Button 
+                        variant="contained" 
+                        color="success" 
+                        startIcon={<CheckCircle />}
+                        onClick={() => resolveComplaint(complaint.id, id)}
+                        sx={{ 
+                          flex: 1, 
+                          mr: isMobile ? 0 : 1,
+                          py: isMobile ? 1 : 'initial',
+                          mb: isMobile ? 1 : 0
+                        }}
+                        aria-label={`Resolve complaint ${complaint.id}`}
+                      >
+                        Resolve
+                      </Button>
+                    )}
                     <Button 
                       variant="contained" 
                       color="error" 
@@ -536,8 +540,9 @@ const SKPersonelForm = () => {
                       onClick={() => dismissComplaint(complaint.id, id)}
                       sx={{ 
                         flex: 1, 
-                        ml: isMobile ? 0 : 1,
-                        py: isMobile ? 1 : 'initial'
+                        ml: (image && selectedComplaintId === complaint.id && !isMobile) ? 1 : 0,
+                        py: isMobile ? 1 : 'initial',
+                        width: (image && selectedComplaintId === complaint.id) ? undefined : '100%'
                       }}
                       aria-label={`Dismiss complaint ${complaint.id}`}
                     >
