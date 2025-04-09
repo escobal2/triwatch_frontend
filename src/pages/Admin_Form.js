@@ -671,14 +671,16 @@ const AdminDashboard = () => {
           justifyContent: 'space-between',
           bgcolor: '#f5f5f5'
         }}>
+          {/* Filter buttons array based on assignment status */}
           {[
-            { 
+            // Only show Assign button if not already assigned
+            ...(complaint.assigned_to_name ? [] : [{ 
               label: 'Assign', 
               action: () => handleAction.assign(complaint.id), 
               color: '#FF6A00', 
               hoverColor: '#FB8C00',
               icon: <ManageAccounts sx={{ fontSize: '0.9rem' }} />
-            },
+            }]),
             { 
               label: 'Archive', 
               action: () => handleAction.archive(complaint.id), 
