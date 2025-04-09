@@ -969,8 +969,7 @@ return (
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      mr: 0.5,
-      cursor: 'pointer'
+      mr: 0.5
     }}
   >
     <Search sx={{ color: 'white', fontSize: isMobile ? '1rem' : '1.2rem' }} />
@@ -1065,7 +1064,7 @@ return (
 )}
 
           {/* Other views rendered using imported components */}
-          {activeView === 'archived' && <ArchivedComplaints archivedComplaints={archivedComplaints} />}
+          {activeView === 'archived' && <ArchivedComplaints searchTerm={searchTerm} />}
           {activeView === 'emergency' && <EmergencyComplaints />}
           {activeView === 'archivedEmergency' && <ArchivedEmergencyComplaints />}
           {activeView === 'createPersonnel' && <SKPersonnelAccountForm />}
