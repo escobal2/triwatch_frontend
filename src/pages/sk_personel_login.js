@@ -200,7 +200,7 @@ const SkpersonelLogin = () => {
           >
             <TextField
               fullWidth
-              placeholder="EMAIL OR LTO CLIENT NUMBER"
+              placeholder="EMAIL OR USERNAME"
               variant="outlined"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

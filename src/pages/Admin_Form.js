@@ -4,12 +4,14 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, Alert, Snackbar, Divider,
   CircularProgress, InputBase, IconButton, Drawer, useMediaQuery,
-  useTheme
+  useTheme, Arc
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import moment from 'moment';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 // Icons - import only what's needed
 import { 
@@ -288,223 +290,430 @@ const AdminDashboard = () => {
 
   // Component for Complaint Card - redesigned for better responsiveness
   const ComplaintCard = ({ complaint }) => (
-    <Card 
-    sx={{ 
+    <Card sx={{ 
       height: '100%', 
       display: 'flex', 
       flexDirection: 'column', 
-      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)', 
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
       borderRadius: '12px',
-      transition: 'transform 0.3s, box-shadow 0.3s',
-      '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
-      }
-    }}
-  >
-    {/* Card Header with ID and Status */}
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      bgcolor: '#FF6A00', 
-      p: 2, 
-      borderTopLeftRadius: '12px', 
-      borderTopRightRadius: '12px',
+      overflow: 'hidden',
+      minWidth: 0 // Important for flex items to allow shrinking below content size
     }}>
-      <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-        Complaint #{complaint.id}
-      </Typography>
-      <Chip 
-        label={complaint.status} 
-        color={getStatusColor(complaint.status)}
-        size="small"
-        sx={{ fontWeight: 'bold' }}
-      />
-    </Box>
-
-    <CardContent sx={{ flexGrow: 1, p: isMobile ? 2 : 3 }}>
-      {/* Primary Information */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        {primaryFields.map((field) => (
-          <Grid item xs={12} sm={6} key={field}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 1.5, 
-                bgcolor: 'rgba(0, 0, 0, 0.03)', 
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              {getFieldIcon(field)}
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {getFieldLabel(field)}
-                </Typography>
-                <Typography sx={{ fontWeight: 'medium' }}>
-                  {field === 'incident_datetime' 
-                    ? formatDateTime(complaint[field]) 
-                    : complaint[field]}
-                </Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Complaint Details */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 1.5, 
-          bgcolor: 'rgba(0, 0, 0, 0.03)', 
-          borderRadius: '8px',
-          mb: 2
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <Description fontSize="small" sx={{ color: 'primary.main' }} />
-          <Typography variant="caption" color="text.secondary">
-            Complaint Details
-          </Typography>
-        </Box>
-        <Typography variant="body2">
-          {complaint.complaintDetails}
-        </Typography>
-      </Paper>
-
-      {/* Secondary Information */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        {secondaryFields.map((field) => (
-          <Grid item xs={12} sm={field === 'location' ? 12 : 6} key={field}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 1.5, 
-                bgcolor: 'rgba(0, 0, 0, 0.03)', 
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              {getFieldIcon(field)}
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {getFieldLabel(field)}
-                </Typography>
-                <Typography sx={{ fontWeight: 'medium' }}>
-                  {field === 'assigned_to_name' 
-                    ? (complaint[field] || 'None') 
-                    : complaint[field]}
-                </Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Driver Info - Collapsible */}
-      {complaint.driver_info && (
-        <Box sx={{ mt: 2, mb: 2 }}>
-          <Box 
-            onClick={() => setExpanded(!expanded)} 
-            sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              cursor: 'pointer',
-              bgcolor: 'rgba(0, 0, 0, 0.05)',
-              p: 1,
-              borderRadius: '8px'
-            }}
-          >
-            <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold' }}>
-              Tricycle Driver Details
-            </Typography>
-            <IconButton size="small">
-              {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-            </IconButton>
-          </Box>
-          
-          <Collapse in={expanded} timeout="auto" unmountOnExit>
-            <Box sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: '8px', mt: 1 }}>
-              <Grid container spacing={2}>
-                {['franchise_plate_no', 'driver_name', 'association', 'address', 'ticket_count'].map((field) => (
-                  <Grid item xs={12} sm={field === 'address' ? 12 : 6} key={field}>
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {getFieldLabel(field)}
-                      </Typography>
-                      <Typography sx={{ fontWeight: 'medium' }}>
-                        {complaint.driver_info[field]}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </Collapse>
-        </Box>
-      )}
-
-      {/* Action buttons - redesigned for better mobile experience */}
+      {/* Card Header - Compact and responsive */}
       <Box sx={{ 
-        marginTop: 2, 
-        display: 'flex', 
-        flexDirection: isSmallMobile ? 'column' : 'row', 
-        gap: isSmallMobile ? 1 : 1, 
-        justifyContent: isSmallMobile ? 'flex-start' : 'space-around' 
+        bgcolor: '#FF6A00', 
+        color: 'white', 
+        py: { xs: 0.5, sm: 0.75 }, 
+        px: { xs: 1, sm: 1.5 },
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        {[
-          { 
-            label: 'Assign', 
-            action: () => handleAction.assign(complaint.id), 
-            color: '#FF6A00', 
-            hoverColor: '#FB8C00' 
-          }, 
-          { 
-            label: 'Archive', 
-            action: () => handleAction.archive(complaint.id), 
-            color: '#0384fc', 
-            hoverColor: '#0366d6' 
-          }, 
-          { 
-            label: 'Notify', 
-            action: () => handleAction.notify(complaint.id), 
-            color: '#fcdf03', 
-            hoverColor: '#e6cc00' 
-          }
-        ].map((btn, idx) => (
-          <Button 
-            key={idx} 
-            onClick={btn.action} 
-            variant="contained" 
-            size="small" 
-            fullWidth={isSmallMobile} 
-            disableElevation
-            sx={{ 
-              backgroundColor: btn.color, 
-              borderRadius: '20px', 
-              px: 3,
-              py: 1,
-              fontWeight: 'bold',
-              '&:hover': { 
-                backgroundColor: btn.hoverColor 
-              }, 
-            }}
-          >
-            {btn.label}
-          </Button>
-        ))}
+        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}>
+          Complaint #{complaint.id}
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            bgcolor: complaint.status === 'Pending' ? '#ffcc80' : '#81c784',
+            color: complaint.status === 'Pending' ? '#e65100' : '#2e7d32',
+            px: 1,
+            py: 0.25,
+            ml: 0.5,
+            borderRadius: '12px',
+            fontWeight: 'bold',
+            fontSize: { xs: '0.6rem', sm: '0.7rem' },
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {complaint.status}
+        </Typography>
       </Box>
-    </CardContent>
-  </Card>
-  );
   
+      <CardContent sx={{ 
+        flexGrow: 1, 
+        p: 0, 
+        "&:last-child": { pb: 0 }, // Remove default padding at bottom
+        overflowY: 'auto' // Allow scrolling if content is too large
+      }}>
+        {/* Unified Grid approach for all sections */}
+        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
+          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+            fontSize: { xs: '0.75rem', sm: '0.85rem' },
+            mb: 0.5
+          }}>
+            Complainant
+          </Typography>
+          
+          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+            {/* Two column layout that becomes single column on very small screens */}
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Name:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    wordBreak: 'break-word',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    width: '100%'
+                  }}
+                >
+                  {complaint.fullName}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Contact:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    wordBreak: 'break-word',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    width: '100%'
+                  }}
+                >
+                  {complaint.contactNumber || 'Not provided'}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+        
+        <Divider />
+        
+        {/* Incident Details - Compact design */}
+        <Box sx={{ p: { xs: 1, sm: 1.5 } }}>
+          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+            fontSize: { xs: '0.75rem', sm: '0.85rem' },
+            mb: 0.5
+          }}>
+            Incident Details
+          </Typography>
+          
+          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Type:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium"
+                  sx={{
+                    bgcolor: 
+                      complaint.category === 'Assault' ? '#ffcdd2' : 
+                      complaint.category === 'Overcharging' ? '#c8e6c9' : 
+                      complaint.category === 'Lost Belonging' ? '#bbdefb' : '#e1f5fe',
+                    px: 0.5,
+                    py: 0.2,
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}
+                >
+                  {complaint.category}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Date:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {formatDateTime(complaint.incident_datetime)}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Location:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    width: '100%'
+                  }}
+                >
+                  {complaint.location}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                Details:
+              </Typography>
+              <Box sx={{ 
+                bgcolor: '#f5f5f5', 
+                p: 1, 
+                borderRadius: '4px', 
+                maxHeight: { xs: '40px', sm: '50px', md: '60px' }, 
+                overflow: 'auto',
+                border: '1px solid #e0e0e0',
+                fontSize: { xs: '0.65rem', sm: '0.7rem' }
+              }}>
+                <Typography 
+                  variant="caption" 
+                  component="div"
+                  sx={{ wordBreak: 'break-word' }}
+                >
+                  {complaint.complaintDetails}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+        
+        <Divider />
+        
+        {/* Vehicle/Driver Information - Streamlined */}
+        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: complaint.driver_info ? '#fff8e1' : 'transparent' }}>
+          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+            fontSize: { xs: '0.75rem', sm: '0.85rem' },
+            mb: 0.5
+          }}>
+            Vehicle Info
+          </Typography>
+          
+          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Plate:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {complaint.franchise_plate_no || 'Not provided'}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            {/* Driver details if available - compressed */}
+            {complaint.driver_info && (
+              <>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      minWidth: { xs: '40px', sm: '50px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      Driver:
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      fontWeight="medium" 
+                      sx={{ 
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%'
+                      }}
+                    >
+                      {complaint.driver_info.driver_name}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      minWidth: { xs: '45px', sm: '55px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      Tickets:
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      fontWeight="medium"
+                      sx={{
+                        bgcolor: 
+                          complaint.driver_info.ticket_count > 3 ? '#ffcdd2' : 
+                          complaint.driver_info.ticket_count > 1 ? '#fff9c4' : '#e8f5e9',
+                        px: 0.5,
+                        py: 0.2,
+                        borderRadius: '4px',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {complaint.driver_info.ticket_count}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </Box>
+        
+        <Divider />
+        
+        {/* Assignment Status - More compact */}
+        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#e3f2fd' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+              mb: 0
+            }}>
+              Assignment
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              bgcolor: complaint.assigned_to_name ? '#e8f5e9' : '#ffebee',
+              px: 0.5,
+              py: 0.25,
+              borderRadius: '4px',
+              maxWidth: '60%',
+              overflow: 'hidden'
+            }}>
+              <AccountCircle sx={{ 
+                fontSize: { xs: 12, sm: 14 }, 
+                mr: 0.5, 
+                color: complaint.assigned_to_name ? '#2e7d32' : '#c62828' 
+              }} />
+              <Typography 
+                variant="caption" 
+                fontWeight="medium" 
+                sx={{ 
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  fontSize: { xs: '0.65rem', sm: '0.7rem' }
+                }}
+              >
+                {complaint.assigned_to_name || 'Not assigned'}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+          
+        {/* Action buttons - optimized for space */}
+        <Box sx={{ 
+          p: { xs: 0.5, sm: 1 },
+          display: 'flex', 
+          gap: 0.5,
+          justifyContent: 'space-between',
+          bgcolor: '#f5f5f5'
+        }}>
+          {[
+            { 
+              label: 'Assign', 
+              action: () => handleAction.assign(complaint.id), 
+              color: '#FF6A00', 
+              hoverColor: '#FB8C00',
+              icon: <ManageAccounts sx={{ fontSize: '0.9rem' }} />
+            },
+            { 
+              label: 'Archive', 
+              action: () => handleAction.archive(complaint.id), 
+              color: '#0384fc', 
+              hoverColor: '#0366d6',
+              icon: <ArchiveIcon sx={{ fontSize: '0.9rem' }} />
+            },
+            { 
+              label: 'Notify', 
+              action: () => handleAction.notify(complaint.id), 
+              color: '#fcdf03', 
+              hoverColor: '#e6cc00',
+              icon: <NotificationsIcon sx={{ fontSize: '0.9rem' }} />
+            }
+          ].map((btn, idx) => (
+            <Button
+              key={idx}
+              startIcon={btn.icon}
+              onClick={btn.action}
+              variant="contained"
+              size="small"
+              sx={{
+                backgroundColor: btn.color,
+                borderRadius: '16px',
+                '&:hover': { backgroundColor: btn.hoverColor },
+                flexGrow: 1,
+                fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                py: { xs: 0.5, sm: 0.75 },
+                px: { xs: 0.5, sm: 1 },
+                minWidth: 0,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {!isSmallMobile ? btn.label : ''}
+            </Button>
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  );
   // Navigation menu item renderer - works for both desktop and mobile
   const renderMenuItem = (icon, label, view, endIcon = null) => (
     <Button
