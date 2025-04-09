@@ -22,6 +22,7 @@ const SKPersonelForm = () => {
   const [extractedText, setExtractedText] = useState(null);
   const [dismissedComplaints, setDismissedComplaints] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const { id, fullname } = router.query;
   const theme = useTheme();
@@ -69,6 +70,7 @@ const SKPersonelForm = () => {
     if (file) {
       setImage(file);
       setSelectedComplaintId(complaintId);
+      setExtractedText(null); // Reset extracted text when a new image is selected
     }
   };
 
@@ -86,7 +88,57 @@ const SKPersonelForm = () => {
     }
   };
 
-  // Resolve Complaint (now includes ticket extraction)
+  // Enhanced ticket number extraction with multiple approaches
+  const extractTicketNumber = async (imageFile) => {
+    setIsProcessing(true);
+    try {
+      // Configure Tesseract with specific options for better digit recognition
+      const { data } = await Tesseract.recognize(imageFile, "eng", {
+        logger: (m) => console.log(m),
+        tessedit_char_whitelist: '0123456789NTRAFFIC°:VIOLATIONSRECEIPT', // Focus on relevant characters
+        tessedit_pageseg_mode: '4', // Assume a single column of text
+      });
+
+      const text = data.text;
+      console.log("Full extracted text:", text);
+
+      // Method 1: Try to find the ticket number by looking for the pattern "N°: [digits]"
+      const ticketPattern = /N[o°:][:.]?\s*(\d+)/i;
+      const ticketMatch = text.match(ticketPattern);
+      
+      if (ticketMatch && ticketMatch[1]) {
+        return ticketMatch[1];
+      }
+      
+      // Method 2: If that fails, look for the red number in the top right (usually longer digits)
+      // This searches for 6+ digit numbers which are likely to be ticket numbers
+      const longNumberPattern = /\b\d{6,}\b/;
+      const longNumberMatch = text.match(longNumberPattern);
+      
+      if (longNumberMatch) {
+        return longNumberMatch[0];
+      }
+      
+      // Method 3: If both above methods fail, extract all numbers and pick the longest one
+      // as it's more likely to be the ticket number
+      const allNumbers = text.match(/\d+/g) || [];
+      const sortedByLength = allNumbers.sort((a, b) => b.length - a.length);
+      
+      if (sortedByLength.length > 0) {
+        return sortedByLength[0];
+      }
+      
+      // If all fails, return N/A
+      return "N/A";
+    } catch (error) {
+      console.error("Error extracting ticket number:", error);
+      return "Error extracting ticket number";
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Resolve Complaint with enhanced ticket extraction
   const resolveComplaint = async (complaintId, personnelId) => {
     const resolution = prompt("Enter resolution for this complaint:");
     if (!resolution) return;
@@ -97,12 +149,8 @@ const SKPersonelForm = () => {
     }
   
     try {
-      // Extract ticket number using Tesseract OCR
-      const { data: { text } } = await Tesseract.recognize(image, "eng", {
-        logger: (m) => console.log(m),
-      });
-  
-      const extractedTicketNumber = text.match(/\d+/)?.[0] || "N/A"; // Default to "N/A" if no number found
+      // Extract ticket number using our enhanced method
+      const extractedTicketNumber = await extractTicketNumber(image);
       setExtractedText(extractedTicketNumber);
       alert(`Extracted Ticket Number: ${extractedTicketNumber}`);
   
@@ -522,6 +570,7 @@ const SKPersonelForm = () => {
                         color="success" 
                         startIcon={<CheckCircle />}
                         onClick={() => resolveComplaint(complaint.id, id)}
+                        disabled={isProcessing}
                         sx={{ 
                           flex: 1, 
                           mr: isMobile ? 0 : 1,
@@ -530,7 +579,7 @@ const SKPersonelForm = () => {
                         }}
                         aria-label={`Resolve complaint ${complaint.id}`}
                       >
-                        Resolve
+                        {isProcessing ? "Processing..." : "Resolve"}
                       </Button>
                     )}
                     <Button 
@@ -538,6 +587,7 @@ const SKPersonelForm = () => {
                       color="error" 
                       startIcon={<Cancel />}
                       onClick={() => dismissComplaint(complaint.id, id)}
+                      disabled={isProcessing}
                       sx={{ 
                         flex: 1, 
                         ml: (image && selectedComplaintId === complaint.id && !isMobile) ? 1 : 0,
