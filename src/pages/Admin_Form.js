@@ -48,6 +48,8 @@ const AdminDashboard = () => {
   const [complaintsAnchorEl, setComplaintsAnchorEl] = useState(null);
   const [activeView, setActiveView] = useState('complaints');
   const [expandedMenu, setExpandedMenu] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredComplaints, setFilteredComplaints] = useState([]);
   
   // Mobile responsive states
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -271,6 +273,26 @@ const AdminDashboard = () => {
     setSuccessMessage(null);
     setErrorMessage(null);
   };
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredComplaints(complaints);
+      return;
+    }
+    
+    const searchTermLower = searchTerm.toLowerCase();
+    const filtered = complaints.filter(complaint => 
+      complaint.fullName?.toLowerCase().includes(searchTermLower) ||
+      complaint.franchise_plate_no?.toLowerCase().includes(searchTermLower) ||
+      complaint.location?.toLowerCase().includes(searchTermLower) ||
+      complaint.category?.toLowerCase().includes(searchTermLower) ||
+      complaint.complaintDetails?.toLowerCase().includes(searchTermLower) ||
+      complaint.assigned_to_name?.toLowerCase().includes(searchTermLower) ||
+      complaint.id?.toString().includes(searchTermLower)
+    );
+    
+    setFilteredComplaints(filtered);
+  }, [searchTerm, complaints]);
 
   // Effect Hook for data fetching
   useEffect(() => {
@@ -922,35 +944,38 @@ return (
         
         {/* Search Box - Responsive width */}
         <Box
-          sx={{
-            position: 'relative',
-            borderRadius: '20px',
-            bgcolor: 'white',
-            width: isMobile ? '150px' : '300px',
-            display: 'flex',
-            alignItems: 'center',
-            ml: isMobile ? 0 : 2
-          }}
-        >
-          <InputBase
-            placeholder="Search..."
-            sx={{ ml: 2, flex: 1, fontSize: isMobile ? '0.8rem' : '1rem' }}
-          />
-          <Box 
-            sx={{ 
-              bgcolor: '#2c3e50', 
-              height: isMobile ? '32px' : '36px', 
-              width: isMobile ? '32px' : '36px', 
-              borderRadius: '50%',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              mr: 0.5
-            }}
-          >
-            <Search sx={{ color: 'white', fontSize: isMobile ? '1rem' : '1.2rem' }} />
-          </Box>
-        </Box>
+  sx={{
+    position: 'relative',
+    borderRadius: '20px',
+    bgcolor: 'white',
+    width: isMobile ? '150px' : '300px',
+    display: 'flex',
+    alignItems: 'center',
+    ml: isMobile ? 0 : 2
+  }}
+>
+  <InputBase
+    placeholder="Search..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    sx={{ ml: 2, flex: 1, fontSize: isMobile ? '0.8rem' : '1rem' }}
+  />
+  <Box 
+    sx={{ 
+      bgcolor: '#2c3e50', 
+      height: isMobile ? '32px' : '36px', 
+      width: isMobile ? '32px' : '36px', 
+      borderRadius: '50%',
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      mr: 0.5,
+      cursor: 'pointer'
+    }}
+  >
+    <Search sx={{ color: 'white', fontSize: isMobile ? '1rem' : '1.2rem' }} />
+  </Box>
+</Box>
         
         {/* City Logo - responsive size and hidden text on small mobile */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -1011,23 +1036,33 @@ return (
         <Box>
           {/* Complaints View */}
           {activeView === 'complaints' && (
-            loadingReports ? (
-              <Box display="flex" justifyContent="center" mt={4}>
-                <CircularProgress sx={{ color: '#3a86a8' }} />
-              </Box>
-            ) : (
-              <Grid container spacing={isMobile ? 2 : 3}>
-                {complaints
-                  .filter(complaint => selectedCategory === '' || complaint.category === selectedCategory)
-                  .map(complaint => (
-                    <Grid item xs={12} sm={6} lg={4} key={complaint.id}>
-                      <ComplaintCard complaint={complaint} />
-                    </Grid>
-                  ))
-                }
+  loadingReports ? (
+    <Box display="flex" justifyContent="center" mt={4}>
+      <CircularProgress sx={{ color: '#3a86a8' }} />
+    </Box>
+  ) : (
+    <>
+      {filteredComplaints.length === 0 ? (
+        <Box textAlign="center" mt={4} p={3} bgcolor="white" borderRadius={2}>
+          <Typography variant="body1" color="text.secondary">
+            No complaints match your search criteria
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={isMobile ? 2 : 3}>
+          {filteredComplaints
+            .filter(complaint => selectedCategory === '' || complaint.category === selectedCategory)
+            .map(complaint => (
+              <Grid item xs={12} sm={6} lg={4} key={complaint.id}>
+                <ComplaintCard complaint={complaint} />
               </Grid>
-            )
-          )}
+            ))
+          }
+        </Grid>
+      )}
+    </>
+  )
+)}
 
           {/* Other views rendered using imported components */}
           {activeView === 'archived' && <ArchivedComplaints archivedComplaints={archivedComplaints} />}
