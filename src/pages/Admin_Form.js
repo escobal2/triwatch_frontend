@@ -226,7 +226,11 @@ const AdminDashboard = () => {
       if (response.status === 200) {
         setSuccessMessage("Complaint successfully archived.");
         setErrorMessage(null);
-        fetchReports();
+  
+        // Optimistically update UI without needing to re-fetch
+        setComplaints(prev => prev.filter(c => c.id !== selectedComplaintId));
+  
+        // Still fetch archived list to keep that up to date
         fetchArchivedComplaints();
       } else {
         setErrorMessage("Error archiving complaint.");
@@ -238,6 +242,7 @@ const AdminDashboard = () => {
       setOpenArchiveDialog(false);
     }
   };
+  
 
   const sendSMSNotification = async () => {
     if (!selectedComplaintId || !message) {
