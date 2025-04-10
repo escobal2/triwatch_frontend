@@ -3,12 +3,13 @@ import {
   Container, Typography, Button, Grid, Divider, Box, 
   Card, CardContent, CardHeader, Avatar, IconButton,
   Paper, AppBar, Toolbar, Badge, Chip, useMediaQuery,
-  useTheme, Menu, MenuItem
+  useTheme, Menu, MenuItem, Dialog, DialogTitle,
+  DialogContent, DialogActions, TextField, Snackbar, Alert
 } from '@mui/material';
 import { 
   ExitToApp, AccountCircle, Camera, CheckCircle, 
   Cancel, LocationOn, DateRange, Phone, Info,
-  Menu as MenuIcon
+  Menu as MenuIcon, Notifications, Send
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import Tesseract from "tesseract.js";
@@ -23,6 +24,13 @@ const SKPersonelForm = () => {
   const [dismissedComplaints, setDismissedComplaints] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Notification related states
+  const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
+  const [message, setMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  
   const router = useRouter();
   const { id, fullname } = router.query;
   const theme = useTheme();
@@ -217,6 +225,63 @@ const SKPersonelForm = () => {
       alert("Failed to dismiss complaint.");
     }
   };
+
+  // New functions for notification feature
+  const handleOpenNotifyDialog = (complaintId) => {
+    setSelectedComplaintId(complaintId);
+    setMessage('');
+    setErrorMessage('');
+    setSuccessMessage('');
+    setOpenNotifyDialog(true);
+  };
+
+  const handleCloseNotifyDialog = () => {
+    setOpenNotifyDialog(false);
+    setSelectedComplaintId(null);
+    setMessage('');
+    setErrorMessage('');
+  };
+
+  const handleMessageChange = (e) => {
+    setMessage(e.target.value);
+  };
+
+  // Using the provided SMS notification function format
+  const sendSMSNotification = async () => {
+    if (!selectedComplaintId || !message) {
+      setErrorMessage("Missing complaintId or message");
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/notify-complainant/${selectedComplaintId}`,
+        { message }
+      );
+      
+      if (response.data?.success) {
+        setSuccessMessage("SMS sent successfully!");
+        setOpenNotifyDialog(false);
+      } else {
+        setErrorMessage(`Failed to send SMS: ${response.data?.message}`);
+      }
+    } catch (error) {
+      setErrorMessage(`Error sending SMS: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Clear messages when dialog closes
+  useEffect(() => {
+    if (!openNotifyDialog) {
+      setTimeout(() => {
+        setSuccessMessage('');
+        setErrorMessage('');
+      }, 300);
+    }
+  }, [openNotifyDialog]);
 
   return (
     <div>
@@ -555,7 +620,7 @@ const SKPersonelForm = () => {
                     </Box>
                   )}
 
-                  {/* Resolve & Dismiss Buttons */}
+                  {/* Action Buttons - Now with Notify button */}
                   <Box sx={{ 
                     display: 'flex', 
                     flexDirection: isMobile ? 'column' : 'row',
@@ -582,6 +647,25 @@ const SKPersonelForm = () => {
                         {isProcessing ? "Processing..." : "Resolve"}
                       </Button>
                     )}
+                    
+                    {/* Add the Notify button */}
+                    <Button
+                      variant="contained"
+                      color="info"
+                      startIcon={<Notifications />}
+                      onClick={() => handleOpenNotifyDialog(complaint.id)}
+                      disabled={isProcessing}
+                      sx={{ 
+                        flex: 1,
+                        mx: isMobile ? 0 : 1,
+                        py: isMobile ? 1 : 'initial',
+                        mb: isMobile ? 1 : 0
+                      }}
+                      aria-label={`Notify complainant ${complaint.id}`}
+                    >
+                      Notify
+                    </Button>
+                    
                     <Button 
                       variant="contained" 
                       color="error" 
@@ -590,9 +674,8 @@ const SKPersonelForm = () => {
                       disabled={isProcessing}
                       sx={{ 
                         flex: 1, 
-                        ml: (image && selectedComplaintId === complaint.id && !isMobile) ? 1 : 0,
-                        py: isMobile ? 1 : 'initial',
-                        width: (image && selectedComplaintId === complaint.id) ? undefined : '100%'
+                        ml: isMobile ? 0 : 1,
+                        py: isMobile ? 1 : 'initial'
                       }}
                       aria-label={`Dismiss complaint ${complaint.id}`}
                     >
@@ -625,6 +708,66 @@ const SKPersonelForm = () => {
           </Paper>
         )}
       </Container>
+
+      {/* Notification Dialog */}
+      <Dialog 
+        open={openNotifyDialog} 
+        onClose={handleCloseNotifyDialog}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="notification-dialog-title"
+      >
+        <DialogTitle id="notification-dialog-title">
+          Send SMS Notification to Complainant
+        </DialogTitle>
+        <DialogContent>
+          {/* Error message display */}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
+          
+          {/* Success message display */}
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {successMessage}
+            </Alert>
+          )}
+          
+          <TextField
+            autoFocus
+            margin="dense"
+            id="notification-message"
+            label="SMS Message"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            value={message}
+            onChange={handleMessageChange}
+            placeholder="Enter status update or information to share with the complainant"
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            This message will be sent as an SMS to the complainant's contact number.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseNotifyDialog} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={sendSMSNotification} 
+            color="primary" 
+            variant="contained" 
+            startIcon={<Send />}
+            disabled={isProcessing || !message.trim()}
+          >
+            {isProcessing ? "Sending..." : "Send SMS"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
