@@ -16,7 +16,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 // Icons - import only what's needed
 import { 
   AccountCircle, People, ManageAccounts, Logout, Warning, 
-  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close, Send
+  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close
 } from '@mui/icons-material';
 
 // Import components
@@ -1223,34 +1223,21 @@ return (
       {/* Notify Dialog */}
       <Dialog 
   open={openNotifyDialog} 
-  onClose={handleCloseNotifyDialog}
+  onClose={() => setOpenNotifyDialog(false)}
+  fullScreen={isSmallMobile}
   fullWidth
   maxWidth="sm"
-  aria-labelledby="notification-dialog-title"
 >
-  <DialogTitle id="notification-dialog-title">
-    Send SMS Notification
+  <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #eaeaea' }}>
+    <Typography variant="h6" fontWeight="500">
+      Send Notification
+    </Typography>
   </DialogTitle>
-  <DialogContent>
-    {/* Error message display */}
-    {errorMessage && (
-      <Alert severity="error" sx={{ mb: 2 }}>
-        {errorMessage}
-      </Alert>
-    )}
-    
-    {/* Success message display */}
-    {successMessage && (
-      <Alert severity="success" sx={{ mb: 2 }}>
-        {successMessage}
-      </Alert>
-    )}
-    
+  <DialogContent sx={{ pt: 2 }}>
     <TextField
       autoFocus
       margin="dense"
-      id="notification-message"
-      label="SMS Message"
+      label="Message"
       type="text"
       fullWidth
       multiline
@@ -1258,25 +1245,32 @@ return (
       variant="outlined"
       value={message}
       onChange={(e) => setMessage(e.target.value)}
-      placeholder="Enter status update or information to share"
+      placeholder="Enter your notification message here..."
+      sx={{ mb: 1 }}
     />
-    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-      This message will be sent as an SMS to the recipient&apos;s contact number.
+    <Typography variant="caption" color="text.secondary">
+      This message will be sent as a notification to the recipient.
     </Typography>
   </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenNotifyDialog(false)} color="primary">
+  <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #eaeaea' }}>
+    <Button 
+      onClick={() => setOpenNotifyDialog(false)}
+      sx={{ mr: 1 }}
+    >
       Cancel
     </Button>
     <Button 
-      onClick={sendSMSNotification} 
-      color="primary" 
+      onClick={sendSMSNotification}
       variant="contained" 
-      startIcon={<Send />}
-      disabled={isProcessing || !message?.trim()}
-      sx={{ bgcolor: '#3a86a8' }}
+      sx={{ 
+        bgcolor: '#3a86a8',
+        '&:hover': {
+          bgcolor: '#2d6a88'
+        }
+      }}
+      disabled={!message?.trim()}
     >
-      {isProcessing ? "Sending..." : "Send SMS"}
+      Send
     </Button>
   </DialogActions>
 </Dialog>
