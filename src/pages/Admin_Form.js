@@ -1261,7 +1261,7 @@ return (
       placeholder="Enter status update or information to share"
     />
     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-      This message will be sent as an SMS to the recipient's contact number.
+      This message will be sent as an SMS to the recipient&apos;s contact number.
     </Typography>
   </DialogContent>
   <DialogActions>
