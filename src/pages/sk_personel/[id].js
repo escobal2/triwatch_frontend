@@ -128,7 +128,7 @@ const SKPersonelForm = () => {
       }
       
       // Method 3: If both above methods fail, extract all numbers and pick the longest one
-      // as it's more likely to be the ticket number
+      // as it&apos;s more likely to be the ticket number
       const allNumbers = text.match(/\d+/g) || [];
       const sortedByLength = allNumbers.sort((a, b) => b.length - a.length);
       
@@ -750,7 +750,7 @@ const SKPersonelForm = () => {
             placeholder="Enter status update or information to share with the complainant"
           />
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            This message will be sent as an SMS to the complainant's contact number.
+            This message will be sent as an SMS to the complainant&apos;s contact number.
           </Typography>
         </DialogContent>
         <DialogActions>
