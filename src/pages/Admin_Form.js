@@ -67,6 +67,7 @@ const AdminDashboard = () => {
   // Loading States
   const [loadingReports, setLoadingReports] = useState(true);
   const [loadingPersonnel, setLoadingPersonnel] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const router = useRouter();
   const theme = useTheme();
