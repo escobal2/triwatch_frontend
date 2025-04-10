@@ -196,15 +196,20 @@ const AdminDashboard = () => {
       setComplaintsAnchorEl(null);
       setExpandedMenu(false);
       if (isMobile) setMobileDrawerOpen(false);
-
-      
     },
+    // In your handleAction object, update these functions:
+toggleArchiveMenu: () => {
+  setExpandedArchiveMenu(!expandedArchiveMenu);
+  // Don't change activeView here - just toggle the menu
+},
+toggleAccountsMenu: () => {
+  setExpandedAccountsMenu(!expandedAccountsMenu);
+  // Don't change activeView here - just toggle the menu
+},
     logout: () => router.push('/Admin_Login'),
     toggleMenu: () => setExpandedMenu(!expandedMenu),
     toggleDrawer: () => setMobileDrawerOpen(!mobileDrawerOpen),
     toggleMenu: () => setExpandedMenu(!expandedMenu),
-    toggleArchiveMenu: () => setExpandedArchiveMenu(!expandedArchiveMenu),
-    toggleAccountsMenu: () => setExpandedAccountsMenu(!expandedAccountsMenu),
     toggleDrawer: () => setMobileDrawerOpen(!mobileDrawerOpen)
   };
 
