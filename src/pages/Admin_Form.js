@@ -287,6 +287,10 @@ toggleAccountsMenu: () => {
     setErrorMessage(null);
   };
 
+  const handleMessageChange = (e) => {
+    setMessage(e.target.value);
+  };
+
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredComplaints(complaints);
@@ -1265,7 +1269,7 @@ return (
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseNotifyDialog} color="primary">
+          <Button onClose={() => setOpenNotifyDialog(false)} color="primary">
             Cancel
           </Button>
           <Button 
