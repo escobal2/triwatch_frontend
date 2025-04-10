@@ -775,7 +775,17 @@ toggleAccountsMenu: () => {
         textTransform: 'none',
         whiteSpace: 'nowrap'
       }}
-      onClick={endIcon ? handleAction.toggleMenu : () => handleAction.view(view)}
+      onClick={() => {
+        if (endIcon) {
+          // Only toggle the menu without changing view
+          if (label === "Complaints") handleAction.toggleMenu();
+          else if (label === "Archives") handleAction.toggleArchiveMenu();
+          else if (label === "Personnel Management") handleAction.toggleAccountsMenu();
+        } else if (view) {
+          // Change the view
+          handleAction.view(view);
+        }
+      }}
     >
       {label}
     </Button>
@@ -807,140 +817,126 @@ toggleAccountsMenu: () => {
         </Typography>
       </Box>
       
-      {/* Navigation Menu */}
+      {/* Navigation Menu - FIXED */}
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'auto' }}>
-      {renderMenuItem(<AccountCircle />, "Complaints", "complaints", expandedMenu ? <ExpandLess /> : <ExpandMore />)}
+        {/* Note: Empty string for view parameter on dropdown menus */}
+        {renderMenuItem(<AccountCircle />, "Complaints", "", expandedMenu ? <ExpandLess /> : <ExpandMore />)}
         
         {/* Complaints submenu */}
-        <Box 
-  sx={{ 
-    display: expandedMenu ? 'block' : 'none',
-    bgcolor: '#253649'
-  }}
->
-  {[
-    { label: 'All Complaints', action: () => handleAction.category('') },
-    { label: 'Overcharging', action: () => handleAction.category('Overcharging') },
-    { label: 'Assault', action: () => handleAction.category('Assault') },
-    { label: 'Lost Belonging', action: () => handleAction.category('Lost Belonging') },
-    { label: 'Emergency Complaints', action: () => handleAction.view('emergency') },
-    { label: 'Resolved Complaints', action: () => handleAction.view('resolved') },
-    { label: 'Issued Tickets', action: () => handleAction.view('tickets') },
-    { label: 'Dismissed Complaints', action: () => handleAction.view('dismissed') }
-  ].map((item, idx) => (
-    <Button 
-      key={idx}
-      onClick={item.action}
-      sx={{ 
-        color: '#ccc',
-        justifyContent: 'flex-start',
-        width: '100%',
-        textTransform: 'none',
-        pl: 4,
-        py: 1,
-        borderRadius: 0,
-        '&:hover': { bgcolor: '#1a2530', color: 'white' }
-      }}
-    >
-      {item.label}
-    </Button>
-  ))}
-</Box>
+        <Box sx={{ display: expandedMenu ? 'block' : 'none', bgcolor: '#253649' }}>
+          {[
+            { label: 'All Complaints', action: () => handleAction.category('') },
+            { label: 'Overcharging', action: () => handleAction.category('Overcharging') },
+            { label: 'Assault', action: () => handleAction.category('Assault') },
+            { label: 'Lost Belonging', action: () => handleAction.category('Lost Belonging') },
+            { label: 'Emergency Complaints', action: () => handleAction.view('emergency') },
+            { label: 'Resolved Complaints', action: () => handleAction.view('resolved') },
+            { label: 'Issued Tickets', action: () => handleAction.view('tickets') },
+            { label: 'Dismissed Complaints', action: () => handleAction.view('dismissed') }
+          ].map((item, idx) => (
+            <Button 
+              key={idx}
+              onClick={item.action}
+              sx={{ 
+                color: '#ccc',
+                justifyContent: 'flex-start',
+                width: '100%',
+                textTransform: 'none',
+                pl: 4,
+                py: 1,
+                borderRadius: 0,
+                '&:hover': { bgcolor: '#1a2530', color: 'white' }
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </Box>
         
-{/* Archives dropdown */}
-{renderMenuItem(<ArchiveIcon />, "Archives", "", expandedArchiveMenu ? <ExpandLess /> : <ExpandMore />)}
-<Box 
-  sx={{ 
-    display: expandedArchiveMenu ? 'block' : 'none',
-    bgcolor: '#253649'
-  }}
->
-  <Button 
-    onClick={() => handleAction.view("archived")}
-    sx={{ 
-      color: '#ccc',
-      justifyContent: 'flex-start',
-      width: '100%',
-      textTransform: 'none',
-      pl: 4,
-      py: 1,
-      borderRadius: 0,
-      '&:hover': { bgcolor: '#1a2530', color: 'white' }
-    }}
-  >
-    Archived Complaints
-  </Button>
-  <Button 
-    onClick={() => handleAction.view("archivedEmergency")}
-    sx={{ 
-      color: '#ccc',
-      justifyContent: 'flex-start',
-      width: '100%',
-      textTransform: 'none',
-      pl: 4,
-      py: 1,
-      borderRadius: 0,
-      '&:hover': { bgcolor: '#1a2530', color: 'white' }
-    }}
-  >
-    Archived Emergency
-  </Button>
-</Box>
+        {/* Archives dropdown - FIXED */}
+        {renderMenuItem(<ArchiveIcon />, "Archives", "", expandedArchiveMenu ? <ExpandLess /> : <ExpandMore />)}
+        <Box sx={{ display: expandedArchiveMenu ? 'block' : 'none', bgcolor: '#253649' }}>
+          <Button 
+            onClick={() => handleAction.view("archived")}
+            sx={{ 
+              color: '#ccc',
+              justifyContent: 'flex-start',
+              width: '100%',
+              textTransform: 'none',
+              pl: 4,
+              py: 1,
+              borderRadius: 0,
+              '&:hover': { bgcolor: '#1a2530', color: 'white' }
+            }}
+          >
+            Archived Complaints
+          </Button>
+          <Button 
+            onClick={() => handleAction.view("archivedEmergency")}
+            sx={{ 
+              color: '#ccc',
+              justifyContent: 'flex-start',
+              width: '100%',
+              textTransform: 'none',
+              pl: 4,
+              py: 1,
+              borderRadius: 0,
+              '&:hover': { bgcolor: '#1a2530', color: 'white' }
+            }}
+          >
+            Archived Emergency
+          </Button>
+        </Box>
 
-{/* Personnel Management dropdown */}
-{renderMenuItem(<People />, "Personnel Management", "", expandedAccountsMenu ? <ExpandLess /> : <ExpandMore />)}
-<Box 
-  sx={{ 
-    display: expandedAccountsMenu ? 'block' : 'none',
-    bgcolor: '#253649'
-  }}
->
-  <Button 
-    onClick={() => handleAction.view("createPersonnel")}
-    sx={{ 
-      color: '#ccc',
-      justifyContent: 'flex-start',
-      width: '100%',
-      textTransform: 'none',
-      pl: 4,
-      py: 1,
-      borderRadius: 0,
-      '&:hover': { bgcolor: '#1a2530', color: 'white' }
-    }}
-  >
-    Create SK Personnel
-  </Button>
-  <Button 
-    onClick={() => handleAction.view("managePersonnel")}
-    sx={{ 
-      color: '#ccc',
-      justifyContent: 'flex-start',
-      width: '100%',
-      textTransform: 'none',
-      pl: 4,
-      py: 1,
-      borderRadius: 0,
-      '&:hover': { bgcolor: '#1a2530', color: 'white' }
-    }}
-  >
-    Manage SK Personnel
-  </Button>
-  <Button 
-    onClick={() => handleAction.view("verifyCommuter")}
-    sx={{ 
-      color: '#ccc',
-      justifyContent: 'flex-start',
-      width: '100%',
-      textTransform: 'none',
-      pl: 4,
-      py: 1,
-      borderRadius: 0,
-      '&:hover': { bgcolor: '#1a2530', color: 'white' }
-    }}
-  >
-    Verify Commuter Accounts
-  </Button>
-</Box>
+        {/* Personnel Management dropdown - FIXED */}
+        {renderMenuItem(<People />, "Personnel Management", "", expandedAccountsMenu ? <ExpandLess /> : <ExpandMore />)}
+        <Box sx={{ display: expandedAccountsMenu ? 'block' : 'none', bgcolor: '#253649' }}>
+          <Button 
+            onClick={() => handleAction.view("createPersonnel")}
+            sx={{ 
+              color: '#ccc',
+              justifyContent: 'flex-start',
+              width: '100%',
+              textTransform: 'none',
+              pl: 4,
+              py: 1,
+              borderRadius: 0,
+              '&:hover': { bgcolor: '#1a2530', color: 'white' }
+            }}
+          >
+            Create SK Personnel
+          </Button>
+          <Button 
+            onClick={() => handleAction.view("managePersonnel")}
+            sx={{ 
+              color: '#ccc',
+              justifyContent: 'flex-start',
+              width: '100%',
+              textTransform: 'none',
+              pl: 4,
+              py: 1,
+              borderRadius: 0,
+              '&:hover': { bgcolor: '#1a2530', color: 'white' }
+            }}
+          >
+            Manage SK Personnel
+          </Button>
+          <Button 
+            onClick={() => handleAction.view("verifyCommuter")}
+            sx={{ 
+              color: '#ccc',
+              justifyContent: 'flex-start',
+              width: '100%',
+              textTransform: 'none',
+              pl: 4,
+              py: 1,
+              borderRadius: 0,
+              '&:hover': { bgcolor: '#1a2530', color: 'white' }
+            }}
+          >
+            Verify Commuter Accounts
+          </Button>
+        </Box>
         
         <Box sx={{ flexGrow: 1 }} />
         
