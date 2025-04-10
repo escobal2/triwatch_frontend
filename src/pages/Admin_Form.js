@@ -50,6 +50,8 @@ const AdminDashboard = () => {
   const [expandedMenu, setExpandedMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredComplaints, setFilteredComplaints] = useState([]);
+  const [expandedArchiveMenu, setExpandedArchiveMenu] = useState(false);
+  const [expandedAccountsMenu, setExpandedAccountsMenu] = useState(false);
   
   // Mobile responsive states
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -194,9 +196,15 @@ const AdminDashboard = () => {
       setComplaintsAnchorEl(null);
       setExpandedMenu(false);
       if (isMobile) setMobileDrawerOpen(false);
+
+      
     },
     logout: () => router.push('/Admin_Login'),
     toggleMenu: () => setExpandedMenu(!expandedMenu),
+    toggleDrawer: () => setMobileDrawerOpen(!mobileDrawerOpen),
+    toggleMenu: () => setExpandedMenu(!expandedMenu),
+    toggleArchiveMenu: () => setExpandedArchiveMenu(!expandedArchiveMenu),
+    toggleAccountsMenu: () => setExpandedAccountsMenu(!expandedAccountsMenu),
     toggleDrawer: () => setMobileDrawerOpen(!mobileDrawerOpen)
   };
 
@@ -796,7 +804,7 @@ const AdminDashboard = () => {
       
       {/* Navigation Menu */}
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'auto' }}>
-        {renderMenuItem(<AccountCircle />, "Complaints", "complaints", expandedMenu ? <ExpandLess /> : <ExpandMore />)}
+      {renderMenuItem(<AccountCircle />, "Complaints", "complaints", expandedMenu ? <ExpandLess /> : <ExpandMore />)}
         
         {/* Complaints submenu */}
         <Box 
@@ -833,7 +841,100 @@ const AdminDashboard = () => {
     </Button>
   ))}
 </Box>
-        
+        {/* Archives dropdown */}
+{renderMenuItem(<ArchiveIcon />, "Archives", "", expandedArchiveMenu ? <ExpandLess /> : <ExpandMore />)}
+<Box 
+  sx={{ 
+    display: expandedArchiveMenu ? 'block' : 'none',
+    bgcolor: '#253649'
+  }}
+>
+  <Button 
+    onClick={() => handleAction.view("archived")}
+    sx={{ 
+      color: '#ccc',
+      justifyContent: 'flex-start',
+      width: '100%',
+      textTransform: 'none',
+      pl: 4,
+      py: 1,
+      borderRadius: 0,
+      '&:hover': { bgcolor: '#1a2530', color: 'white' }
+    }}
+  >
+    Archived Complaints
+  </Button>
+  <Button 
+    onClick={() => handleAction.view("archivedEmergency")}
+    sx={{ 
+      color: '#ccc',
+      justifyContent: 'flex-start',
+      width: '100%',
+      textTransform: 'none',
+      pl: 4,
+      py: 1,
+      borderRadius: 0,
+      '&:hover': { bgcolor: '#1a2530', color: 'white' }
+    }}
+  >
+    Archived Emergency
+  </Button>
+</Box>
+
+{/* Personnel Management dropdown */}
+{renderMenuItem(<People />, "Personnel Management", "", expandedAccountsMenu ? <ExpandLess /> : <ExpandMore />)}
+<Box 
+  sx={{ 
+    display: expandedAccountsMenu ? 'block' : 'none',
+    bgcolor: '#253649'
+  }}
+>
+  <Button 
+    onClick={() => handleAction.view("createPersonnel")}
+    sx={{ 
+      color: '#ccc',
+      justifyContent: 'flex-start',
+      width: '100%',
+      textTransform: 'none',
+      pl: 4,
+      py: 1,
+      borderRadius: 0,
+      '&:hover': { bgcolor: '#1a2530', color: 'white' }
+    }}
+  >
+    Create SK Personnel
+  </Button>
+  <Button 
+    onClick={() => handleAction.view("managePersonnel")}
+    sx={{ 
+      color: '#ccc',
+      justifyContent: 'flex-start',
+      width: '100%',
+      textTransform: 'none',
+      pl: 4,
+      py: 1,
+      borderRadius: 0,
+      '&:hover': { bgcolor: '#1a2530', color: 'white' }
+    }}
+  >
+    Manage SK Personnel
+  </Button>
+  <Button 
+    onClick={() => handleAction.view("verifyCommuter")}
+    sx={{ 
+      color: '#ccc',
+      justifyContent: 'flex-start',
+      width: '100%',
+      textTransform: 'none',
+      pl: 4,
+      py: 1,
+      borderRadius: 0,
+      '&:hover': { bgcolor: '#1a2530', color: 'white' }
+    }}
+  >
+    Verify Commuter Accounts
+  </Button>
+</Box>
         {/* Other menu items */}
         {renderMenuItem(<People />, "Archived Complaints", "archived")}
         {renderMenuItem(<Warning />, "Archived Emergency", "archivedEmergency")}
