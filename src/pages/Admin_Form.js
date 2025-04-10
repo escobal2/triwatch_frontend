@@ -4,7 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, Alert, Snackbar, Divider,
   CircularProgress, InputBase, IconButton, Drawer, useMediaQuery,
-  useTheme, Arc, Send
+  useTheme, Arc
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -1223,7 +1223,7 @@ return (
       {/* Notify Dialog */}
       <Dialog 
         open={openNotifyDialog} 
-        onClose={handleCloseNotifyDialog}
+        onClose={() => setOpenNotifyDialog(false)}
         fullWidth
         maxWidth="sm"
         aria-labelledby="notification-dialog-title"
