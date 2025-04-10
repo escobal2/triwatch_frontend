@@ -1222,28 +1222,64 @@ return (
 
       {/* Notify Dialog */}
       <Dialog 
-        open={openNotifyDialog} 
-        onClose={() => setOpenNotifyDialog(false)}
-        fullScreen={isSmallMobile}
-      >
-        <DialogTitle>Send Notification</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Message"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenNotifyDialog(false)}>Cancel</Button>
-          <Button onClick={sendSMSNotification} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Send</Button>
-        </DialogActions>
-      </Dialog>
+  open={openNotifyDialog} 
+  onClose={handleCloseNotifyDialog}
+  fullWidth
+  maxWidth="sm"
+  aria-labelledby="notification-dialog-title"
+>
+  <DialogTitle id="notification-dialog-title">
+    Send SMS Notification
+  </DialogTitle>
+  <DialogContent>
+    {/* Error message display */}
+    {errorMessage && (
+      <Alert severity="error" sx={{ mb: 2 }}>
+        {errorMessage}
+      </Alert>
+    )}
+    
+    {/* Success message display */}
+    {successMessage && (
+      <Alert severity="success" sx={{ mb: 2 }}>
+        {successMessage}
+      </Alert>
+    )}
+    
+    <TextField
+      autoFocus
+      margin="dense"
+      id="notification-message"
+      label="SMS Message"
+      type="text"
+      fullWidth
+      multiline
+      rows={4}
+      variant="outlined"
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      placeholder="Enter status update or information to share"
+    />
+    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+      This message will be sent as an SMS to the recipient's contact number.
+    </Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenNotifyDialog(false)} color="primary">
+      Cancel
+    </Button>
+    <Button 
+      onClick={sendSMSNotification} 
+      color="primary" 
+      variant="contained" 
+      startIcon={<Send />}
+      disabled={isProcessing || !message?.trim()}
+      sx={{ bgcolor: '#3a86a8' }}
+    >
+      {isProcessing ? "Sending..." : "Send SMS"}
+    </Button>
+  </DialogActions>
+</Dialog>
 
       {/* Notifications - positioned better for mobile */}
       <Snackbar
