@@ -841,7 +841,8 @@ const AdminDashboard = () => {
     </Button>
   ))}
 </Box>
-        {/* Archives dropdown */}
+        
+{/* Archives dropdown */}
 {renderMenuItem(<ArchiveIcon />, "Archives", "", expandedArchiveMenu ? <ExpandLess /> : <ExpandMore />)}
 <Box 
   sx={{ 
@@ -935,12 +936,6 @@ const AdminDashboard = () => {
     Verify Commuter Accounts
   </Button>
 </Box>
-        {/* Other menu items */}
-        {renderMenuItem(<People />, "Archived Complaints", "archived")}
-        {renderMenuItem(<Warning />, "Archived Emergency", "archivedEmergency")}
-        {renderMenuItem(<People />, "Create SK Personnel", "createPersonnel")}
-        {renderMenuItem(<ManageAccounts />, "Manage SK Personnel", "managePersonnel")}
-        {renderMenuItem(<People />, "Verify Commuter Accounts", "verifyCommuter")}
         
         <Box sx={{ flexGrow: 1 }} />
         
