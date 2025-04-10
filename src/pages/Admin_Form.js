@@ -4,7 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, Alert, Snackbar, Divider,
   CircularProgress, InputBase, IconButton, Drawer, useMediaQuery,
-  useTheme, Arc
+  useTheme, Arc, AppBar, Toolbar
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -1228,12 +1228,39 @@ return (
   fullWidth
   maxWidth="sm"
 >
-  <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #eaeaea' }}>
-    <Typography variant="h6" fontWeight="500">
-      Send Notification
-    </Typography>
-  </DialogTitle>
-  <DialogContent sx={{ pt: 2 }}>
+  <AppBar position="static" color="default" elevation={0} sx={{ 
+    display: isSmallMobile ? 'flex' : 'none',
+    position: 'relative'
+  }}>
+    <Toolbar>
+      <IconButton
+        edge="start"
+        color="inherit"
+        onClick={() => setOpenNotifyDialog(false)}
+        aria-label="close"
+      >
+        <Close />
+      </IconButton>
+      <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
+        Send Notification
+      </Typography>
+    </Toolbar>
+  </AppBar>
+  
+  {/* Regular title for desktop */}
+  {!isSmallMobile && (
+    <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #eaeaea' }}>
+      <Typography variant="h6" fontWeight="500">
+        Send Notification
+      </Typography>
+    </DialogTitle>
+  )}
+  
+  <DialogContent sx={{ 
+    pt: isSmallMobile ? 2 : 2,
+    px: isSmallMobile ? 2 : 3,
+    pb: isSmallMobile ? 2 : 1
+  }}>
     <TextField
       autoFocus
       margin="dense"
@@ -1241,7 +1268,7 @@ return (
       type="text"
       fullWidth
       multiline
-      rows={4}
+      rows={isSmallMobile ? 6 : 4}
       variant="outlined"
       value={message}
       onChange={(e) => setMessage(e.target.value)}
@@ -1252,29 +1279,66 @@ return (
       This message will be sent as a notification to the recipient.
     </Typography>
   </DialogContent>
-  <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #eaeaea' }}>
-    <Button 
-      onClick={() => setOpenNotifyDialog(false)}
-      sx={{ mr: 1 }}
-    >
-      Cancel
-    </Button>
-    <Button 
-      onClick={sendSMSNotification}
-      variant="contained" 
-      sx={{ 
-        bgcolor: '#3a86a8',
-        '&:hover': {
-          bgcolor: '#2d6a88'
-        }
-      }}
-      disabled={!message?.trim()}
-    >
-      Send
-    </Button>
+  
+  <DialogActions sx={{ 
+    px: isSmallMobile ? 2 : 3, 
+    py: isSmallMobile ? 2 : 2, 
+    borderTop: '1px solid #eaeaea',
+    flexDirection: isSmallMobile ? 'column' : 'row',
+    alignItems: isSmallMobile ? 'stretch' : 'center'
+  }}>
+    {isSmallMobile ? (
+      <>
+        <Button 
+          onClick={sendSMSNotification}
+          variant="contained" 
+          fullWidth
+          size="large"
+          sx={{ 
+            mb: 1,
+            bgcolor: '#3a86a8',
+            '&:hover': {
+              bgcolor: '#2d6a88'
+            }
+          }}
+          disabled={!message?.trim()}
+        >
+          Send
+        </Button>
+        <Button 
+          onClick={() => setOpenNotifyDialog(false)}
+          fullWidth
+          size="large"
+          variant="outlined"
+        >
+          Cancel
+        </Button>
+      </>
+    ) : (
+      <>
+        <Button 
+          onClick={() => setOpenNotifyDialog(false)}
+          sx={{ mr: 1 }}
+        >
+          Cancel
+        </Button>
+        <Button 
+          onClick={sendSMSNotification}
+          variant="contained" 
+          sx={{ 
+            bgcolor: '#3a86a8',
+            '&:hover': {
+              bgcolor: '#2d6a88'
+            }
+          }}
+          disabled={!message?.trim()}
+        >
+          Send
+        </Button>
+      </>
+    )}
   </DialogActions>
 </Dialog>
-
       {/* Notifications - positioned better for mobile */}
       <Snackbar
         open={!!successMessage || !!errorMessage}
