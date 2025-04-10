@@ -4,7 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, Alert, Snackbar, Divider,
   CircularProgress, InputBase, IconButton, Drawer, useMediaQuery,
-  useTheme, Arc, Send
+  useTheme, Arc
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -67,7 +67,6 @@ const AdminDashboard = () => {
   // Loading States
   const [loadingReports, setLoadingReports] = useState(true);
   const [loadingPersonnel, setLoadingPersonnel] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
   
   const router = useRouter();
   const theme = useTheme();
@@ -286,10 +285,6 @@ toggleAccountsMenu: () => {
   const closeNotification = () => {
     setSuccessMessage(null);
     setErrorMessage(null);
-  };
-
-  const handleMessageChange = (e) => {
-    setMessage(e.target.value);
   };
 
   useEffect(() => {
@@ -1229,59 +1224,24 @@ return (
       <Dialog 
         open={openNotifyDialog} 
         onClose={() => setOpenNotifyDialog(false)}
-        fullWidth
-        maxWidth="sm"
-        aria-labelledby="notification-dialog-title"
+        fullScreen={isSmallMobile}
       >
-        <DialogTitle id="notification-dialog-title">
-          Send SMS Notification to Complainant
-        </DialogTitle>
+        <DialogTitle>Send Notification</DialogTitle>
         <DialogContent>
-          {/* Error message display */}
-          {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMessage}
-            </Alert>
-          )}
-          
-          {/* Success message display */}
-          {successMessage && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {successMessage}
-            </Alert>
-          )}
-          
           <TextField
             autoFocus
             margin="dense"
-            id="notification-message"
-            label="SMS Message"
+            label="Message"
             type="text"
             fullWidth
-            multiline
-            rows={4}
             variant="outlined"
             value={message}
-            onChange={handleMessageChange}
-            placeholder="Enter status update or information to share with the complainant"
+            onChange={(e) => setMessage(e.target.value)}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            This message will be sent as an SMS to the complainant&apos;s contact number.
-          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClose={() => setOpenNotifyDialog(false)} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={sendSMSNotification} 
-            color="primary" 
-            variant="contained" 
-            startIcon={<Send />}
-            disabled={isProcessing || !message.trim()}
-          >
-            {isProcessing ? "Sending..." : "Send SMS"}
-          </Button>
+          <Button onClick={() => setOpenNotifyDialog(false)}>Cancel</Button>
+          <Button onClick={sendSMSNotification} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Send</Button>
         </DialogActions>
       </Dialog>
 
