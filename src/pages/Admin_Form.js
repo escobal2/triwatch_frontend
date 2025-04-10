@@ -1223,25 +1223,60 @@ return (
       {/* Notify Dialog */}
       <Dialog 
         open={openNotifyDialog} 
-        onClose={() => setOpenNotifyDialog(false)}
-        fullScreen={isSmallMobile}
+        onClose={handleCloseNotifyDialog}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="notification-dialog-title"
       >
-        <DialogTitle>Send Notification</DialogTitle>
+        <DialogTitle id="notification-dialog-title">
+          Send SMS Notification to Complainant
+        </DialogTitle>
         <DialogContent>
+          {/* Error message display */}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
+          
+          {/* Success message display */}
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {successMessage}
+            </Alert>
+          )}
+          
           <TextField
             autoFocus
             margin="dense"
-            label="Message"
+            id="notification-message"
+            label="SMS Message"
             type="text"
             fullWidth
+            multiline
+            rows={4}
             variant="outlined"
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleMessageChange}
+            placeholder="Enter status update or information to share with the complainant"
           />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            This message will be sent as an SMS to the complainant&apos;s contact number.
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenNotifyDialog(false)}>Cancel</Button>
-          <Button onClick={sendSMSNotification} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Send</Button>
+          <Button onClick={handleCloseNotifyDialog} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={sendSMSNotification} 
+            color="primary" 
+            variant="contained" 
+            startIcon={<Send />}
+            disabled={isProcessing || !message.trim()}
+          >
+            {isProcessing ? "Sending..." : "Send SMS"}
+          </Button>
         </DialogActions>
       </Dialog>
 
