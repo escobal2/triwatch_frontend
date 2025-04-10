@@ -1175,89 +1175,69 @@ return (
 
       {/* Dialogs - with responsive adjustments */}
       {/* Assign Dialog */}
-      <Dialog 
-        open={openAssignDialog} 
-        onClose={() => setOpenAssignDialog(false)}
-        fullScreen={isSmallMobile}
-      >
-        <DialogTitle>Assign Complaint</DialogTitle>
-        <DialogContent>
-          <Select
-            fullWidth
-            value={selectedPersonnelId}
-            onChange={(e) => setSelectedPersonnelId(e.target.value)}
-            displayEmpty
-            sx={{ mt: 1, mb: 2 }}
-          >
-            <MenuItem value="" disabled>Select Personnel</MenuItem>
-            {personnelList.map((personnel) => (
-              <MenuItem key={personnel.id} value={personnel.id}>
-                {personnel.fullname}
-              </MenuItem>
-            ))}
-          </Select>
-          {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAssignDialog(false)}>Cancel</Button>
-          <Button onClick={assignComplaint} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Assign</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Archive Dialog */}
-      <Dialog 
-        open={openArchiveDialog} 
-        onClose={() => setOpenArchiveDialog(false)}
-        fullScreen={isSmallMobile}
-      >
-        <DialogTitle>Confirm Archive</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to archive this complaint?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenArchiveDialog(false)}>Cancel</Button>
-          <Button onClick={confirmArchiveComplaint} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Confirm</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Notify Dialog */}
-      <Dialog 
-  open={openNotifyDialog} 
-  onClose={() => setOpenNotifyDialog(false)}
-  fullScreen={isSmallMobile}
+{/* Assign Dialog */}
+<Dialog 
+  open={openAssignDialog} 
+  onClose={() => setOpenAssignDialog(false)}
   fullWidth
   maxWidth="sm"
 >
-  <AppBar position="static" color="default" elevation={0} sx={{ 
-    display: isSmallMobile ? 'flex' : 'none',
-    position: 'relative'
-  }}>
-    <Toolbar>
-      <IconButton
-        edge="start"
-        color="inherit"
-        onClick={() => setOpenNotifyDialog(false)}
-        aria-label="close"
-      >
-        <Close />
-      </IconButton>
-      <Typography sx={{ ml: 2, flex: 1 }} variant="h6">
-        Send Notification
-      </Typography>
-    </Toolbar>
-  </AppBar>
-  
-  {/* Regular title for desktop */}
-  {!isSmallMobile && (
-    <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #eaeaea' }}>
-      <Typography variant="h6" fontWeight="500">
-        Send Notification
-      </Typography>
-    </DialogTitle>
-  )}
+  <DialogTitle>Assign Complaint</DialogTitle>
+  <DialogContent>
+    <Select
+      fullWidth
+      value={selectedPersonnelId}
+      onChange={(e) => setSelectedPersonnelId(e.target.value)}
+      displayEmpty
+      sx={{ mt: 1, mb: 2 }}
+    >
+      <MenuItem value="" disabled>Select Personnel</MenuItem>
+      {personnelList.map((personnel) => (
+        <MenuItem key={personnel.id} value={personnel.id}>
+          {personnel.fullname}
+        </MenuItem>
+      ))}
+    </Select>
+    {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenAssignDialog(false)}>Cancel</Button>
+    <Button onClick={assignComplaint} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Assign</Button>
+  </DialogActions>
+</Dialog>
+
+{/* Archive Dialog */}
+<Dialog 
+  open={openArchiveDialog} 
+  onClose={() => setOpenArchiveDialog(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle>Confirm Archive</DialogTitle>
+  <DialogContent>
+    <Typography>Are you sure you want to archive this complaint?</Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenArchiveDialog(false)}>Cancel</Button>
+    <Button onClick={confirmArchiveComplaint} variant="contained" sx={{ bgcolor: '#3a86a8' }}>Confirm</Button>
+  </DialogActions>
+</Dialog>
+
+{/* Notify Dialog */}
+<Dialog 
+  open={openNotifyDialog} 
+  onClose={() => setOpenNotifyDialog(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #eaeaea' }}>
+    <Typography variant="h6" fontWeight="500">
+      Send Notification
+    </Typography>
+  </DialogTitle>
   
   <DialogContent sx={{ 
-    pt: isSmallMobile ? 2 : 2,
+    pt: 2,
     px: isSmallMobile ? 2 : 3,
     pb: isSmallMobile ? 2 : 1
   }}>
