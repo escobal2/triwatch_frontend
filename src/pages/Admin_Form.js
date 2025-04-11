@@ -4,7 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, Alert, Snackbar, Divider,
   CircularProgress, InputBase, IconButton, Drawer, useMediaQuery,
-  useTheme, Arc, AppBar, Toolbar
+  useTheme, Arc, AppBar, Toolbar, Chip
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -16,7 +16,9 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 // Icons - import only what's needed
 import { 
   AccountCircle, People, ManageAccounts, Logout, Warning, 
-  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close
+  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close, 
+  Archive as ArchiveIcon, 
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
 
 // Import components
@@ -40,6 +42,9 @@ const AdminDashboard = () => {
   const [resolvedComplaints, setResolvedComplaints] = useState([]);
   const [dismissedComplaints, setDismissedComplaints] = useState([]);
   const [issuedTickets, setIssuedTickets] = useState([]);
+  const [openBaklasPlakaDiablog, setOpenBaklasPlakaDiablog] = useState(false);
+  const [currentOffenseCount, setCurrentOffenseCount] = useState(0);
+  const [currentPlateNo, setCurrentPlateNo] = useState('');
   
   // UI States
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
@@ -118,6 +123,19 @@ const AdminDashboard = () => {
 
   // Consolidated data fetching function
  
+  // Function to notify authorities about baklas plaka
+const notifyBaklasPlaka = async (plateNo) => {
+  try {
+    // You could create a new endpoint for this
+    await axios.post(`${API_BASE_URL}/schedule-baklas-plaka`, {
+      franchise_plate_no: plateNo,
+      scheduled_date: new Date().toISOString()
+    });
+    setSuccessMessage('Baklas Plaka operation scheduled successfully');
+  } catch (error) {
+    setErrorMessage('Failed to schedule Baklas Plaka operation');
+  }
+}
 
   // Simplified data fetching functions
   const fetchArchivedComplaints = useCallback(async () => {
@@ -329,7 +347,7 @@ toggleAccountsMenu: () => {
 }, []);
 
   // Component for Complaint Card - redesigned for better responsiveness
-  const ComplaintCard = ({ complaint }) => (
+  const ComplaintCard = ({ complaint, isSmallMobile, handleAction, formatDateTime }) => (
     <Card sx={{ 
       height: '100%', 
       display: 'flex', 
@@ -621,29 +639,52 @@ toggleAccountsMenu: () => {
                 </Grid>
                 
                 <Grid item xs={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: { xs: '45px', sm: '55px' },
-                      flexShrink: 0,
-                      pt: 0.1
-                    }}>
-                      Tickets:
-                    </Typography>
-                    <Typography 
-                      variant="caption" 
-                      fontWeight="medium"
-                      sx={{
-                        bgcolor: 
-                          complaint.driver_info.ticket_count > 3 ? '#ffcdd2' : 
-                          complaint.driver_info.ticket_count > 1 ? '#fff9c4' : '#e8f5e9',
-                        px: 0.5,
-                        py: 0.2,
-                        borderRadius: '4px',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {complaint.driver_info.ticket_count}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ 
+                        minWidth: { xs: '45px', sm: '55px' },
+                        flexShrink: 0,
+                        pt: 0.1
+                      }}>
+                        Tickets:
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        fontWeight="medium"
+                        sx={{
+                          bgcolor: 
+                            complaint.driver_info.ticket_count > 3 ? '#ffcdd2' : 
+                            complaint.driver_info.ticket_count > 1 ? '#fff9c4' : '#e8f5e9',
+                          px: 0.5,
+                          py: 0.2,
+                          borderRadius: '4px',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {complaint.driver_info.ticket_count}
+                      </Typography>
+                    </Box>
+                    
+                    {/* Add the warning notification for multiple tickets */}
+                    {complaint.driver_info.ticket_count > 1 && (
+                      <Box sx={{ mt: 0.5, ml: { xs: '45px', sm: '55px' } }}>
+                        <Chip
+                          label={complaint.driver_info.ticket_count >= 3 
+                            ? "Baklas Plaka Required" 
+                            : `Warning: Offense ${complaint.driver_info.ticket_count} of 3`}
+                          color={complaint.driver_info.ticket_count >= 3 ? "error" : "warning"}
+                          size="small"
+                          sx={{ 
+                            fontWeight: 'bold',
+                            height: '16px',
+                            '& .MuiChip-label': {
+                              px: 0.5,
+                              fontSize: '0.65rem'
+                            }
+                          }}
+                        />
+                      </Box>
+                    )}
                   </Box>
                 </Grid>
               </>
@@ -1174,7 +1215,48 @@ return (
       </Box>
 
       {/* Dialogs - with responsive adjustments */}
-      {/* Assign Dialog */}
+{/* Baklas Plaka Dialog */}
+<Dialog 
+  open={openBaklasPlakaDiablog} 
+  onClose={() => setOpenBaklasPlakaDiablog(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle sx={{ bgcolor: '#ffebee', color: '#c62828' }}>
+    <Box display="flex" alignItems="center">
+      <WarningIcon sx={{ mr: 1 }} />
+      <Typography variant="h6" fontWeight="bold">Baklas Plaka Required</Typography>
+    </Box>
+  </DialogTitle>
+  <DialogContent sx={{ pt: 2 }}>
+    <Alert severity="warning" sx={{ mb: 2 }}>
+      This is the {currentOffenseCount}rd offense for this tricycle. 
+      Baklas Plaka operation is now required.
+    </Alert>
+    <Typography variant="body1" gutterBottom>
+      Plate Number: <strong>{currentPlateNo}</strong>
+    </Typography>
+    <Typography variant="body2" color="text.secondary" paragraph>
+      According to regulations, this tricycle must have its plate removed due to repeated violations.
+      Please coordinate with the appropriate authorities to schedule the operation.
+    </Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenBaklasPlakaDiablog(false)}>Close</Button>
+    <Button 
+      variant="contained" 
+      color="error"
+      onClick={() => {
+        // Here you could add code to schedule or log the baklas plaka operation
+        notifyBaklasPlaka(currentPlateNo);
+        setOpenBaklasPlakaDiablog(false);
+      }}
+    >
+      Schedule Operation
+    </Button>
+  </DialogActions>
+</Dialog>
+
 {/* Assign Dialog */}
 <Dialog 
   open={openAssignDialog} 
