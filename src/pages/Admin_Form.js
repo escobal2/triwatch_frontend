@@ -17,7 +17,6 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { 
   AccountCircle, People, ManageAccounts, Logout, Warning, 
   ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close, 
-  Archive as ArchiveIcon, 
   Notifications as NotificationsIcon
 } from '@mui/icons-material';
 
