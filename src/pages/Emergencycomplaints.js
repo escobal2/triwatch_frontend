@@ -4,22 +4,9 @@ import {
   CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, 
   TextField, Snackbar, Alert 
 } from '@mui/material';
-import { NotificationsActive as NotificationsIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import axios from 'axios';
+import Image from 'next/image';
 import API_BASE_URL from '@/config/apiConfig';
-
-// Helper function to format datetime (assumed from the second snippet)
-const formatDateTime = (dateTimeString) => {
-  if (!dateTimeString) return 'Not provided';
-  const date = new Date(dateTimeString);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
 
 const EmergencyComplaints = () => {
     const [emergencyComplaints, setEmergencyComplaints] = useState([]);
@@ -29,19 +16,6 @@ const EmergencyComplaints = () => {
         message: '',
         severity: 'success'
     });
-    
-    // Check for small mobile screens
-    const [isSmallMobile, setIsSmallMobile] = useState(false);
-    
-    useEffect(() => {
-        const checkScreenSize = () => {
-            setIsSmallMobile(window.innerWidth < 400);
-        };
-        
-        checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
-        return () => window.removeEventListener('resize', checkScreenSize);
-    }, []);
     
     // Dialog states
     const [dialogState, setDialogState] = useState({
@@ -70,7 +44,7 @@ const EmergencyComplaints = () => {
 
     useEffect(() => {
         fetchEmergencyComplaints();
-        const interval = setInterval(fetchEmergencyComplaints, 10000); // Polling every 10 seconds
+        const interval = setInterval(fetchEmergencyComplaints, 10000); // Polling every 10 seconds instead of 2
         return () => clearInterval(interval);
     }, [fetchEmergencyComplaints]);
 
@@ -87,30 +61,18 @@ const EmergencyComplaints = () => {
         setNotification(prev => ({ ...prev, open: false }));
     };
 
-    // Action handlers
-    const handleAction = {
-        notify: (complaintId) => {
-            setDialogState(prev => ({
-                ...prev,
-                smsDialog: {
-                    open: true,
-                    complaintId,
-                    message: ''
-                }
-            }));
-        },
-        archive: (complaintId) => {
-            setDialogState(prev => ({
-                ...prev,
-                archiveDialog: {
-                    open: true,
-                    complaintId
-                }
-            }));
-        }
+    // SMS Dialog handlers
+    const openSmsDialog = (complaintId) => {
+        setDialogState(prev => ({
+            ...prev,
+            smsDialog: {
+                open: true,
+                complaintId,
+                message: ''
+            }
+        }));
     };
 
-    // SMS Dialog handlers
     const closeSmsDialog = () => {
         setDialogState(prev => ({
             ...prev,
@@ -158,6 +120,16 @@ const EmergencyComplaints = () => {
     };
 
     // Archive Dialog handlers
+    const openArchiveDialog = (complaintId) => {
+        setDialogState(prev => ({
+            ...prev,
+            archiveDialog: {
+                open: true,
+                complaintId
+            }
+        }));
+    };
+
     const closeArchiveDialog = () => {
         setDialogState(prev => ({
             ...prev,
@@ -202,7 +174,7 @@ const EmergencyComplaints = () => {
                 Emergency Complaints
             </Typography>
             
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
                 {emergencyComplaints.length === 0 ? (
                     <Grid item xs={12}>
                         <Card sx={{ backgroundColor: '#f5f5f5' }}>
@@ -216,322 +188,63 @@ const EmergencyComplaints = () => {
                 ) : (
                     emergencyComplaints.map((complaint) => (
                         <Grid item xs={12} sm={6} md={4} key={complaint.id}>
-                            <Card sx={{ 
-                                height: '100%', 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-                                borderRadius: '12px',
-                                overflow: 'hidden',
-                                minWidth: 0 // Important for flex items to allow shrinking below content size
-                            }}>
-                                {/* Card Header - Emergency style with red background */}
-                                <Box sx={{ 
-                                    bgcolor: '#d32f2f', // Emergency red color
-                                    color: 'white', 
-                                    py: { xs: 0.5, sm: 0.75 }, 
-                                    px: { xs: 1, sm: 1.5 },
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ 
-                                        fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
-                                    }}>
-                                        Emergency #{complaint.id}
+                            <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography variant="h6" color="error" gutterBottom>
+                                        <strong>Emergency Complaint #{complaint.id}</strong>
                                     </Typography>
-                                    <Typography 
-                                        variant="caption" 
+                                    <Divider sx={{ marginBottom: 2 }} />
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="body1"><strong>Name:</strong> {complaint.fullName}</Typography>
+                                        <Typography variant="body1"><strong>Contact:</strong> {complaint.contactNumber}</Typography>
+                                    </Box>
+                                    
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Category:</strong> {complaint.category}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Incident Date:</strong> {complaint.incident_datetime}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Location:</strong> {complaint.location}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}><strong>Franchise Plate:</strong> {complaint.franchise_plate_no}</Typography>
+                                    
+                                    <Typography variant="subtitle2" sx={{ mt: 2, mb: 0.5 }}><strong>Details:</strong></Typography>
+                                    <Typography variant="body2" sx={{ 
+                                        backgroundColor: '#f8f8f8', 
+                                        p: 1.5, 
+                                        borderRadius: 1,
+                                        maxHeight: '100px',
+                                        overflow: 'auto'
+                                    }}>
+                                        {complaint.complaintDetails}
+                                    </Typography>
+                                </CardContent>
+                                
+                                <Divider />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
+                                    <Button
+                                        onClick={() => openSmsDialog(complaint.id)}
+                                        variant="contained"
                                         sx={{ 
-                                            bgcolor: 'rgba(255, 255, 255, 0.2)',
-                                            color: 'white',
-                                            px: 1,
-                                            py: 0.25,
-                                            ml: 0.5,
-                                            borderRadius: '12px',
-                                            fontWeight: 'bold',
-                                            fontSize: { xs: '0.6rem', sm: '0.7rem' },
-                                            whiteSpace: 'nowrap'
+                                            backgroundColor: '#fcdf03', 
+                                            color: '#000',
+                                            borderRadius: '20px', 
+                                            px: 2,
+                                            '&:hover': { backgroundColor: '#e6cc03' } 
                                         }}
                                     >
-                                        URGENT
-                                    </Typography>
+                                        Notify
+                                    </Button>
+                                    <Button
+                                        onClick={() => openArchiveDialog(complaint.id)}
+                                        variant="contained"
+                                        sx={{ 
+                                            backgroundColor: '#0384fc', 
+                                            borderRadius: '20px', 
+                                            px: 2,
+                                            '&:hover': { backgroundColor: '#0270d7' } 
+                                        }}
+                                    >
+                                        Archive
+                                    </Button>
                                 </Box>
-                            
-                                <CardContent sx={{ 
-                                    flexGrow: 1, 
-                                    p: 0, 
-                                    "&:last-child": { pb: 0 }, // Remove default padding at bottom
-                                    overflowY: 'auto' // Allow scrolling if content is too large
-                                }}>
-                                    {/* Complainant Information */}
-                                    <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
-                                        <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-                                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                                            mb: 0.5
-                                        }}>
-                                            Complainant
-                                        </Typography>
-                                        
-                                        <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-                                            <Grid item xs={12} sm={6}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Name:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium" 
-                                                        sx={{ 
-                                                            wordBreak: 'break-word',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 1,
-                                                            WebkitBoxOrient: 'vertical',
-                                                            width: '100%'
-                                                        }}
-                                                    >
-                                                        {complaint.fullName}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                            
-                                            <Grid item xs={12} sm={6}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Contact:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium" 
-                                                        sx={{ 
-                                                            wordBreak: 'break-word',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap',
-                                                            width: '100%'
-                                                        }}
-                                                    >
-                                                        {complaint.contactNumber || 'Not provided'}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    
-                                    <Divider />
-                                    
-                                    {/* Incident Details */}
-                                    <Box sx={{ p: { xs: 1, sm: 1.5 } }}>
-                                        <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-                                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                                            mb: 0.5
-                                        }}>
-                                            Incident Details
-                                        </Typography>
-                                        
-                                        <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-                                            <Grid item xs={6}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Type:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium"
-                                                        sx={{
-                                                            bgcolor: 
-                                                                complaint.category === 'Assault' ? '#ffcdd2' : 
-                                                                complaint.category === 'Overcharging' ? '#c8e6c9' : 
-                                                                complaint.category === 'Lost Belonging' ? '#bbdefb' : '#e1f5fe',
-                                                            px: 0.5,
-                                                            py: 0.2,
-                                                            borderRadius: '4px',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap',
-                                                            maxWidth: '100%'
-                                                        }}
-                                                    >
-                                                        {complaint.category}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                            
-                                            <Grid item xs={6}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Date:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium" 
-                                                        sx={{ 
-                                                            fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis'
-                                                        }}
-                                                    >
-                                                        {formatDateTime(complaint.incident_datetime)}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Location:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium" 
-                                                        sx={{ 
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 1,
-                                                            WebkitBoxOrient: 'vertical',
-                                                            width: '100%'
-                                                        }}
-                                                    >
-                                                        {complaint.location}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-                                                    Details:
-                                                </Typography>
-                                                <Box sx={{ 
-                                                    bgcolor: '#f5f5f5', 
-                                                    p: 1, 
-                                                    borderRadius: '4px', 
-                                                    maxHeight: { xs: '40px', sm: '50px', md: '60px' }, 
-                                                    overflow: 'auto',
-                                                    border: '1px solid #e0e0e0',
-                                                    fontSize: { xs: '0.65rem', sm: '0.7rem' }
-                                                }}>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        component="div"
-                                                        sx={{ wordBreak: 'break-word' }}
-                                                    >
-                                                        {complaint.complaintDetails}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    
-                                    <Divider />
-                                    
-                                    {/* Vehicle Information */}
-                                    <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#fff8e1' }}>
-                                        <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-                                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                                            mb: 0.5
-                                        }}>
-                                            Vehicle Info
-                                        </Typography>
-                                        
-                                        <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-                                            <Grid item xs={12}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <Typography variant="caption" color="text.secondary" sx={{ 
-                                                        minWidth: { xs: '40px', sm: '50px' },
-                                                        flexShrink: 0,
-                                                        pt: 0.1
-                                                    }}>
-                                                        Plate:
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        fontWeight="medium" 
-                                                        sx={{ 
-                                                            fontFamily: 'monospace',
-                                                            letterSpacing: '0.5px'
-                                                        }}
-                                                    >
-                                                        {complaint.franchise_plate_no || 'Not provided'}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    
-                                    {/* Action buttons - optimized for space */}
-                                    <Box sx={{ 
-                                        p: { xs: 0.5, sm: 1 },
-                                        display: 'flex', 
-                                        gap: 0.5,
-                                        justifyContent: 'space-between',
-                                        bgcolor: '#f5f5f5'
-                                    }}>
-                                        <Button
-                                            startIcon={<NotificationsIcon sx={{ fontSize: '0.9rem' }} />}
-                                            onClick={() => handleAction.notify(complaint.id)}
-                                            variant="contained"
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: '#fcdf03',
-                                                color: '#000000',
-                                                borderRadius: '16px',
-                                                '&:hover': { backgroundColor: '#e6cc00' },
-                                                flexGrow: 1,
-                                                fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                                                py: { xs: 0.5, sm: 0.75 },
-                                                px: { xs: 0.5, sm: 1 },
-                                                minWidth: 0,
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            {!isSmallMobile ? 'Notify' : ''}
-                                        </Button>
-                                        
-                                        <Button
-                                            startIcon={<ArchiveIcon sx={{ fontSize: '0.9rem' }} />}
-                                            onClick={() => handleAction.archive(complaint.id)}
-                                            variant="contained"
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: '#0384fc',
-                                                borderRadius: '16px',
-                                                '&:hover': { backgroundColor: '#0366d6' },
-                                                flexGrow: 1,
-                                                fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                                                py: { xs: 0.5, sm: 0.75 },
-                                                px: { xs: 0.5, sm: 1 },
-                                                minWidth: 0,
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            {!isSmallMobile ? 'Archive' : ''}
-                                        </Button>
-                                    </Box>
-                                </CardContent>
                             </Card>
                         </Grid>
                     ))
