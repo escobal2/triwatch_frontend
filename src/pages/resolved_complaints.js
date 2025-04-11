@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Typography, Button, Grid, Divider, Alert, MenuItem, Select, FormControl, InputLabel, TextField, Box } from '@mui/material';
-import { AccountCircle, CheckCircle } from '@mui/icons-material';
+import { Container, Card, CardContent, Typography, Button, Grid, Divider, Alert, MenuItem, Select, FormControl, InputLabel, TextField } from '@mui/material';
 import axios from 'axios';
 import API_BASE_URL from '@/config/apiConfig';
 
@@ -23,6 +22,7 @@ const ResolvedComplaints = () => {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
     });
   };
 
@@ -41,6 +41,9 @@ const ResolvedComplaints = () => {
       }
 
       const response = await axios.get(`${API_BASE_URL}/resolved-reports`, { params });
+
+      console.log('Fetched Resolved Complaints:', response.data.resolved_complaints);
+
       const parsedComplaints = response.data.resolved_complaints.map((complaint) => ({
         ...complaint,
         driver_info: complaint.driver_info ? JSON.parse(complaint.driver_info) : null, // Parse only if exists
@@ -62,351 +65,33 @@ const ResolvedComplaints = () => {
     return () => clearInterval(interval);
   }, [fetchResolvedComplaints, timeframe, selectedMonth, startDate, endDate]);
 
-  // Component for individual resolved complaint cards
-  const ResolvedComplaintCard = ({ complaint }) => (
-    <Box sx={{ 
-      height: '100%', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-      borderRadius: '12px',
-      overflow: 'hidden',
-      minWidth: 0 // Important for flex items to allow shrinking below content size
-    }}>
-      {/* Card Header */}
-      <Box sx={{ 
-        bgcolor: '#0384fc', 
-        color: 'white', 
-        py: { xs: 0.5, sm: 0.75 }, 
-        px: { xs: 1, sm: 1.5 },
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}>
-          Complaint #{complaint.id}
-        </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            bgcolor: '#81c784',
-            color: '#2e7d32',
-            px: 1,
-            py: 0.25,
-            ml: 0.5,
-            borderRadius: '12px',
-            fontWeight: 'bold',
-            fontSize: { xs: '0.6rem', sm: '0.7rem' },
-            whiteSpace: 'nowrap'
-          }}
-        >
-          Resolved
-        </Typography>
-      </Box>
-  
-      {/* Card Content */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        p: 0, 
-        overflowY: 'auto' // Allow scrolling if content is too large
-      }}>
-        {/* Resolution Section */}
-        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#e8f5e9' }}>
-          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-            mb: 0.5
-          }}>
-            Resolution Information
-          </Typography>
-          
-          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '50px', sm: '60px' },
-                  flexShrink: 0,
-                  pt: 0.1
-                }}>
-                  By:
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <AccountCircle sx={{ fontSize: '14px', mr: 0.5, color: '#2e7d32' }} />
-                  <Typography 
-                    variant="caption" 
-                    fontWeight="medium" 
-                    sx={{ 
-                      wordBreak: 'break-word',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      width: '100%'
-                    }}
-                  >
-                    {complaint.resolved_by_name}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '50px', sm: '60px' },
-                  flexShrink: 0,
-                  pt: 0.1
-                }}>
-                  Date:
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  fontWeight="medium" 
-                  sx={{ 
-                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}
-                >
-                  {formatDateTime(complaint.resolved_at)}
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-                Resolution:
-              </Typography>
-              <Box sx={{ 
-                bgcolor: '#f5f5f5', 
-                p: 1, 
-                borderRadius: '4px', 
-                maxHeight: { xs: '40px', sm: '50px', md: '60px' }, 
-                overflow: 'auto',
-                border: '1px solid #e0e0e0',
-                fontSize: { xs: '0.65rem', sm: '0.7rem' }
-              }}>
-                <Typography 
-                  variant="caption" 
-                  component="div"
-                  sx={{ wordBreak: 'break-word' }}
-                >
-                  {complaint.resolution}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-        
-        <Divider />
-        
-        {/* Vehicle Information */}
-        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: complaint.driver_info ? '#fff8e1' : 'transparent' }}>
-          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-            mb: 0.5
-          }}>
-            Vehicle Info
-          </Typography>
-          
-          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '40px', sm: '50px' },
-                  flexShrink: 0,
-                  pt: 0.1
-                }}>
-                  Plate:
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  fontWeight="medium" 
-                  sx={{ 
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  {complaint.franchise_plate_no}
-                </Typography>
-              </Box>
-            </Grid>
-            
-            {/* Driver details if available */}
-            {complaint.driver_info && (
-              <>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: { xs: '40px', sm: '50px' },
-                      flexShrink: 0,
-                      pt: 0.1
-                    }}>
-                      Driver:
-                    </Typography>
-                    <Typography 
-                      variant="caption" 
-                      fontWeight="medium" 
-                      sx={{ 
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                      }}
-                    >
-                      {complaint.driver_info.driver_name}
-                    </Typography>
-                  </Box>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: { xs: '40px', sm: '50px' },
-                      flexShrink: 0,
-                      pt: 0.1
-                    }}>
-                      Assoc:
-                    </Typography>
-                    <Typography 
-                      variant="caption" 
-                      fontWeight="medium" 
-                      sx={{ 
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                      }}
-                    >
-                      {complaint.driver_info.association}
-                    </Typography>
-                  </Box>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: { xs: '40px', sm: '50px' },
-                      flexShrink: 0,
-                      pt: 0.1
-                    }}>
-                      Address:
-                    </Typography>
-                    <Typography 
-                      variant="caption" 
-                      fontWeight="medium" 
-                      sx={{ 
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        width: '100%'
-                      }}
-                    >
-                      {complaint.driver_info.address}
-                    </Typography>
-                  </Box>
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </Box>
-        
-        {/* Bottom status indicator */}
-        <Box sx={{ 
-          p: { xs: 0.75, sm: 1 },
-          bgcolor: '#e3f2fd',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1
-        }}>
-          <CheckCircle sx={{ 
-            color: '#2e7d32', 
-            fontSize: { xs: '0.9rem', sm: '1rem' } 
-          }} />
-          <Typography 
-            variant="caption" 
-            fontWeight="bold"
-            sx={{ 
-              color: '#2e7d32',
-              fontSize: { xs: '0.7rem', sm: '0.8rem' }
-            }}
-          >
-            ISSUE RESOLVED
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 4, paddingBottom: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.25rem' },
-        fontWeight: 'bold',
-        color: '#0384fc'
-      }}>
-        🧾 Resolved Complaints
+    <Container maxWidth="md" sx={{ paddingTop: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        🧾 Resolved Complaints (Active & Archived)
       </Typography>
 
-      {errorMessage && (
-        <Alert severity="error" sx={{ marginBottom: 2, borderRadius: '8px' }}>
-          {errorMessage}
-        </Alert>
-      )}
+      {errorMessage && <Alert severity="error" sx={{ marginBottom: 2 }}>{errorMessage}</Alert>}
 
-      {/* Filter Controls Section */}
-      <Box sx={{ 
-        mb: 3,
-        p: 2,
-        borderRadius: '12px',
-        bgcolor: '#f5f5f5',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-      }}>
-        <Typography variant="subtitle1" gutterBottom sx={{ 
-          fontWeight: 'bold',
-          color: '#0384fc',
-          fontSize: { xs: '0.9rem', sm: '1rem' }
-        }}>
-          Filter Resolved Cases
-        </Typography>
-        
-        {/* Timeframe Filter Buttons */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexWrap: 'wrap',
-          gap: 1,
-          mb: 2
-        }}>
+      <Grid container spacing={3}>
+        {/* Timeframe Filter */}
+        <Grid item xs={12}>
           {['daily', 'specific_week', 'specific_month'].map((time) => (
             <Button
               key={time}
               variant={timeframe === time ? 'contained' : 'outlined'}
               onClick={() => setTimeframe(time)}
-              sx={{ 
-                borderRadius: '20px',
-                textTransform: 'capitalize',
-                bgcolor: timeframe === time ? '#0384fc' : 'transparent',
-                borderColor: '#0384fc',
-                color: timeframe === time ? 'white' : '#0384fc',
-                fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                '&:hover': {
-                  bgcolor: timeframe === time ? '#0366d6' : 'rgba(3, 132, 252, 0.1)'
-                }
-              }}
+              sx={{ marginRight: 2 }}
             >
-              {time.replace('_', ' ')}
+              {time.replace('_', ' ').charAt(0).toUpperCase() + time.replace('_', ' ').slice(1)}
             </Button>
           ))}
-        </Box>
+        </Grid>
 
-        {/* Specific Week Selectors */}
+        {/* Specific Week Selector (Only shown when 'specific_week' is selected) */}
         {timeframe === 'specific_week' && (
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+          <>
+            <Grid item xs={6}>
               <TextField
                 fullWidth
                 label="Start Date (Monday)"
@@ -414,16 +99,9 @@ const ResolvedComplaints = () => {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                size="small"
-                sx={{ 
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                  }
-                }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6}>
               <TextField
                 fullWidth
                 label="End Date (Sunday)"
@@ -431,80 +109,86 @@ const ResolvedComplaints = () => {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                size="small"
-                sx={{ 
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px', 
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                  }
-                }}
               />
             </Grid>
+          </>
+        )}
+
+        {/* Month Selector (Only shown when 'specific_month' is selected) */}
+        {timeframe === 'specific_month' && (
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Select Month</InputLabel>
+              <Select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                {[
+                  'January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'
+                ].map((month, index) => (
+                  <MenuItem key={index + 1} value={index + 1}>
+                    {month}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
         )}
 
-        {/* Month Selector */}
-        {timeframe === 'specific_month' && (
-          <FormControl fullWidth size="small" sx={{ 
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-              fontSize: { xs: '0.8rem', sm: '0.9rem' }
-            }
-          }}>
-            <InputLabel>Select Month</InputLabel>
-            <Select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              label="Select Month"
-            >
-              {[
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-              ].map((month, index) => (
-                <MenuItem key={index + 1} value={index + 1}>
-                  {month}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-      </Box>
-
-      {/* Complaints Grid */}
-      {loadingReports ? (
-        <Box sx={{ 
-          textAlign: 'center', 
-          py: 4,
-          bgcolor: '#f9f9f9',
-          borderRadius: '12px'
-        }}>
-          <Typography variant="body1" sx={{ color: '#666' }}>
+        {/* Show loading only during first load */}
+        {loadingReports ? (
+          <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
             Loading resolved complaints...
           </Typography>
-        </Box>
-      ) : (
-        resolvedComplaints.length > 0 ? (
-          <Grid container spacing={2}>
-            {resolvedComplaints.map((complaint) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={complaint.id}>
-                <ResolvedComplaintCard complaint={complaint} />
-              </Grid>
-            ))}
-          </Grid>
         ) : (
-          <Box sx={{ 
-            textAlign: 'center', 
-            py: 4,
-            bgcolor: '#f9f9f9',
-            borderRadius: '12px',
-            border: '1px dashed #ccc'
-          }}>
-            <Typography variant="body1" sx={{ color: '#666' }}>
-              No resolved complaints available for the selected timeframe.
+          resolvedComplaints.length > 0 ? (
+            resolvedComplaints.map((complaint) => (
+              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 3, borderRadius: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Complaint ID: {complaint.id}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolved By:</strong> {complaint.resolved_by_name}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolved At:</strong> {formatDateTime(complaint.resolved_at)}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Resolution:</strong> {complaint.resolution}
+                    </Typography>
+                    <Typography paragraph>
+                      <strong>Franchise Plate Number:</strong> {complaint.franchise_plate_no}
+                    </Typography>
+
+                    {complaint.driver_info && (
+                      <>
+                        <Divider sx={{ marginY: 2 }} />
+                        <Typography variant="subtitle1">🚖 Driver Information</Typography>
+                        <Typography paragraph>
+                          <strong>Name:</strong> {complaint.driver_info.driver_name}
+                        </Typography>
+                        <Typography paragraph>
+                          <strong>Association:</strong> {complaint.driver_info.association}
+                        </Typography>
+                        <Typography paragraph>
+                          <strong>Address:</strong> {complaint.driver_info.address}
+                        </Typography>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Typography variant="body1" sx={{ width: '100%', textAlign: 'center', marginTop: 3 }}>
+              No resolved complaints available.
             </Typography>
-          </Box>
-        )
-      )}
+          )
+        )}
+      </Grid>
     </Container>
   );
 };
