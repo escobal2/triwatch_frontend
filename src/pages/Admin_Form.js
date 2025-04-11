@@ -16,8 +16,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 // Icons - import only what's needed
 import { 
   AccountCircle, People, ManageAccounts, Logout, Warning, 
-  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close, 
-  Notifications as NotificationsIcon
+  ExpandMore, ExpandLess, Search, Menu as MenuIcon, Close 
 } from '@mui/icons-material';
 
 // Import components
