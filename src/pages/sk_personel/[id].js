@@ -157,40 +157,39 @@ const SKPersonelForm = () => {
     }
   
     try {
-      setIsProcessing(true);
-      
       // Extract ticket number using our enhanced method
       const extractedTicketNumber = await extractTicketNumber(image);
       setExtractedText(extractedTicketNumber);
-      
+      alert(`Extracted Ticket Number: ${extractedTicketNumber}`);
+  
       // Fetch SK personnel details
       const skPersonnel = await fetchSKPersonnel(personnelId);
       if (!skPersonnel) {
         alert("Failed to fetch SK personnel details.");
         return;
       }
-      
-      // Create form data for the API request
-      const formData = {
+  
+      // Send resolution details along with SK personnel name
+      const response = await axios.post(`${API_BASE_URL}/add-resolution/${complaintId}`, {
         resolution,
         ticket_number: extractedTicketNumber,
         resolved_by: skPersonnel.id,
         resolved_by_name: skPersonnel.fullname,
-      };
-      
-      // Use the new endpoint for resolving complaints with tickets
-      const response = await axios.post(`${API_BASE_URL}/add-resolution/${complaintId}`, formData);
-      
-      // Update the UI: Remove the resolved complaint from the list
-      setComplaints(prevComplaints => prevComplaints.filter(c => c.id !== complaintId));
-      
-      // Provide a success message using response data if available
-      alert(response.data.message || "Complaint resolved successfully!");
+      });
+  
+      // Find the complaint and update ticket count in UI
+      setComplaints((prevComplaints) =>
+        prevComplaints.map((c) =>
+          c.franchise_plate_no === response.data.franchise_plate_no
+            ? { ...c, ticket_count: response.data.ticket_count }
+            : c
+        )
+      );
+  
+      alert("Complaint resolved successfully!");
     } catch (error) {
       console.error("Error during resolution:", error);
       alert("An error occurred while resolving the complaint.");
-    } finally {
-      setIsProcessing(false);
     }
   };
   
