@@ -198,9 +198,6 @@ const EmergencyComplaints = () => {
 
     return (
         <>
-            <Typography variant="h5" component="h1" gutterBottom>
-                Emergency Complaints
-            </Typography>
             
             <Grid container spacing={2}>
                 {emergencyComplaints.length === 0 ? (

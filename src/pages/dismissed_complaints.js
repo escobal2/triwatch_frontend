@@ -332,13 +332,6 @@ const DismissedComplaints = () => {
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4, paddingBottom: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' },
-        color: '#333',
-        fontWeight: 'bold'
-      }}>
-        ❌ Dismissed Complaints
-      </Typography>
 
       {errorMessage && <Alert severity="error" sx={{ marginBottom: 2, borderRadius: '8px' }}>{errorMessage}</Alert>}
 

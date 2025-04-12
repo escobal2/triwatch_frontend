@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { 
-  Container, Typography, TextField, Button, Grid, Box, Card, CardContent,
-  CardMedia, CssBaseline, Alert, MenuItem
+  Container, Typography, TextField, Button, Box, CssBaseline, Alert,
+  MenuItem, InputLabel, FormControl, Select, Paper
 } from "@mui/material";
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import API_BASE_URL from '@/config/apiConfig';
@@ -31,9 +30,6 @@ const SKPersonnelAccountForm = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-  
-  // You might want to add this for responsive design
-  const isMobile = false; // This would typically be determined with a hook or media query
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -90,198 +86,207 @@ const SKPersonnelAccountForm = () => {
     }
   };
 
+  // Custom styles to match the provided design
+  const inputStyle = {
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    padding: '8px 12px',
+    width: '100%',
+    backgroundColor: 'white',
+    fontSize: '16px',
+    height: '42px',
+    '&:focus': {
+      borderColor: '#2684FF',
+      boxShadow: '0 0 0 1px #2684FF',
+    }
+  };
+
+  const labelStyle = {
+    display: 'block',
+    marginBottom: '6px',
+    fontSize: '14px',
+    color: '#333',
+    fontWeight: '500'
+  };
+
   return (
-    <Container component="main" maxWidth="sm" sx={{ marginTop: 8 }}>
+    <Container component="main" maxWidth="md" sx={{ marginTop: 4, marginBottom: 4 }}>
       <CssBaseline />
-      <Card 
+      <Paper 
         sx={{ 
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)', 
-          borderRadius: 2,
-          overflow: 'hidden',
-          background: 'rgba(255, 255, 255, 0.95)',
-          width: '100%',
-          maxWidth: '500px',
-          mb: 2,
-          mx: 'auto'
+          padding: 3,
+          backgroundColor: '#f0f6fa',
+          border: '1px solid #cfd8dc',
+          borderRadius: '4px'
         }}
       >
-        <Box 
-          sx={{ 
-            backgroundColor: '#004e73', 
-            color: 'white', 
-            padding: '12px 20px',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <PersonAddIcon sx={{ mr: 1 }} />
-          <Typography variant="h5" sx={{ fontWeight: 'medium' }}>
-            Create SK Personnel Account
-          </Typography>
-        </Box>
+        {submissionStatus === "success" && (
+          <Alert severity="success" sx={{ marginBottom: 3 }}>
+            Account successfully created!
+          </Alert>
+        )}
         
-        {/* Optional: Image Banner */}
-        <CardMedia 
-          component="img" 
-          height={isMobile ? "100" : "120"} 
-          image="/images/profile.png" 
-          alt="SK Personnel Profile"
-          sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5', padding: '10px 0' }}
-        />
-        
-        <CardContent sx={{ padding: isMobile ? '16px' : '24px' }}>
-          {submissionStatus === "success" && (
-            <Alert severity="success" sx={{ marginTop: 2, marginBottom: 2 }}>
-              Account successfully created!
-            </Alert>
-          )}
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            {/* First row */}
+            <Box sx={{ flex: 1, minWidth: '250px' }}>
+              <InputLabel htmlFor="name" sx={labelStyle}>Full Name</InputLabel>
+              <TextField
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                error={Boolean(formErrors.name)}
+                fullWidth
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    ...inputStyle
+                  }
+                }}
+                placeholder="Enter full name"
+                InputProps={{ sx: { height: '42px' } }}
+              />
+            </Box>
+            
+            <Box sx={{ flex: 1, minWidth: '250px' }}>
+              <InputLabel htmlFor="contactNumber" sx={labelStyle}>Contact Number</InputLabel>
+              <TextField
+                id="contactNumber"
+                name="contactNumber"
+                value={formData.contactNumber}
+                onChange={handleChange}
+                error={Boolean(formErrors.contactNumber)}
+                fullWidth
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    ...inputStyle
+                  }
+                }}
+                placeholder="+63XXXXXXXXXX"
+                InputProps={{ sx: { height: '42px' } }}
+              />
+            </Box>
+          </Box>
           
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField 
-                  fullWidth 
-                  label="Full Name" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required
-                  variant="outlined"
-                  error={Boolean(formErrors.name)}
-                  helperText={formErrors.name}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  fullWidth 
-                  label="Contact Number" 
-                  name="contactNumber" 
-                  value={formData.contactNumber} 
-                  onChange={handleChange} 
-                  required
-                  variant="outlined"
-                  error={Boolean(formErrors.contactNumber)}
-                  helperText={formErrors.contactNumber}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  fullWidth 
-                  label="Username" 
-                  name="username" 
-                  value={formData.username} 
-                  onChange={handleChange} 
-                  required
-                  variant="outlined"
-                  error={Boolean(formErrors.username)}
-                  helperText={formErrors.username}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  fullWidth 
-                  type="password" 
-                  label="Password" 
-                  name="password" 
-                  value={formData.password} 
-                  onChange={handleChange} 
-                  required
-                  variant="outlined"
-                  error={Boolean(formErrors.password)}
-                  helperText={formErrors.password}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  fullWidth 
-                  label="Location" 
-                  name="location" 
-                  value={formData.location} 
-                  onChange={handleChange} 
-                  required
-                  variant="outlined"
-                  error={Boolean(formErrors.location)}
-                  helperText={formErrors.location}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Role"
-                  variant="outlined"
+          {/* Second row */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            <Box sx={{ flex: 1, minWidth: '250px' }}>
+              <InputLabel htmlFor="role" sx={labelStyle}>Role</InputLabel>
+              <FormControl fullWidth variant="outlined">
+                <Select
+                  id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
+                  sx={{ 
+                    height: '42px',
+                    '& .MuiOutlinedInput-root': {
+                      ...inputStyle
+                    }
                   }}
                 >
                   <MenuItem value="SK Personnel">SK Personnel</MenuItem>
-                </TextField>
-              </Grid>
-              
-              <Grid item xs={12} sx={{ mt: 2 }}>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  fullWidth 
-                  sx={{ 
-                    backgroundColor: '#42a5f5',
-                    color: 'white',
-                    height: '50px',
-                    borderRadius: '8px',
-                    textTransform: 'none',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      backgroundColor: '#1976d2',
-                    },
-                  }} 
-                  disabled={loading}
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </Grid>
-              
-              <Grid item xs={12} sx={{ textAlign: 'center' }}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: '#1976d2', 
-                    mt: 1,
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => router.push('/login')}
-                >
-                  Already have an account? Login
-                </Typography>
-              </Grid>
-            </Grid>
-          </form>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            <Box sx={{ flex: 1, minWidth: '250px' }}>
+              <InputLabel htmlFor="location" sx={labelStyle}>Location</InputLabel>
+              <TextField
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                error={Boolean(formErrors.location)}
+                fullWidth
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    ...inputStyle
+                  }
+                }}
+                placeholder="Enter location"
+                InputProps={{ sx: { height: '42px' } }}
+              />
+            </Box>
+          </Box>
           
-          {submissionStatus === "error" && (
-            <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
-              Failed to create account. Please try again.
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
+          {/* Third row */}
+          <Box sx={{ mb: 3 }}>
+            <InputLabel htmlFor="username" sx={labelStyle}>Username</InputLabel>
+            <TextField
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              error={Boolean(formErrors.username)}
+              fullWidth
+              variant="outlined"
+              sx={{ 
+                '& .MuiOutlinedInput-root': {
+                  ...inputStyle
+                }
+              }}
+              placeholder="Enter username"
+              InputProps={{ sx: { height: '42px' } }}
+            />
+          </Box>
+          
+          {/* Fourth row */}
+          <Box sx={{ mb: 4 }}>
+            <InputLabel htmlFor="password" sx={labelStyle}>Password</InputLabel>
+            <TextField
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              error={Boolean(formErrors.password)}
+              fullWidth
+              variant="outlined"
+              sx={{ 
+                '& .MuiOutlinedInput-root': {
+                  ...inputStyle
+                }
+              }}
+              placeholder="Enter password"
+              InputProps={{ sx: { height: '42px' } }}
+            />
+          </Box>
+          
+          {/* Submit button */}
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                padding: '10px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                borderRadius: '4px',
+                '&:hover': {
+                  backgroundColor: '#c82333',
+                },
+              }}
+            >
+              {loading ? 'Creating Account...' : 'Creat Account'}
+            </Button>
+          </Box>
+          
+        </form>
+        
+        {submissionStatus === "error" && (
+          <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+            Failed to create account. Please try again.
+          </Typography>
+        )}
+      </Paper>
     </Container>
   );
 };

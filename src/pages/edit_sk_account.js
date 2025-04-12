@@ -42,9 +42,6 @@ const SKPersonnelList = () => {
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: '#333', fontWeight: 'bold' }}>
-        SK Personnel Accounts
-      </Typography>
 
       {errorMessage && (
         <Alert severity="error" sx={{ marginBottom: 2 }}>

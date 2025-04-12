@@ -369,27 +369,6 @@ const IssuedTickets = () => {
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4, paddingBottom: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 1,
-        mb: 3,
-        color: '#FF6A00',
-        fontWeight: 'bold'
-      }}>
-        🎫 Issued Tickets
-        <Typography component="span" variant="subtitle1" sx={{ 
-          bgcolor: '#f5f5f5',
-          px: 1,
-          py: 0.5,
-          borderRadius: '12px',
-          color: '#555',
-          ml: 1,
-          fontSize: { xs: '0.7rem', sm: '0.8rem' }
-        }}>
-          Active & Archived
-        </Typography>
-      </Typography>
 
       {errorMessage && <Alert severity="error" sx={{ marginBottom: 2 }}>{errorMessage}</Alert>}
 
