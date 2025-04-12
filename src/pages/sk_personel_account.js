@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Container, Typography, TextField, Button, Grid, Paper, CssBaseline, Alert, MenuItem } from "@mui/material";
+import { 
+  Container, Typography, TextField, Button, Grid, Box, Card, CardContent,
+  CardMedia, CssBaseline, Alert, MenuItem
+} from "@mui/material";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import API_BASE_URL from '@/config/apiConfig';
@@ -26,6 +30,10 @@ const SKPersonnelAccountForm = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
+  
+  // You might want to add this for responsive design
+  const isMobile = false; // This would typically be determined with a hook or media query
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,7 +50,6 @@ const SKPersonnelAccountForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
-
     
     if (!formData.name.trim()) {
       errors.name = "Name is required";
@@ -61,6 +68,7 @@ const SKPersonnelAccountForm = () => {
     }
 
     if (Object.keys(errors).length === 0) {
+      setLoading(true);
       try {
         await SubmitAcc(formData);
         setSubmissionStatus("success");
@@ -74,6 +82,8 @@ const SKPersonnelAccountForm = () => {
         });
       } catch (error) {
         setSubmissionStatus("error");
+      } finally {
+        setLoading(false);
       }
     } else {
       setFormErrors(errors);
@@ -83,108 +93,195 @@ const SKPersonnelAccountForm = () => {
   return (
     <Container component="main" maxWidth="sm" sx={{ marginTop: 8 }}>
       <CssBaseline />
-      <Paper elevation={3} sx={{ padding: 5, textAlign: 'center', marginBottom: 4 }}>
-        <Typography component="h1" variant="h5">
-          Create SK Personnel Account
-        </Typography>
-        {submissionStatus === "success" && (
-          <Alert severity="success" sx={{ marginTop: 2 }}>
-            Account successfully created!
-          </Alert>
-        )}
-        <form onSubmit={handleSubmit} style={{ marginTop: 4 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Full Name"
-                variant="outlined"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                error={Boolean(formErrors.name)}
-                helperText={formErrors.name}
-              />
+      <Card 
+        sx={{ 
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)', 
+          borderRadius: 2,
+          overflow: 'hidden',
+          background: 'rgba(255, 255, 255, 0.95)',
+          width: '100%',
+          maxWidth: '500px',
+          mb: 2,
+          mx: 'auto'
+        }}
+      >
+        <Box 
+          sx={{ 
+            backgroundColor: '#004e73', 
+            color: 'white', 
+            padding: '12px 20px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <PersonAddIcon sx={{ mr: 1 }} />
+          <Typography variant="h5" sx={{ fontWeight: 'medium' }}>
+            Create SK Personnel Account
+          </Typography>
+        </Box>
+        
+        {/* Optional: Image Banner */}
+        <CardMedia 
+          component="img" 
+          height={isMobile ? "100" : "120"} 
+          image="/images/profile.png" 
+          alt="SK Personnel Profile"
+          sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5', padding: '10px 0' }}
+        />
+        
+        <CardContent sx={{ padding: isMobile ? '16px' : '24px' }}>
+          {submissionStatus === "success" && (
+            <Alert severity="success" sx={{ marginTop: 2, marginBottom: 2 }}>
+              Account successfully created!
+            </Alert>
+          )}
+          
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth 
+                  label="Full Name" 
+                  name="name" 
+                  value={formData.name} 
+                  onChange={handleChange} 
+                  required
+                  variant="outlined"
+                  error={Boolean(formErrors.name)}
+                  helperText={formErrors.name}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth 
+                  label="Contact Number" 
+                  name="contactNumber" 
+                  value={formData.contactNumber} 
+                  onChange={handleChange} 
+                  required
+                  variant="outlined"
+                  error={Boolean(formErrors.contactNumber)}
+                  helperText={formErrors.contactNumber}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth 
+                  label="Username" 
+                  name="username" 
+                  value={formData.username} 
+                  onChange={handleChange} 
+                  required
+                  variant="outlined"
+                  error={Boolean(formErrors.username)}
+                  helperText={formErrors.username}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth 
+                  type="password" 
+                  label="Password" 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  required
+                  variant="outlined"
+                  error={Boolean(formErrors.password)}
+                  helperText={formErrors.password}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth 
+                  label="Location" 
+                  name="location" 
+                  value={formData.location} 
+                  onChange={handleChange} 
+                  required
+                  variant="outlined"
+                  error={Boolean(formErrors.location)}
+                  helperText={formErrors.location}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Role"
+                  variant="outlined"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  InputProps={{
+                    sx: { borderRadius: '8px' }
+                  }}
+                >
+                  <MenuItem value="SK Personnel">SK Personnel</MenuItem>
+                </TextField>
+              </Grid>
+              
+              <Grid item xs={12} sx={{ mt: 2 }}>
+                <Button 
+                  type="submit" 
+                  variant="contained" 
+                  fullWidth 
+                  sx={{ 
+                    backgroundColor: '#42a5f5',
+                    color: 'white',
+                    height: '50px',
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      backgroundColor: '#1976d2',
+                    },
+                  }} 
+                  disabled={loading}
+                >
+                  {loading ? 'Creating Account...' : 'Create Account'}
+                </Button>
+              </Grid>
+              
+              <Grid item xs={12} sx={{ textAlign: 'center' }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#1976d2', 
+                    mt: 1,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => router.push('/login')}
+                >
+                  Already have an account? Login
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Contact Number"
-                variant="outlined"
-                name="contactNumber"
-                value={formData.contactNumber}
-                onChange={handleChange}
-                error={Boolean(formErrors.contactNumber)}
-                helperText={formErrors.contactNumber}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Username"
-                variant="outlined"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                error={Boolean(formErrors.username)}
-                helperText={formErrors.username}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                variant="outlined"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                error={Boolean(formErrors.password)}
-                helperText={formErrors.password}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Location"
-                variant="outlined"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                error={Boolean(formErrors.location)}
-                helperText={formErrors.location}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                fullWidth
-                label="Role"
-                variant="outlined"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <MenuItem value="SK Personnel">SK Personnel</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                sx={{
-                  marginTop: 2,
-                  backgroundColor: '#FF6A00',
-                  '&:hover': { backgroundColor: '#FF6A00' },
-                }}
-              >
-                Create Account
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
+          </form>
+          
+          {submissionStatus === "error" && (
+            <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+              Failed to create account. Please try again.
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
     </Container>
   );
 };
