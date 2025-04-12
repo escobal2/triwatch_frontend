@@ -17,10 +17,13 @@ const VerifyCommuterAccs = () => {
   const [pendingAccounts, setPendingAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 400);
+  const [isSmallMobile, setIsSmallMobile] = useState(false); // Default value without window
 
-  // Detect small screens for responsive design
+  // Detect small screens for responsive design - moved inside useEffect
   useEffect(() => {
+    // Safe to use window here as this will only run client-side
+    setIsSmallMobile(window.innerWidth < 400);
+    
     const handleResize = () => {
       setIsSmallMobile(window.innerWidth < 400);
     };
@@ -41,13 +44,16 @@ const VerifyCommuterAccs = () => {
   };
 
   useEffect(() => {
-    fetchPendingAccounts(); // Initial fetch
+    // Only fetch data client-side
+    if (typeof window !== 'undefined') {
+      fetchPendingAccounts(); // Initial fetch
 
-    const interval = setInterval(() => {
-      fetchPendingAccounts(); 
-    }, 3000);
+      const interval = setInterval(() => {
+        fetchPendingAccounts(); 
+      }, 3000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+      return () => clearInterval(interval); // Cleanup on unmount
+    }
   }, []);
 
   // Approve Function
@@ -252,19 +258,21 @@ const VerifyCommuterAccs = () => {
             mt: 1,
             mb: 1
           }}>
-            <Box 
-              component="img"
-              src={`${API_BASE_URL}/storage/${commuter.valid_id_path}`}
-              alt="Valid ID"
-              sx={{
-                width: '100%', 
-                maxWidth: '250px',
-                height: 'auto',
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
-              }}
-            />
+            {commuter.valid_id_path && (
+              <Box 
+                component="img"
+                src={`${API_BASE_URL}/storage/${commuter.valid_id_path}`}
+                alt="Valid ID"
+                sx={{
+                  width: '100%', 
+                  maxWidth: '250px',
+                  height: 'auto',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                }}
+              />
+            )}
           </Box>
         </Box>
         
