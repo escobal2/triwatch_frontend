@@ -1,5 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Typography, Button, Grid, Box, Divider, Alert, MenuItem, Select, FormControl, InputLabel, TextField } from '@mui/material';
+import { 
+  Typography, 
+  Button, 
+  Grid, 
+  Box, 
+  Divider, 
+  Alert, 
+  MenuItem, 
+  Select, 
+  FormControl, 
+  InputLabel, 
+  TextField 
+} from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import axios from 'axios';
 import API_BASE_URL from '@/config/apiConfig';
@@ -8,11 +20,11 @@ const DismissedComplaints = () => {
   const [dismissedComplaints, setDismissedComplaints] = useState([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [timeframe, setTimeframe] = useState('daily'); // Default timeframe
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default: current month
-  const [startDate, setStartDate] = useState(''); // Start of the week (Monday)
-  const [endDate, setEndDate] = useState(''); // End of the week (Sunday)
-  const [firstLoad, setFirstLoad] = useState(true); // Track first load
+  const [timeframe, setTimeframe] = useState('daily');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [firstLoad, setFirstLoad] = useState(true);
 
   // Format date function
   const formatDateTime = (dateString) => {
@@ -29,16 +41,16 @@ const DismissedComplaints = () => {
 
   // Fetch dismissed complaints (including archived)
   const fetchDismissedComplaints = useCallback(async (selectedTimeframe, month = null, start = null, end = null) => {
-    if (firstLoad) setLoadingReports(true); // Show loading only on first load
+    if (firstLoad) setLoadingReports(true);
     setErrorMessage(null);
 
     try {
       const params = { timeframe: selectedTimeframe, include_archived: true };
       if (selectedTimeframe === 'specific_month') {
-        params.month = month; // Send selected month to backend
+        params.month = month;
       } else if (selectedTimeframe === 'specific_week' && start && end) {
-        params.start_date = start; // Send start date (Monday)
-        params.end_date = end; // Send end date (Sunday)
+        params.start_date = start;
+        params.end_date = end;
       }
 
       const response = await axios.get(`${API_BASE_URL}/dismissed-reports`, { params });
@@ -48,7 +60,7 @@ const DismissedComplaints = () => {
       // Parse driver_info JSON string before setting state
       const parsedComplaints = response.data.dismissed_complaints.map((complaint) => ({
         ...complaint,
-        driver_info: complaint.driver_info ? JSON.parse(complaint.driver_info) : null, // Parse only if exists
+        driver_info: complaint.driver_info ? JSON.parse(complaint.driver_info) : null,
       }));
 
       setDismissedComplaints(parsedComplaints);
@@ -57,7 +69,7 @@ const DismissedComplaints = () => {
       setErrorMessage('Failed to fetch dismissed complaints.');
     } finally {
       setLoadingReports(false);
-      setFirstLoad(false); // Disable first load after initial fetch
+      setFirstLoad(false);
     }
   }, [firstLoad]);
 
@@ -75,10 +87,10 @@ const DismissedComplaints = () => {
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
       borderRadius: '12px',
       overflow: 'hidden',
-      minWidth: 0, // Important for flex items to allow shrinking below content size
+      minWidth: 0,
       backgroundColor: 'white'
     }}>
-      {/* Card Header - Compact and responsive */}
+      {/* Card Header */}
       <Box sx={{ 
         bgcolor: '#FF6A00', 
         color: 'white', 
@@ -88,7 +100,10 @@ const DismissedComplaints = () => {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}>
+        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ 
+          fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
+          maxWidth: '70%'
+        }}>
           Dismissed #{complaint.id}
         </Typography>
         <Typography 
@@ -112,7 +127,7 @@ const DismissedComplaints = () => {
       <Box sx={{ 
         flexGrow: 1,
         p: 0,
-        overflowY: 'auto' // Allow scrolling if content is too large
+        overflowY: 'auto'
       }}>
         {/* Dismissed By Section */}
         <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
@@ -124,7 +139,6 @@ const DismissedComplaints = () => {
           </Typography>
           
           <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-            {/* Two column layout that becomes single column on very small screens */}
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ 
@@ -137,12 +151,14 @@ const DismissedComplaints = () => {
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center',
-                  maxWidth: 'calc(100% - 60px)'
+                  maxWidth: 'calc(100% - 60px)',
+                  overflow: 'hidden'
                 }}>
                   <AccountCircle sx={{ 
                     fontSize: { xs: 12, sm: 14 }, 
                     mr: 0.5, 
-                    color: '#0384fc' 
+                    color: '#0384fc',
+                    flexShrink: 0
                   }} />
                   <Typography 
                     variant="caption" 
@@ -177,7 +193,6 @@ const DismissedComplaints = () => {
                   fontWeight="medium" 
                   sx={{ 
                     fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                    whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
                   }}
@@ -214,7 +229,7 @@ const DismissedComplaints = () => {
         
         <Divider />
         
-        {/* Vehicle Information - Streamlined */}
+        {/* Vehicle Information */}
         <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: complaint.driver_info ? '#fff8e1' : 'transparent' }}>
           <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
             fontSize: { xs: '0.75rem', sm: '0.85rem' },
@@ -238,7 +253,9 @@ const DismissedComplaints = () => {
                   fontWeight="medium" 
                   sx={{ 
                     fontFamily: 'monospace',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {complaint.franchise_plate_no || 'Not provided'}
@@ -246,7 +263,7 @@ const DismissedComplaints = () => {
               </Box>
             </Grid>
             
-            {/* Driver details if available - compressed */}
+            {/* Driver details if available */}
             {complaint.driver_info && (
               <>
                 <Grid item xs={12}>
@@ -331,15 +348,37 @@ const DismissedComplaints = () => {
   );
 
   return (
-    <Container maxWidth="md" sx={{ paddingTop: 4, paddingBottom: 4 }}>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: '100vw',
+      margin: 0,
+      padding: { xs: 1, sm: 2, md: 3 },
+      boxSizing: 'border-box',
+      overflowX: 'hidden'
+    }}>
+      {errorMessage && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            marginBottom: 2, 
+            borderRadius: '8px',
+            width: '100%'
+          }}
+        >
+          {errorMessage}
+        </Alert>
+      )}
 
-      {errorMessage && <Alert severity="error" sx={{ marginBottom: 2, borderRadius: '8px' }}>{errorMessage}</Alert>}
-
-      <Box sx={{ mb: 3, mt: 2 }}>
+      <Box sx={{ mb: 3, mt: 2, width: '100%' }}>
         <Typography variant="subtitle1" color="text.secondary" mb={1} sx={{ fontSize: { xs: '0.85rem', sm: '0.9rem' } }}>
           Filter by timeframe:
         </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 1,
+          width: '100%'
+        }}>
           {['daily', 'specific_week', 'specific_month'].map((time) => (
             <Button
               key={time}
@@ -355,7 +394,8 @@ const DismissedComplaints = () => {
                   bgcolor: timeframe === time ? '#FB8C00' : 'rgba(255, 106, 0, 0.04)',
                   borderColor: '#FB8C00'
                 },
-                fontSize: { xs: '0.75rem', sm: '0.8rem' }
+                fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                flexGrow: { xs: 1, sm: 0 }
               }}
             >
               {time.replace('_', ' ').charAt(0).toUpperCase() + time.replace('_', ' ').slice(1)}
@@ -364,14 +404,15 @@ const DismissedComplaints = () => {
         </Box>
       </Box>
 
-      {/* Specific Week Selector (Only shown when 'specific_week' is selected) */}
+      {/* Specific Week Selector */}
       {timeframe === 'specific_week' && (
         <Box sx={{ 
           mb: 3, 
-          p: 2, 
+          p: { xs: 1.5, sm: 2 }, 
           bgcolor: '#f9f9f9', 
           borderRadius: '8px',
-          border: '1px solid #e0e0e0'
+          border: '1px solid #e0e0e0',
+          width: '100%'
         }}>
           <Typography variant="subtitle2" mb={1} color="#0384fc" fontWeight="bold">
             Select Date Range
@@ -415,14 +456,15 @@ const DismissedComplaints = () => {
         </Box>
       )}
 
-      {/* Month Selector (Only shown when 'specific_month' is selected) */}
+      {/* Month Selector */}
       {timeframe === 'specific_month' && (
         <Box sx={{ 
           mb: 3, 
-          p: 2, 
+          p: { xs: 1.5, sm: 2 }, 
           bgcolor: '#f9f9f9', 
           borderRadius: '8px',
-          border: '1px solid #e0e0e0'
+          border: '1px solid #e0e0e0',
+          width: '100%'
         }}>
           <Typography variant="subtitle2" mb={1} color="#0384fc" fontWeight="bold">
             Select Month
@@ -452,13 +494,13 @@ const DismissedComplaints = () => {
         </Box>
       )}
 
-      {/* Show loading only during first load */}
+      {/* Loading or Results */}
       {loadingReports ? (
         <Box sx={{ 
           width: '100%', 
           textAlign: 'center', 
-          marginTop: 5,
-          p: 3,
+          marginTop: 3,
+          p: { xs: 2, sm: 3 },
           bgcolor: '#f5f5f5',
           borderRadius: '8px'
         }}>
@@ -468,9 +510,9 @@ const DismissedComplaints = () => {
         </Box>
       ) : (
         dismissedComplaints.length > 0 ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1, sm: 2 }} sx={{ width: '100%', margin: 0 }}>
             {dismissedComplaints.map((complaint) => (
-              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
+              <Grid item xs={12} sm={6} lg={4} xl={3} key={complaint.id} sx={{ width: '100%' }}>
                 <DismissedComplaintCard complaint={complaint} />
               </Grid>
             ))}
@@ -479,8 +521,8 @@ const DismissedComplaints = () => {
           <Box sx={{ 
             width: '100%', 
             textAlign: 'center', 
-            marginTop: 5,
-            p: 4,
+            marginTop: 3,
+            p: { xs: 2, sm: 3, md: 4 },
             bgcolor: '#f5f5f5',
             borderRadius: '8px',
             border: '1px dashed #ccc'
@@ -491,7 +533,7 @@ const DismissedComplaints = () => {
           </Box>
         )
       )}
-    </Container>
+    </Box>
   );
 };
 

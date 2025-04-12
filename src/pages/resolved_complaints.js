@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { 
-  Container, Typography, Button, Grid, Divider, Alert, 
+  Typography, Button, Grid, Divider, Alert, 
   MenuItem, Select, FormControl, InputLabel, TextField,
-  Box, Card, CardContent, Snackbar, CircularProgress
+  Box, Card, CardContent
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HistoryIcon from '@mui/icons-material/History';
@@ -19,28 +19,9 @@ const ResolvedComplaints = () => {
   const [startDate, setStartDate] = useState(''); // Start of the week (Monday)
   const [endDate, setEndDate] = useState(''); // End of the week (Sunday)
   const [firstLoad, setFirstLoad] = useState(true); // Track first load
-  const [notification, setNotification] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
-  
-  // Check for small mobile screens
-  const [isSmallMobile, setIsSmallMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallMobile(window.innerWidth < 400);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   // Format date function
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'Not provided';
     const date = new Date(dateString);
     return date.toLocaleString(undefined, {
       year: 'numeric',
@@ -49,19 +30,6 @@ const ResolvedComplaints = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  // Notification handler
-  const showNotification = (message, severity = 'success') => {
-    setNotification({
-      open: true,
-      message,
-      severity
-    });
-  };
-
-  const closeNotification = () => {
-    setNotification(prev => ({ ...prev, open: false }));
   };
 
   // Fetch resolved complaints
@@ -79,20 +47,16 @@ const ResolvedComplaints = () => {
       }
 
       const response = await axios.get(`${API_BASE_URL}/resolved-reports`, { params });
-
-      console.log('Fetched Resolved Complaints:', response.data.resolved_complaints);
-
+      
       const parsedComplaints = response.data.resolved_complaints.map((complaint) => ({
         ...complaint,
         driver_info: complaint.driver_info ? JSON.parse(complaint.driver_info) : null, // Parse only if exists
       }));
 
       setResolvedComplaints(parsedComplaints);
-      showNotification("Resolved complaints updated", "info");
     } catch (error) {
       console.error('Error fetching resolved complaints:', error);
       setErrorMessage('Failed to fetch resolved complaints.');
-      showNotification("Failed to load resolved complaints", "error");
     } finally {
       setLoadingReports(false);
       setFirstLoad(false); // Disable first load after initial fetch
@@ -105,29 +69,37 @@ const ResolvedComplaints = () => {
     return () => clearInterval(interval);
   }, [fetchResolvedComplaints, timeframe, selectedMonth, startDate, endDate]);
 
-  // Resolved Complaint Card Component - Now accepting isSmallMobile prop
-  const ResolvedComplaintCard = ({ complaint, isSmallMobile }) => (
+  // Resolved Complaint Card Component
+  const ResolvedComplaintCard = ({ complaint }) => (
     <Card sx={{ 
       height: '100%', 
       display: 'flex', 
       flexDirection: 'column', 
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-      borderRadius: isSmallMobile ? '8px' : '12px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      minWidth: 0 // Important for flex items to allow shrinking below content size
+      minWidth: 0, // Important for flex items to allow shrinking below content size
+      transition: 'all 0.2s ease-in-out',
+      '&:hover': {
+        transform: 'translateY(-3px)',
+        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+      }
     }}>
       {/* Card Header - Resolution Status */}
       <Box sx={{ 
         bgcolor: '#4CAF50', // Green for resolved status
         color: 'white', 
-        py: isSmallMobile ? 0.3 : { xs: 0.5, sm: 0.75 }, 
-        px: isSmallMobile ? 0.75 : { xs: 1, sm: 1.5 },
+        py: { xs: 0.5, sm: 0.75 }, 
+        px: { xs: 1, sm: 1.5 },
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
         <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ 
-          fontSize: isSmallMobile ? '0.75rem' : { xs: '0.8rem', sm: '0.9rem', md: '1rem' } 
+          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.95rem', lg: '1rem' },
+          flexShrink: 1,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
         }}>
           Complaint #{complaint.id}
         </Typography>
@@ -136,19 +108,20 @@ const ResolvedComplaints = () => {
           sx={{ 
             bgcolor: '#e8f5e9',
             color: '#2e7d32',
-            px: isSmallMobile ? 0.75 : 1,
-            py: isSmallMobile ? 0.2 : 0.25,
+            px: 1,
+            py: 0.25,
             ml: 0.5,
             borderRadius: '12px',
             fontWeight: 'bold',
-            fontSize: isSmallMobile ? '0.55rem' : { xs: '0.6rem', sm: '0.7rem' },
+            fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
             whiteSpace: 'nowrap',
             display: 'flex',
             alignItems: 'center',
-            gap: isSmallMobile ? 0.3 : 0.5
+            gap: 0.5,
+            flexShrink: 0
           }}
         >
-          <CheckCircleIcon sx={{ fontSize: isSmallMobile ? '0.7rem' : '0.8rem' }} />
+          <CheckCircleIcon sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }} />
           Resolved
         </Typography>
       </Box>
@@ -160,25 +133,23 @@ const ResolvedComplaints = () => {
         overflowY: 'auto' // Allow scrolling if content is too large
       }}>
         {/* Resolution Information */}
-        <Box sx={{ p: isSmallMobile ? 0.75 : { xs: 1, sm: 1.5 }, bgcolor: '#e8f5e9' }}>
+        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#e8f5e9' }}>
           <Typography variant="subtitle2" color="#2e7d32" fontWeight="bold" sx={{ 
-            fontSize: isSmallMobile ? '0.7rem' : { xs: '0.75rem', sm: '0.85rem' },
-            mb: isSmallMobile ? 0.3 : 0.5,
+            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.85rem' },
+            mb: 0.5,
             display: 'flex',
             alignItems: 'center',
-            gap: isSmallMobile ? 0.3 : 0.5
+            gap: 0.5
           }}>
-            <HistoryIcon sx={{ fontSize: isSmallMobile ? '0.9rem' : '1rem' }} />
+            <HistoryIcon sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }} />
             Resolution Details
           </Typography>
           
-          <Grid container spacing={isSmallMobile ? 0.5 : 1} sx={{ 
-            fontSize: isSmallMobile ? '0.65rem' : { xs: '0.7rem', sm: '0.75rem' } 
-          }}>
+          <Grid container spacing={1} sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' } }}>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                  minWidth: { xs: '50px', sm: '60px', md: '70px' },
                   flexShrink: 0,
                   pt: 0.1
                 }}>
@@ -205,7 +176,7 @@ const ResolvedComplaints = () => {
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                  minWidth: { xs: '50px', sm: '60px', md: '70px' },
                   flexShrink: 0,
                   pt: 0.1
                 }}>
@@ -215,7 +186,7 @@ const ResolvedComplaints = () => {
                   variant="caption" 
                   fontWeight="medium" 
                   sx={{ 
-                    fontSize: isSmallMobile ? '0.6rem' : { xs: '0.65rem', sm: '0.7rem' },
+                    fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
@@ -227,20 +198,17 @@ const ResolvedComplaints = () => {
             </Grid>
             
             <Grid item xs={12}>
-              <Typography variant="caption" color="text.secondary" sx={{ 
-                mb: isSmallMobile ? 0.3 : 0.5, 
-                display: 'block' 
-              }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
                 Resolution:
               </Typography>
               <Box sx={{ 
                 bgcolor: '#f5f5f5', 
-                p: isSmallMobile ? 0.75 : 1, 
+                p: 1, 
                 borderRadius: '4px', 
-                maxHeight: isSmallMobile ? '50px' : { xs: '60px', sm: '70px', md: '80px' }, 
+                maxHeight: { xs: '60px', sm: '65px', md: '70px', lg: '80px' }, 
                 overflow: 'auto',
                 border: '1px solid #e0e0e0',
-                fontSize: isSmallMobile ? '0.6rem' : { xs: '0.65rem', sm: '0.7rem' }
+                fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' }
               }}>
                 <Typography 
                   variant="caption" 
@@ -257,25 +225,23 @@ const ResolvedComplaints = () => {
         <Divider />
         
         {/* Vehicle/Driver Information */}
-        <Box sx={{ p: isSmallMobile ? 0.75 : { xs: 1, sm: 1.5 }, bgcolor: complaint.driver_info ? '#fff8e1' : 'transparent' }}>
+        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: complaint.driver_info ? '#fff8e1' : 'transparent' }}>
           <Typography variant="subtitle2" color="#FF6A00" fontWeight="bold" sx={{ 
-            fontSize: isSmallMobile ? '0.7rem' : { xs: '0.75rem', sm: '0.85rem' },
-            mb: isSmallMobile ? 0.3 : 0.5,
+            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.85rem' },
+            mb: 0.5,
             display: 'flex',
             alignItems: 'center',
-            gap: isSmallMobile ? 0.3 : 0.5
+            gap: 0.5
           }}>
-            <LocalTaxiIcon sx={{ fontSize: isSmallMobile ? '0.9rem' : '1rem' }} />
+            <LocalTaxiIcon sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }} />
             Vehicle Information
           </Typography>
           
-          <Grid container spacing={isSmallMobile ? 0.5 : 1} sx={{ 
-            fontSize: isSmallMobile ? '0.65rem' : { xs: '0.7rem', sm: '0.75rem' } 
-          }}>
+          <Grid container spacing={1} sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' } }}>
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                  minWidth: { xs: '50px', sm: '60px', md: '70px' },
                   flexShrink: 0,
                   pt: 0.1
                 }}>
@@ -286,10 +252,10 @@ const ResolvedComplaints = () => {
                   fontWeight="medium" 
                   sx={{ 
                     fontFamily: 'monospace',
-                    letterSpacing: isSmallMobile ? '0.3px' : '0.5px',
+                    letterSpacing: '0.5px',
                     bgcolor: '#f5f5f5',
-                    px: isSmallMobile ? 0.3 : 0.5,
-                    py: isSmallMobile ? 0.1 : 0.2,
+                    px: 0.5,
+                    py: 0.2,
                     borderRadius: '4px'
                   }}
                 >
@@ -304,7 +270,7 @@ const ResolvedComplaints = () => {
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                      minWidth: { xs: '50px', sm: '60px', md: '70px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -328,7 +294,7 @@ const ResolvedComplaints = () => {
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                      minWidth: { xs: '50px', sm: '60px', md: '70px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -352,7 +318,7 @@ const ResolvedComplaints = () => {
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      minWidth: isSmallMobile ? '35px' : { xs: '40px', sm: '50px' },
+                      minWidth: { xs: '50px', sm: '60px', md: '70px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -365,7 +331,7 @@ const ResolvedComplaints = () => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: isSmallMobile ? 1 : 2,
+                        WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                         width: '100%'
                       }}
@@ -383,24 +349,33 @@ const ResolvedComplaints = () => {
   );
 
   return (
-    <Container maxWidth="md" sx={{ paddingTop: 4, paddingBottom: 4 }}>
-      {errorMessage && <Alert severity="error" sx={{ marginBottom: 2 }}>{errorMessage}</Alert>}
+    <Box sx={{ 
+      width: '100%', 
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      p: { xs: 1, sm: 2, md: 3 }
+    }}>
+      {errorMessage && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{errorMessage}</Alert>}
 
       {/* Timeframe Filter */}
       <Box sx={{ 
+        width: '100%',
         mb: 3, 
-        p: isSmallMobile ? 1.5 : 2, 
+        p: { xs: 1.5, sm: 2 }, 
         borderRadius: '8px', 
         bgcolor: '#f5f5f5',
         boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
       }}>
-        <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
+        <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{
+          fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
+        }}>
           Filter by Timeframe
         </Typography>
         
-        <Grid container spacing={isSmallMobile ? 1 : 2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: isSmallMobile ? 0.5 : 1 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 0.5, sm: 1 } }}>
               {[
                 { value: 'daily', label: 'Daily' },
                 { value: 'specific_week', label: 'Custom Week' },
@@ -412,14 +387,17 @@ const ResolvedComplaints = () => {
                   onClick={() => setTimeframe(option.value)}
                   sx={{ 
                     borderRadius: '20px',
+                    fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                    px: { xs: 1.5, sm: 2 },
+                    py: { xs: 0.5, sm: 0.75 },
+                    minWidth: { xs: '70px', sm: 'auto' },
+                    mb: { xs: 0.5, sm: 0 },
                     bgcolor: timeframe === option.value ? '#4CAF50' : 'transparent',
                     '&:hover': {
                       bgcolor: timeframe === option.value ? '#43a047' : 'rgba(0,0,0,0.04)'
-                    },
-                    fontSize: isSmallMobile ? '0.65rem' : { xs: '0.7rem', sm: '0.8rem' },
-                    px: isSmallMobile ? 1 : undefined
+                    }
                   }}
-                  size={isSmallMobile ? "small" : "small"}
+                  size="small"
                 >
                   {option.label}
                 </Button>
@@ -442,10 +420,10 @@ const ResolvedComplaints = () => {
                   sx={{ 
                     '& .MuiOutlinedInput-root': { borderRadius: '8px' },
                     '& .MuiInputLabel-root': { 
-                      fontSize: isSmallMobile ? '0.75rem' : undefined 
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                     },
-                    '& .MuiInputBase-input': {
-                      fontSize: isSmallMobile ? '0.75rem' : undefined
+                    '& .MuiInputBase-input': { 
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                     }
                   }}
                 />
@@ -462,10 +440,10 @@ const ResolvedComplaints = () => {
                   sx={{ 
                     '& .MuiOutlinedInput-root': { borderRadius: '8px' },
                     '& .MuiInputLabel-root': { 
-                      fontSize: isSmallMobile ? '0.75rem' : undefined 
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                     },
-                    '& .MuiInputBase-input': {
-                      fontSize: isSmallMobile ? '0.75rem' : undefined
+                    '& .MuiInputBase-input': { 
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                     }
                   }}
                 />
@@ -479,10 +457,10 @@ const ResolvedComplaints = () => {
               <FormControl fullWidth size="small" sx={{ 
                 '& .MuiOutlinedInput-root': { borderRadius: '8px' },
                 '& .MuiInputLabel-root': { 
-                  fontSize: isSmallMobile ? '0.75rem' : undefined 
+                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                 },
-                '& .MuiSelect-select': {
-                  fontSize: isSmallMobile ? '0.75rem' : undefined
+                '& .MuiSelect-select': { 
+                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
                 }
               }}>
                 <InputLabel>Select Month</InputLabel>
@@ -495,7 +473,11 @@ const ResolvedComplaints = () => {
                     'January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'
                   ].map((month, index) => (
-                    <MenuItem key={index + 1} value={index + 1}>
+                    <MenuItem 
+                      key={index + 1} 
+                      value={index + 1}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } }}
+                    >
                       {month}
                     </MenuItem>
                   ))}
@@ -509,63 +491,56 @@ const ResolvedComplaints = () => {
       {/* Show loading or complaints */}
       {loadingReports ? (
         <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '50vh',
-          width: '100%',
+          width: '100%', 
+          textAlign: 'center', 
+          py: { xs: 4, sm: 6, md: 8 },
           bgcolor: '#f9f9f9',
-          borderRadius: '8px'
+          borderRadius: '8px',
+          flexGrow: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
-          <CircularProgress color="primary" size={isSmallMobile ? 30 : 40} />
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } }}>
+            Loading resolved complaints...
+          </Typography>
         </Box>
       ) : (
         resolvedComplaints.length > 0 ? (
-          <Grid container spacing={isSmallMobile ? 1 : 2}>
-            {resolvedComplaints.map((complaint) => (
-              <Grid item xs={12} sm={6} md={4} key={complaint.id}>
-                <ResolvedComplaintCard 
-                  complaint={complaint} 
-                  isSmallMobile={isSmallMobile}  // Pass the isSmallMobile prop here
-                />
-              </Grid>
-            ))}
-          </Grid>
+          <Box sx={{ width: '100%', flexGrow: 1 }}>
+            <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }}>
+              {resolvedComplaints.map((complaint) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={complaint.id} sx={{ 
+                  display: 'flex',
+                  '@media (max-width: 899px) and (min-width: 600px) and (orientation: landscape)': {
+                    width: '33.333%', // Force 3 columns on landscape tablets
+                    flexBasis: '33.333%'
+                  }
+                }}>
+                  <ResolvedComplaintCard complaint={complaint} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         ) : (
           <Box sx={{ 
             width: '100%', 
             textAlign: 'center', 
-            py: isSmallMobile ? 6 : 8,
+            py: { xs: 4, sm: 6, md: 8 },
             bgcolor: '#f9f9f9',
-            borderRadius: '8px'
+            borderRadius: '8px',
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
-            <Typography variant="body1" sx={{ fontSize: isSmallMobile ? '0.85rem' : undefined }}>
+            <Typography variant="body1" sx={{ fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } }}>
               No resolved complaints available for the selected timeframe.
             </Typography>
           </Box>
         )
       )}
-
-      {/* Notification Snackbar */}
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={4000}
-        onClose={closeNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={closeNotification} 
-          severity={notification.severity} 
-          variant="filled"
-          sx={{ 
-            width: '100%',
-            fontSize: isSmallMobile ? '0.75rem' : undefined
-          }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

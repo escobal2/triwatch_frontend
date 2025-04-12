@@ -76,7 +76,11 @@ const IssuedTickets = () => {
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
       borderRadius: '12px',
       overflow: 'hidden',
-      minWidth: 0 // Important for flex items to allow shrinking below content size
+      minWidth: 0, // Important for flex items to allow shrinking below content size
+      transition: 'all 0.2s ease-in-out', // Smooth transition for zoom
+      '&:hover': {
+        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+      }
     }}>
       {/* Card Header - Compact and responsive */}
       <Box sx={{ 
@@ -88,7 +92,10 @@ const IssuedTickets = () => {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}>
+        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ 
+          fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
+          flexGrow: 1,
+        }}>
           Ticket #{ticket.id}
         </Typography>
         <Typography 
@@ -102,7 +109,8 @@ const IssuedTickets = () => {
             borderRadius: '12px',
             fontWeight: 'bold',
             fontSize: { xs: '0.6rem', sm: '0.7rem' },
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
         >
           Issued
@@ -169,10 +177,13 @@ const IssuedTickets = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 0.5,
-                    fontSize: { xs: '0.65rem', sm: '0.7rem' }
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  <AccessTime sx={{ fontSize: '0.8rem' }} />
+                  <AccessTime sx={{ fontSize: '0.8rem', flexShrink: 0 }} />
                   {formatDateTime(ticket.resolved_at)}
                 </Typography>
               </Box>
@@ -233,7 +244,11 @@ const IssuedTickets = () => {
                     bgcolor: '#e3f2fd',
                     px: 0.5,
                     py: 0.2,
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    display: 'inline-block'
                   }}
                 >
                   {ticket.ticket_number}
@@ -259,7 +274,11 @@ const IssuedTickets = () => {
                     bgcolor: '#fff8e1',
                     px: 0.5,
                     py: 0.2,
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    display: 'inline-block'
                   }}
                 >
                   {ticket.franchise_plate_no}
@@ -275,7 +294,7 @@ const IssuedTickets = () => {
             <Divider />
             <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#fff8e1' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                <LocalTaxi sx={{ fontSize: '0.9rem', color: '#0384fc', mr: 0.5 }} />
+                <LocalTaxi sx={{ fontSize: '0.9rem', color: '#0384fc', mr: 0.5, flexShrink: 0 }} />
                 <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
                   fontSize: { xs: '0.75rem', sm: '0.85rem' }
                 }}>
@@ -367,12 +386,49 @@ const IssuedTickets = () => {
     </Card>
   );
 
+  // Calculate dynamic grid sizing based on content
+  const getGridSize = (totalTickets) => {
+    // Adjust grid sizes based on number of tickets and screen size
+    if (totalTickets <= 3) {
+      return { xs: 12, sm: 6, md: 4 }; // 1 column on xs, 2 on sm, 3 on md for few tickets
+    } else if (totalTickets <= 6) {
+      return { xs: 12, sm: 6, md: 4 }; // Same as above but more optimal for medium number
+    } else {
+      return { xs: 12, sm: 6, md: 4, lg: 3 }; // Add lg:3 for many tickets on large screens
+    }
+  };
+
+  // Grid sizing for the current set of tickets
+  const gridSizes = getGridSize(issuedTickets.length);
+
   return (
-    <Container maxWidth="md" sx={{ paddingTop: 4, paddingBottom: 4 }}>
+    <Container maxWidth={false} sx={{ 
+      width: '100%', 
+      height: '100%',
+      paddingTop: { xs: 2, sm: 3, md: 4 }, 
+      paddingBottom: { xs: 2, sm: 3, md: 4 },
+      paddingLeft: { xs: 1, sm: 2, md: 3 },
+      paddingRight: { xs: 1, sm: 2, md: 3 },
+    }}>
+      {errorMessage && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            marginBottom: 2,
+            width: '100%'
+          }}
+        >
+          {errorMessage}
+        </Alert>
+      )}
 
-      {errorMessage && <Alert severity="error" sx={{ marginBottom: 2 }}>{errorMessage}</Alert>}
-
-      <Box sx={{ mb: 3, bgcolor: '#f5f5f5', borderRadius: 2, p: 2 }}>
+      <Box sx={{ 
+        mb: 3, 
+        bgcolor: '#f5f5f5', 
+        borderRadius: 2, 
+        p: { xs: 1.5, sm: 2 },
+        width: '100%'
+      }}>
         {/* Timeframe Filter */}
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -381,7 +437,12 @@ const IssuedTickets = () => {
               Filter by Timeframe
             </Typography>
             
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 1,
+              width: '100%'
+            }}>
               {['daily', 'specific_week', 'specific_month'].map((time) => (
                 <Button
                   key={time}
@@ -397,7 +458,8 @@ const IssuedTickets = () => {
                       bgcolor: timeframe === time ? '#FB8C00' : 'rgba(255, 106, 0, 0.1)'
                     },
                     borderRadius: '16px',
-                    px: { xs: 1, sm: 2 }
+                    px: { xs: 1, sm: 2 },
+                    minWidth: { xs: '70px', sm: '85px' }
                   }}
                 >
                   {time.replace('_', ' ')}
@@ -418,6 +480,7 @@ const IssuedTickets = () => {
                   onChange={(e) => setStartDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   size="small"
+                  sx={{ width: '100%' }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -429,6 +492,7 @@ const IssuedTickets = () => {
                   onChange={(e) => setEndDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   size="small"
+                  sx={{ width: '100%' }}
                 />
               </Grid>
             </>
@@ -437,7 +501,7 @@ const IssuedTickets = () => {
           {/* Month Selector */}
           {timeframe === 'specific_month' && (
             <Grid item xs={12}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" sx={{ width: '100%' }}>
                 <InputLabel>Select Month</InputLabel>
                 <Select
                   value={selectedMonth}
@@ -461,16 +525,23 @@ const IssuedTickets = () => {
 
       {/* Loading and Results */}
       {loadingReports ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: 4, 
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
           <Typography variant="body1">
             Loading issued tickets...
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ width: '100%' }}>
           {issuedTickets.length > 0 ? (
             issuedTickets.map((ticket) => (
-              <Grid item xs={12} sm={6} md={4} key={ticket.id}>
+              <Grid item {...gridSizes} key={ticket.id} sx={{ width: '100%' }}>
                 <TicketCard ticket={ticket} />
               </Grid>
             ))
@@ -481,7 +552,8 @@ const IssuedTickets = () => {
                 py: 4, 
                 bgcolor: '#f5f5f5', 
                 borderRadius: 2,
-                border: '1px dashed #ccc'
+                border: '1px dashed #ccc',
+                width: '100%'
               }}>
                 <Typography variant="body1">
                   No issued tickets available for the selected timeframe.
