@@ -53,6 +53,35 @@ const SKPersonelForm = () => {
     handleMenuClose();
   };
 
+  useEffect(() => {
+    // Check if user is logged in by verifying token exists
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      // If no token, redirect to login
+      router.replace('/sk_personel_login');
+      return;
+    }
+    
+    // Replace the current history state to prevent going back to login
+    window.history.replaceState(null, '', window.location.pathname);
+    
+    // Optional: Add a listener for the popstate event (back/forward buttons)
+    const handlePopState = (event) => {
+      // If trying to go back to login page, prevent it
+      if (document.referrer.includes('sk_personel_login')) {
+        window.history.pushState(null, '', window.location.pathname);
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    // Clean up the event listener when component unmounts
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [router]);
+
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
     if (!id) return;
