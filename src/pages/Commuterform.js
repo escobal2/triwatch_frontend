@@ -131,7 +131,7 @@ const CommuterForm = () => {
       
       if (!storedCommuter) {
         // No session found, redirect to login
-        router.replace('/');
+        router.replace('/Commuter_login');
         return;
       }
       
@@ -142,7 +142,7 @@ const CommuterForm = () => {
         setCommuterName(parsedCommuter.name); // Set name from session immediately
       } catch (error) {
         console.error("Error parsing commuter data:", error);
-        router.replace('/');
+        router.replace('/Commuter_login');
       }
     }
   }, [router]);
@@ -169,9 +169,12 @@ const CommuterForm = () => {
   const handleDrawerClose = () => setOpenDrawer(false);
 
   const handleLogout = () => {
-    // Clear session storage
-    sessionStorage.removeItem('commuter');
-    // Redirect to login page
+    // Clear ALL session storage to ensure complete logout
+    sessionStorage.clear();
+    // Or if you want to be specific:
+    // sessionStorage.removeItem('commuter');
+    
+    // Replace the current history entry with the login page
     router.replace('/Commuter_login');
   };
 

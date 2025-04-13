@@ -53,20 +53,21 @@ const handleSubmit = async (e) => {
       password,
     });
 
-    if (response.status === 200) {
-      const commuter = response.data;
-      if (!commuter.verified) {
-        setErrorMessage("Your account is pending admin approval. Please wait for verification.");
-        return;
-      }
-      
-      // Store the commuter data in sessionStorage
-      sessionStorage.setItem('commuter', JSON.stringify(commuter));
-      
-      // Replace the current history entry with the dashboard page
-      // This will prevent going back to login when hitting back button
-      router.replace('/Commuterform');
-    }
+    // After successful login
+if (response.status === 200) {
+  const commuter = response.data;
+  if (!commuter.verified) {
+    setErrorMessage("Your account is pending admin approval. Please wait for verification.");
+    return;
+  }
+  
+  // Store the commuter data in sessionStorage
+  sessionStorage.setItem('commuter', JSON.stringify(commuter));
+  
+  // Replace (not push) the current history entry with the dashboard page
+  // This will prevent going back to login when hitting back button
+  router.replace('/Commuterform');
+}
   } catch (error) {
     setErrorMessage(error.response?.data?.message || 'Invalid username or password');
   }
