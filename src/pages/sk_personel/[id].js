@@ -24,6 +24,7 @@ const SKPersonelForm = () => {
   const [dismissedComplaints, setDismissedComplaints] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Notification related states
   const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
@@ -33,6 +34,7 @@ const SKPersonelForm = () => {
   
   const router = useRouter();
   const { id, fullname} = router.query;
+  const [userId, setUserId] = useState(null);
   const [userData, setUserData] = useState({ id: '', fullname: '' });
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -56,45 +58,66 @@ const SKPersonelForm = () => {
   };
 
   useEffect(() => {
-    // Check for session data first
-    const skPersonnel = sessionStorage.getItem('skPersonnel');
-    if (!skPersonnel) {
-      router.replace('/sk_personel_login');
-      return;
-    }
+    // Only run this once the router is ready
+    if (!router.isReady) return;
     
-    const parsedData = JSON.parse(skPersonnel);
-    setUserData({
-      id: parsedData.id,
-      fullname: parsedData.fullname
-    });
-    
-    // Only attempt to redirect if router is ready and we have an id in the URL
-    if (router.isReady && router.query.id && parsedData.id.toString() !== router.query.id.toString()) {
-      router.replace(`/sk_personel/${parsedData.id}`);
+    try {
+      const skPersonnel = sessionStorage.getItem('skPersonnel');
+      
+      if (!skPersonnel) {
+        console.log("No session found, redirecting to login");
+        router.push('/sk_personel_login');
+        return;
+      }
+      
+      const parsedData = JSON.parse(skPersonnel);
+      
+      // Set both userData and userId for consistency
+      setUserData({
+        id: parsedData.id,
+        fullname: parsedData.fullname
+      });
+      setUserId(parsedData.id);
+      
+      // Only redirect if there's an ID mismatch in the URL
+      if (router.query.id && parsedData.id.toString() !== router.query.id.toString()) {
+        console.log("ID mismatch, redirecting to correct profile");
+        router.push(`/sk_personel/${parsedData.id}`);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Session verification error:", error);
+      router.push('/sk_personel_login');
     }
-  }, [router.isReady, router.query.id]);
+  }, [router.isReady]);
 
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
-    // Only fetch if we have valid userData.id or router.query.id
-    const currentId = userData.id || router.query.id;
-    if (!currentId || !router.isReady) return;
-  
+    // Don't fetch until we have a valid userId and router is ready
+    if (!userId || isLoading) return;
+    
+    console.log("Fetching complaints for user ID:", userId);
+    
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${currentId}`);
-        setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
+        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${userId}`);
+        if (response.data && response.data.retrieved_data) {
+          const activeComplaints = response.data.retrieved_data.filter(
+            c => c.status !== 'dismissed' && c.status !== 'resolved'
+          );
+          setComplaints(activeComplaints);
+        }
       } catch (error) {
         console.error('Error fetching complaints:', error);
       }
     };
-  
+    
     fetchComplaints();
     const interval = setInterval(fetchComplaints, 5000);
-  
+    
     return () => clearInterval(interval);
-  }, [userData.id, router.query.id, router.isReady]);
+  }, [userId, isLoading]);
 
   const fetchSKPersonnel = async (personnelId) => {
     if (!personnelId) {
