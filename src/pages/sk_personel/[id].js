@@ -56,9 +56,9 @@ const SKPersonelForm = () => {
   };
 
   useEffect(() => {
+    // Check for session data first
     const skPersonnel = sessionStorage.getItem('skPersonnel');
     if (!skPersonnel) {
-      // User is not logged in, redirect to login page
       router.replace('/sk_personel_login');
       return;
     }
@@ -69,19 +69,21 @@ const SKPersonelForm = () => {
       fullname: parsedData.fullname
     });
     
-    // If the ID in the URL doesn't match the logged-in user's ID, redirect
-    if (id && parsedData.id.toString() !== id.toString()) {
+    // Only attempt to redirect if router is ready and we have an id in the URL
+    if (router.isReady && router.query.id && parsedData.id.toString() !== router.query.id.toString()) {
       router.replace(`/sk_personel/${parsedData.id}`);
     }
-  }, [router, id]);
+  }, [router.isReady, router.query.id]);
 
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
-    if (!id) return;
+    // Only fetch if we have valid userData.id or router.query.id
+    const currentId = userData.id || router.query.id;
+    if (!currentId || !router.isReady) return;
   
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${currentId}`);
         setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -92,17 +94,7 @@ const SKPersonelForm = () => {
     const interval = setInterval(fetchComplaints, 5000);
   
     return () => clearInterval(interval);
-  }, [id]); // Changed dependency from id to userData.id
-  
-  // Handle ticket image selection
-  const handleImageChange = (e, complaintId) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setSelectedComplaintId(complaintId);
-      setExtractedText(null); // Reset extracted text when a new image is selected
-    }
-  };
+  }, [userData.id, router.query.id, router.isReady]);
 
   const fetchSKPersonnel = async (personnelId) => {
     if (!personnelId) {
