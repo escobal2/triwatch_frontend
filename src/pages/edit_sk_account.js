@@ -1,310 +1,311 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { 
-  Grid, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Button, 
-  Box, 
-  Divider 
-} from "@mui/material";
-import API_BASE_URL from "@/config/apiConfig";
+import { useEffect, useState } from 'react';
+import { Container, Card, CardContent, Typography, Button, Grid, Box, Divider, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PersonIcon from '@mui/icons-material/Person';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BadgeIcon from '@mui/icons-material/Badge';
+import axios from 'axios';
+import API_BASE_URL from '@/config/apiConfig';
 
 const SKPersonnelList = () => {
   const [skPersonnel, setSKPersonnel] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [isSmallMobile, setIsSmallMobile] = useState(false);
 
-  // Detect small screens for responsive design
   useEffect(() => {
-    // Safe to use window here as this will only run client-side
-    setIsSmallMobile(window.innerWidth < 400);
-    
-    const handleResize = () => {
-      setIsSmallMobile(window.innerWidth < 400);
+    const fetchAccounts = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/sk_personnel`);
+        setSKPersonnel(response.data.retrieved_data);
+      } catch (error) {
+        console.error('Error fetching SK personnel accounts:', error);
+        setErrorMessage("Failed to fetch accounts.");
+      }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
-  const fetchSKPersonnel = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/sk_personnel`);
-      setSKPersonnel(response.data.retrieved_data);
-    } catch (err) {
-      setError("Failed to fetch SK personnel accounts.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Only fetch data client-side
-    if (typeof window !== 'undefined') {
-      fetchSKPersonnel();
-    }
+    fetchAccounts();
   }, []);
 
   const deleteAccount = async (username) => {
-    const confirmDeletion = window.confirm(
-      "Are you sure you want to delete this account? This action cannot be undone."
-    );
-
-    if (!confirmDeletion) return;
-
     try {
       const res = await axios.delete(`${API_BASE_URL}/delete_account/${username}`);
       setSuccessMessage(res.data.message);
-      setSKPersonnel((prev) => prev.filter((person) => person.username !== username));
+      setErrorMessage(null);
       
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-    } catch (err) {
-      setError("Error deleting account. Please try again.");
-      
-      // Clear error message after 3 seconds
-      setTimeout(() => {
-        setError(null);
-      }, 3000);
+      setSKPersonnel((prevPersonnel) => prevPersonnel.filter(person => person.username !== username));
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setErrorMessage("Failed to delete account.");
+      setSuccessMessage(null);
     }
   };
 
-  if (loading) return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100px'
+  return (
+    <Container maxWidth={false} sx={{ 
+      paddingTop: { xs: 2, sm: 3, md: 4 },
+      paddingX: { xs: 1, sm: 2, md: 3 },
+      width: '100%'
     }}>
-      <Typography variant="body1" color="text.secondary">Loading...</Typography>
-    </Box>
-  );
-  
-  if (error) return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100px',
-      color: 'error.main' 
-    }}>
-      <Typography variant="body1">{error}</Typography>
-    </Box>
-  );
+      {errorMessage && (
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      {successMessage && (
+        <Alert severity="success" sx={{ marginBottom: 2 }}>
+          {successMessage}
+        </Alert>
+      )}
 
-  const PersonnelCard = ({ person }) => (
-    <Card sx={{ 
-      height: '100%', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-      borderRadius: '12px',
-      overflow: 'hidden',
-      minWidth: 0 // Important for flex items
-    }}>
-      {/* Card Header */}
-      <Box sx={{ 
-        bgcolor: '#0384fc', 
-        color: 'white', 
-        py: { xs: 0.5, sm: 0.75 }, 
-        px: { xs: 1, sm: 1.5 },
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <Typography noWrap variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}>
-          {person.fullname}
-        </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            bgcolor: "#e3f2fd",
-            color: "#0d47a1",
-            px: 1,
-            py: 0.25,
-            ml: 0.5,
-            borderRadius: '12px',
-            fontWeight: 'bold',
-            fontSize: { xs: '0.6rem', sm: '0.7rem' },
-            whiteSpace: 'nowrap'
-          }}
-        >
-          {person.role}
-        </Typography>
-      </Box>
-  
-      <CardContent sx={{ 
-        flexGrow: 1, 
-        p: 0, 
-        "&:last-child": { pb: 0 }, 
-        overflowY: 'auto'
-      }}>
-        {/* Personal Information */}
-        <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
-          <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-            mb: 0.5
-          }}>
-            Account Information
-          </Typography>
-          
-          <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '60px', sm: '70px' },
-                  flexShrink: 0,
-                  pt: 0.1
-                }}>
-                  Username:
-                </Typography>
+      <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
+        {skPersonnel.map((person) => (
+          <Grid item xs={12} sm={6} lg={4} xl={3} key={person.id}>
+            <Card sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
+              borderRadius: { xs: '8px', sm: '12px' },
+              overflow: 'hidden',
+              width: '100%'
+            }}>
+              {/* Card Header */}
+              <Box sx={{ 
+                bgcolor: '#FF6A00', 
+                color: 'white', 
+                py: { xs: 0.5, sm: 0.75 }, 
+                px: { xs: 1, sm: 1.5 },
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 0.5
+              }}>
                 <Typography 
-                  variant="caption" 
-                  fontWeight="medium" 
+                  noWrap 
+                  variant="subtitle1" 
+                  fontWeight="bold" 
                   sx={{ 
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.5px',
-                    wordBreak: 'break-word'
+                    fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
+                    flexGrow: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {person.username}
                 </Typography>
+                <Box sx={{ flexShrink: 0 }}>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      bgcolor: '#81c784',
+                      color: '#2e7d32',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: '12px',
+                      fontWeight: 'bold',
+                      fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                      whiteSpace: 'nowrap',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {person.role}
+                  </Typography>
+                </Box>
               </Box>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '60px', sm: '70px' },
-                  flexShrink: 0,
-                  pt: 0.1
-                }}>
-                  Contact:
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  fontWeight="medium" 
-                  sx={{ 
-                    wordBreak: 'break-word',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    width: '100%'
-                  }}
-                >
-                  {person.contactnum || 'Not provided'}
-                </Typography>
-              </Box>
-            </Grid>
 
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ 
-                  minWidth: { xs: '60px', sm: '70px' },
-                  flexShrink: 0,
-                  pt: 0.1
+              <CardContent sx={{ 
+                flexGrow: 1, 
+                p: 0, 
+                "&:last-child": { pb: 0 },
+                overflowY: 'auto'
+              }}>
+                {/* Personnel Information Section */}
+                <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
+                  <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    mb: 0.5
+                  }}>
+                    Personal Information
+                  </Typography>
+                  
+                  <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                          <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ 
+                          width: { xs: '40px', sm: '50px' },
+                          flexShrink: 0,
+                          pt: 0.1
+                        }}>
+                          Name:
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          fontWeight="medium" 
+                          sx={{ 
+                            wordBreak: 'break-word',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            flexGrow: 1
+                          }}
+                        >
+                          {person.fullname}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                          <PhoneIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ 
+                          width: { xs: '40px', sm: '50px' },
+                          flexShrink: 0,
+                          pt: 0.1
+                        }}>
+                          Contact:
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          fontWeight="medium" 
+                          sx={{ 
+                            wordBreak: 'break-word',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            flexGrow: 1
+                          }}
+                        >
+                          {person.contactnum || 'Not provided'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Divider />
+                
+                {/* Account Details */}
+                <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#e3f2fd' }}>
+                  <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    mb: 0.5
+                  }}>
+                    Account Details
+                  </Typography>
+                  
+                  <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                          <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ 
+                          width: { xs: '40px', sm: '50px' },
+                          flexShrink: 0,
+                          pt: 0.1
+                        }}>
+                          ID:
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          fontWeight="medium" 
+                          sx={{ 
+                            fontFamily: 'monospace',
+                            letterSpacing: '0.5px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            wordBreak: 'break-all',
+                            flexGrow: 1
+                          }}
+                        >
+                          {person.id}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                        <Box sx={{ width: '0.9rem', flexShrink: 0, mr: 0.5 }}>
+                          {/* Spacer to align with icons above */}
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ 
+                          width: { xs: '40px', sm: '50px' },
+                          flexShrink: 0,
+                          pt: 0.1
+                        }}>
+                          Role:
+                        </Typography>
+                        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                          <Typography 
+                            variant="caption" 
+                            fontWeight="medium"
+                            sx={{
+                              display: 'inline-block',
+                              bgcolor: 
+                                person.role === 'Admin' ? '#ffcdd2' : 
+                                person.role === 'Officer' ? '#c8e6c9' : '#e1f5fe',
+                              px: 0.5,
+                              py: 0.2,
+                              borderRadius: '4px',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '100%'
+                            }}
+                          >
+                            {person.role}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Divider />
+                
+                {/* Action button */}
+                <Box sx={{ 
+                  p: { xs: 0.75, sm: 1 },
+                  display: 'flex', 
+                  justifyContent: 'center',
+                  bgcolor: '#f5f5f5',
+                  width: '100%'
                 }}>
-                  ID:
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  fontWeight="medium" 
-                >
-                  #{person.id}
-                </Typography>
-              </Box>
-            </Grid>
+                  <Button
+                    startIcon={<DeleteIcon sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }} />}
+                    onClick={() => deleteAccount(person.username)}
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      backgroundColor: '#DB0606',
+                      borderRadius: '16px',
+                      '&:hover': { backgroundColor: '#b20000' },
+                      width: '100%',
+                      fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                      py: { xs: 0.5, sm: 0.75 },
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Delete Account
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
           </Grid>
-        </Box>
-        
-        <Divider />
-        
-        {/* Action buttons */}
-        <Box sx={{ 
-          p: { xs: 0.5, sm: 1 },
-          display: 'flex', 
-          gap: 0.5,
-          justifyContent: 'space-between',
-          bgcolor: '#f5f5f5'
-        }}>
-          <Button
-            startIcon={<DeleteIcon sx={{ fontSize: '0.9rem' }} />}
-            onClick={() => deleteAccount(person.username)}
-            variant="contained"
-            color="error"
-            size="small"
-            sx={{
-              borderRadius: '16px',
-              flexGrow: 1,
-              fontSize: { xs: '0.65rem', sm: '0.7rem' },
-              py: { xs: 0.5, sm: 0.75 },
-              px: { xs: 0.5, sm: 1 },
-              minWidth: 0,
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {!isSmallMobile ? 'Delete Account' : 'Delete'}
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom color="#0384fc" fontWeight="bold" sx={{ mb: 2 }}>
-        SK Personnel Accounts
-      </Typography>
-      
-      {successMessage && (
-        <Box sx={{ 
-          bgcolor: '#e8f5e9', 
-          color: '#2e7d32', 
-          p: 1.5, 
-          borderRadius: '8px',
-          mb: 2,
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <Typography variant="body2">{successMessage}</Typography>
-        </Box>
-      )}
-      
-      <Grid container spacing={2}>
-        {skPersonnel.length === 0 ? (
-          <Grid item xs={12}>
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              height: '100px',
-              bgcolor: '#f5f5f5',
-              borderRadius: '8px',
-              p: 2,
-              mt: 2
-            }}>
-              <Typography variant="body1" color="text.secondary">
-                No SK personnel accounts found.
-              </Typography>
-            </Box>
-          </Grid>
-        ) : (
-          skPersonnel.map((person) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={person.id}>
-              <PersonnelCard person={person} />
-            </Grid>
-          ))
-        )}
+        ))}
       </Grid>
-    </Box>
+    </Container>
   );
 };
 
