@@ -37,38 +37,22 @@ const CommuterLogin = () => {
     }
     
     try {
-      // Configure axios to include credentials (cookies)
       const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
         username,
         password,
-      }, {
-        withCredentials: true, // This allows cookies to be sent and received
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
       });
 
       if (response.status === 200) {
-        const userData = response.data;
-        // No need to store data in sessionStorage as Laravel will handle the session
-        
-        // Check if user is verified
-        if (!userData.verified) {
+        const commuter = response.data;
+        if (!commuter.verified) {
           setErrorMessage("Your account is pending admin approval. Please wait for verification.");
           return;
         }
-        
-        // Redirect to the dashboard after successful login
+        sessionStorage.setItem('commuter', JSON.stringify(commuter));
         router.push('/Commuterform');
       }
     } catch (error) {
-      if (error.response?.status === 403) {
-        setErrorMessage("Your account is pending admin approval. Please wait for verification.");
-      } else {
-        setErrorMessage(error.response?.data?.message || 'Invalid username or password');
-      }
+      setErrorMessage(error.response?.data?.message || 'Invalid username or password');
     }
   };
 
