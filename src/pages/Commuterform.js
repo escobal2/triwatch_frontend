@@ -172,7 +172,7 @@ const CommuterForm = () => {
     // Clear session storage
     sessionStorage.removeItem('commuter');
     // Redirect to login page
-    router.replace('/');
+    router.replace('/Commuter_login');
   };
 
   // Return null while checking authentication
