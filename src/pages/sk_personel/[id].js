@@ -59,7 +59,7 @@ const SKPersonelForm = () => {
     
     if (!token) {
       // If no token, redirect to login
-      router.replace('/sk_personel_login');
+      router.replace(`/sk_personel/${id}`);
       return;
     }
     
