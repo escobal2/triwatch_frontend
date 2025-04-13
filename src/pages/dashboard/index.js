@@ -37,7 +37,7 @@ const WelcomePage = () => {
       
       if (storedCommuter) {
         // User is already logged in, redirect to commuter panel
-        router.replace('/commuter_panel'); // Replace with your actual dashboard route
+        router.replace('/index'); // Replace with your actual dashboard route
       }
     }
   }, [router]);
