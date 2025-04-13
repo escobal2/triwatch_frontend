@@ -32,7 +32,7 @@ const SKPersonelForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   
   const router = useRouter();
-  const { id, fullname } = router.query;
+  const [userData, setUserData] = useState({ id: '', fullname: '' });
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
@@ -48,47 +48,47 @@ const SKPersonelForm = () => {
 
   // Logout function
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    // Clear session data
+    sessionStorage.removeItem('skPersonnel');
     router.push('/sk_personel_login');
     handleMenuClose();
   };
 
   useEffect(() => {
-    // Check if user is logged in by verifying token exists
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      // If no token, redirect to login
-      router.replace(`/sk_personel/${id}`);
+    // Check if user is logged in
+    const skPersonnel = sessionStorage.getItem('skPersonnel');
+    if (!skPersonnel) {
+      // User is not logged in, redirect to login page
+      router.replace('/sk_personel_login');
       return;
     }
     
-    // Replace the current history state to prevent going back to login
-    window.history.replaceState(null, '', window.location.pathname);
+    // Parse the user data from sessionStorage
+    const userData = JSON.parse(skPersonnel);
     
-    // Optional: Add a listener for the popstate event (back/forward buttons)
-    const handlePopState = (event) => {
-      // If trying to go back to login page, prevent it
-      if (document.referrer.includes('sk_personel_login')) {
-        window.history.pushState(null, '', window.location.pathname);
-      }
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    
-    // Clean up the event listener when component unmounts
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [router]);
+    // If the ID in the URL doesn't match the logged-in user's ID, redirect
+    if (id && userData.id.toString() !== id.toString()) {
+      router.replace(`/sk_personel/${userData.id}`);
+    }
+  }, [router, id]);
 
+  useEffect(() => {
+    const skPersonnel = sessionStorage.getItem('skPersonnel');
+    if (skPersonnel) {
+      const parsedData = JSON.parse(skPersonnel);
+      setUserData({
+        id: parsedData.id,
+        fullname: parsedData.fullname
+      });
+    }
+  }, []);
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
-    if (!id) return;
+    if (!userData.id) return;
   
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${userData.id}`);
         setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -99,7 +99,7 @@ const SKPersonelForm = () => {
     const interval = setInterval(fetchComplaints, 5000); // Fetch every 5 seconds
   
     return () => clearInterval(interval);
-  }, [id]);
+  }, [userData.id]); // Changed dependency from id to userData.id
   
   // Handle ticket image selection
   const handleImageChange = (e, complaintId) => {

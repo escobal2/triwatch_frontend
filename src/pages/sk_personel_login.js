@@ -26,6 +26,16 @@ const SkpersonelLogin = () => {
     }
   }, []);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const skPersonnel = sessionStorage.getItem('skPersonnel');
+    if (skPersonnel) {
+      // User is already logged in, redirect to dashboard
+      const userData = JSON.parse(skPersonnel);
+      router.replace(`/sk_personel/${userData.id}`);
+    }
+  }, [router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
@@ -43,8 +53,20 @@ const SkpersonelLogin = () => {
       });
 
       if (response.data.success) {
-        const { id } = response.data.user;
-        router.push(`/sk_personel/${id}`);
+        const userData = response.data.user;
+        
+        // Check if account is verified (if applicable)
+        if (userData.verified === false) {
+          setErrorMessage('Your account is pending admin approval. Please wait for verification.');
+          return;
+        }
+        
+        // Store user data in sessionStorage
+        sessionStorage.setItem('skPersonnel', JSON.stringify(userData));
+        
+        // Replace (not push) the current history entry with the dashboard page
+        // This will prevent going back to login when hitting back button
+        router.replace(`/sk_personel/${userData.id}`);
       } else {
         setErrorMessage('Invalid credentials. Please try again.');
       }
