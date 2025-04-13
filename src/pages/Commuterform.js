@@ -155,7 +155,7 @@ const CommuterForm = () => {
       // If the user is authenticated and tries to go back
       if (sessionStorage.getItem('commuter')) {
         // Push them forward to this page again
-        router.replace('/commuter_panel'); // Replace with your actual route
+        router.replace('/Commuterform'); // Replace with your actual route
         event.preventDefault();
       }
     };
