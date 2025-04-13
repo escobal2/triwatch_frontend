@@ -32,7 +32,7 @@ const SKPersonelForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   
   const router = useRouter();
-  const { id } = router.query;
+  const { id, fullname} = router.query;
   const [userData, setUserData] = useState({ id: '', fullname: '' });
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
