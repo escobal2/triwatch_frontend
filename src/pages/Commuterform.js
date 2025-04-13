@@ -27,7 +27,7 @@ const BackgroundImage = styled('div')({
   left: 0,
   width: '100%',
   height: '100%',
-  backgroundImage: 'url("/images/citystreet.jpg")', // Add this background image to your public folder
+  backgroundImage: 'url("/images/citystreet.jpg")',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   zIndex: 0,
@@ -120,6 +120,7 @@ const CommuterForm = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [commuterId, setCommuterId] = useState(null);
   const [commuter, setCommuter] = useState({ id: null, name: '' });
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useMediaQuery('(max-width:600px)');
   const router = useRouter();
 
@@ -140,11 +141,27 @@ const CommuterForm = () => {
         setCommuter(parsedCommuter);
         setCommuterId(parsedCommuter.id);
         setCommuterName(parsedCommuter.name); // Set name from session immediately
+        setIsLoading(false);
       } catch (error) {
         console.error("Error parsing commuter data:", error);
         router.replace('/Commuter_login');
       }
     }
+  }, [router]);
+
+  // Prevent back button from going to login page
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // If the user is authenticated and tries to go back
+      if (sessionStorage.getItem('commuter')) {
+        // Push them forward to this page again
+        router.replace('/commuter_panel'); // Replace with your actual route
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, [router]);
 
   useEffect(() => {
@@ -159,6 +176,8 @@ const CommuterForm = () => {
       } catch (error) {
         console.error("API Error:", error);
         // Don't reset to "Unknown" - keep the name from session
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -171,14 +190,27 @@ const CommuterForm = () => {
   const handleLogout = () => {
     // Clear ALL session storage to ensure complete logout
     sessionStorage.clear();
-    // Or if you want to be specific:
-    // sessionStorage.removeItem('commuter');
     
     // Replace the current history entry with the login page
     router.replace('/Commuter_login');
   };
 
-  // Return null while checking authentication
+  // Return loading indicator while checking authentication
+  if (isLoading) {
+    return (
+      <RootContainer>
+        <BackgroundImage />
+        <BlueOverlay />
+        <ContentContainer>
+          <Typography variant="h6" color="white">
+            Loading...
+          </Typography>
+        </ContentContainer>
+      </RootContainer>
+    );
+  }
+
+  // If not authenticated and not loading, the first useEffect will handle redirection
   if (typeof window !== 'undefined' && !sessionStorage.getItem('commuter')) {
     return null;
   }

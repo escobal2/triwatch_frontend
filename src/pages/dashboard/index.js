@@ -14,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
+import { useRouter } from 'next/router';
 
 const WelcomePage = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -26,6 +27,20 @@ const WelcomePage = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
   // True if screen width is between 601px and 960px
   const isTablet = useMediaQuery('(min-width:601px) and (max-width:960px)');
+  const router = useRouter();
+
+  // Check if user is already logged in, and redirect if they are
+  useEffect(() => {
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const storedCommuter = sessionStorage.getItem('commuter');
+      
+      if (storedCommuter) {
+        // User is already logged in, redirect to commuter panel
+        router.replace('/commuter_panel'); // Replace with your actual dashboard route
+      }
+    }
+  }, [router]);
 
   useEffect(() => {
     // Handler to call on window resize
@@ -183,8 +198,6 @@ const WelcomePage = () => {
               CITY OF SORSOGON
             </Typography>
           </Box>
-          
-          {/* Removed the old menu button from here */}
         </div>
 
         {/* Floating Menu Button on the right side */}
