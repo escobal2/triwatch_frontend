@@ -26,35 +26,51 @@ const CommuterLogin = () => {
     }
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
-    
-    if (rememberUsername) {
-      localStorage.setItem('rememberedUsername', username);
-    } else {
-      localStorage.removeItem('rememberedUsername');
+  useEffect(() => {
+    // Check if user is already logged in
+    const commuter = sessionStorage.getItem('commuter');
+    if (commuter) {
+      // User is already logged in, redirect to dashboard
+      router.replace('/Commuterform');
     }
-    
-    try {
-      const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
-        username,
-        password,
-      });
+  }, [router]);
 
-      if (response.status === 200) {
-        const commuter = response.data;
-        if (!commuter.verified) {
-          setErrorMessage("Your account is pending admin approval. Please wait for verification.");
-          return;
-        }
-        sessionStorage.setItem('commuter', JSON.stringify(commuter));
-        router.push('/Commuterform');
+ // In your CommuterLogin component, modify the login success handler:
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setErrorMessage("");
+  
+  if (rememberUsername) {
+    localStorage.setItem('rememberedUsername', username);
+  } else {
+    localStorage.removeItem('rememberedUsername');
+  }
+  
+  try {
+    const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
+      username,
+      password,
+    });
+
+    if (response.status === 200) {
+      const commuter = response.data;
+      if (!commuter.verified) {
+        setErrorMessage("Your account is pending admin approval. Please wait for verification.");
+        return;
       }
-    } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Invalid username or password');
+      
+      // Store the commuter data in sessionStorage
+      sessionStorage.setItem('commuter', JSON.stringify(commuter));
+      
+      // Replace the current history entry with the dashboard page
+      // This will prevent going back to login when hitting back button
+      router.replace('/Commuterform');
     }
-  };
+  } catch (error) {
+    setErrorMessage(error.response?.data?.message || 'Invalid username or password');
+  }
+};
 
   const handleForgotPassword = () => {
     // Implement password recovery functionality

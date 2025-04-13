@@ -122,20 +122,33 @@ const CommuterForm = () => {
   const [commuter, setCommuter] = useState({ id: null, name: '' });
   const isMobile = useMediaQuery('(max-width:600px)');
   const router = useRouter();
-  const { id } = router.query;
 
+  // Check authentication
   useEffect(() => {
-    const storedCommuter = sessionStorage.getItem('commuter');
-    if (storedCommuter) {
-      const parsedCommuter = JSON.parse(storedCommuter);
-      setCommuter(parsedCommuter);
-      setCommuterId(parsedCommuter.id);
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const storedCommuter = sessionStorage.getItem('commuter');
+      
+      if (!storedCommuter) {
+        // No session found, redirect to login
+        router.replace('/');
+        return;
+      }
+      
+      try {
+        const parsedCommuter = JSON.parse(storedCommuter);
+        setCommuter(parsedCommuter);
+        setCommuterId(parsedCommuter.id);
+        setCommuterName(parsedCommuter.name); // Set name from session immediately
+      } catch (error) {
+        console.error("Error parsing commuter data:", error);
+        router.replace('/');
+      }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!commuterId) {
-      console.warn("No commuterId found!");
       return;
     }
 
@@ -145,7 +158,7 @@ const CommuterForm = () => {
         setCommuterName(response.data.name);
       } catch (error) {
         console.error("API Error:", error);
-        setCommuterName("Unknown");
+        // Don't reset to "Unknown" - keep the name from session
       }
     };
 
@@ -154,6 +167,18 @@ const CommuterForm = () => {
 
   const handleDrawerOpen = () => setOpenDrawer(true);
   const handleDrawerClose = () => setOpenDrawer(false);
+
+  const handleLogout = () => {
+    // Clear session storage
+    sessionStorage.removeItem('commuter');
+    // Redirect to login page
+    router.replace('/');
+  };
+
+  // Return null while checking authentication
+  if (typeof window !== 'undefined' && !sessionStorage.getItem('commuter')) {
+    return null;
+  }
 
   return (
     <RootContainer>
@@ -199,10 +224,8 @@ const CommuterForm = () => {
               <ListItemText primary="Edit Account" />
             </Link>
           </ListItem>
-          <ListItem button>
-            <Link href="/Commuter_login" passHref style={{ width: '100%' }}>
-              <ListItemText primary="Logout" />
-            </Link>
+          <ListItem button onClick={handleLogout} sx={{ cursor: 'pointer' }}>
+            <ListItemText primary="Logout" />
           </ListItem>
         </List>
       </Drawer>
