@@ -55,7 +55,6 @@ const SKPersonelForm = () => {
   };
 
   useEffect(() => {
-    // Check if user is logged in
     const skPersonnel = sessionStorage.getItem('skPersonnel');
     if (!skPersonnel) {
       // User is not logged in, redirect to login page
@@ -63,32 +62,25 @@ const SKPersonelForm = () => {
       return;
     }
     
-    // Parse the user data from sessionStorage
-    const userData = JSON.parse(skPersonnel);
+    const parsedData = JSON.parse(skPersonnel);
+    setUserData({
+      id: parsedData.id,
+      fullname: parsedData.fullname
+    });
     
     // If the ID in the URL doesn't match the logged-in user's ID, redirect
-    if (id && userData.id.toString() !== id.toString()) {
-      router.replace(`/sk_personel/${userData.id}`);
+    if (id && parsedData.id.toString() !== id.toString()) {
+      router.replace(`/sk_personel/${parsedData.id}`);
     }
   }, [router, id]);
 
-  useEffect(() => {
-    const skPersonnel = sessionStorage.getItem('skPersonnel');
-    if (skPersonnel) {
-      const parsedData = JSON.parse(skPersonnel);
-      setUserData({
-        id: parsedData.id,
-        fullname: parsedData.fullname
-      });
-    }
-  }, []);
   // Fetch complaints assigned to SK personnel
   useEffect(() => {
-    if (!userData.id) return;
+    if (!id) return;
   
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${userData.id}`);
+        const response = await axios.get(`${API_BASE_URL}/assigned-reports/${id}`);
         setComplaints(response.data.retrieved_data.filter(c => c.status !== 'dismissed' && c.status !== 'resolved'));
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -96,10 +88,10 @@ const SKPersonelForm = () => {
     };
   
     fetchComplaints();
-    const interval = setInterval(fetchComplaints, 5000); // Fetch every 5 seconds
+    const interval = setInterval(fetchComplaints, 5000);
   
     return () => clearInterval(interval);
-  }, [userData.id]); // Changed dependency from id to userData.id
+  }, [id]); // Changed dependency from id to userData.id
   
   // Handle ticket image selection
   const handleImageChange = (e, complaintId) => {
@@ -357,7 +349,7 @@ const SKPersonelForm = () => {
               >
                 <MenuItem sx={{ display: 'flex', alignItems: 'center' }}>
                   <AccountCircle sx={{ mr: 1 }} />
-                  {fullname || 'SK Personnel'}
+                  {userData.fullname  || 'SK Personnel'}
                 </MenuItem>
                 <MenuItem onClick={handleLogout}>
                   <ExitToApp sx={{ mr: 1 }} />
