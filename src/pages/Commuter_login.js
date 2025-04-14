@@ -73,11 +73,6 @@ if (response.status === 200) {
   }
 };
 
-  const handleForgotPassword = () => {
-    // Implement password recovery functionality
-    router.push('/forgot-password');
-  };
-
   return (
     <Box
       sx={{
@@ -308,21 +303,6 @@ if (response.status === 200) {
                 }
                 label={<Typography variant="body2">Remember Username</Typography>}
               />
-              
-              <Button 
-                variant="text" 
-                onClick={handleForgotPassword}
-                sx={{ 
-                  color: '#004d66', 
-                  textTransform: 'none', 
-                  fontWeight: 'normal',
-                  fontSize: isMobile ? '0.75rem' : '0.875rem',
-                  padding: isMobile ? '2px 4px' : '6px 8px',
-                  marginLeft: 'auto' // Push to the right side
-                }}
-              >
-                Forgot Password
-              </Button>
             </Box>
             
             <Button
