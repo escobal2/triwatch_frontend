@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
+  // output: "export" line is removed to enable proper dynamic routing
   images: {
     unoptimized: true,
   },
@@ -30,7 +30,16 @@ const nextConfig = {
         ],
       },
     ];
-  }  
+  },
+  // Add rewrites to handle dynamic routes better
+  async rewrites() {
+    return [
+      {
+        source: '/sk_personel/:path*',
+        destination: '/sk_personel/[id]',
+      }
+    ];
+  }
 };
 
 export default nextConfig;
