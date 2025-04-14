@@ -34,10 +34,15 @@ const WelcomePage = () => {
     // Check if we're in the browser environment
     if (typeof window !== 'undefined') {
       const storedCommuter = sessionStorage.getItem('commuter');
+      const skPersonnel = sessionStorage.getItem('skPersonnel');
       
       if (storedCommuter) {
-        // User is already logged in, redirect to commuter panel
-        router.replace('/index'); // Replace with your actual dashboard route
+        // User is already logged in as commuter, redirect to commuter panel
+        router.replace('/index');
+      } else if (skPersonnel) {
+        // User is already logged in as SK personnel, redirect to SK panel
+        const parsedData = JSON.parse(skPersonnel);
+        router.replace(`/sk_personel/${parsedData.id}`);
       }
     }
   }, [router]);
