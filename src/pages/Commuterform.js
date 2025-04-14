@@ -12,7 +12,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const RootContainer = styled('div')({
-  width: '100vw',
+  width: '100%',
   height: '100vh',
   position: 'relative',
   overflow: 'hidden',
