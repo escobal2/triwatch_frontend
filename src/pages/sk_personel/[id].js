@@ -57,40 +57,42 @@ const SKPersonelForm = () => {
     handleMenuClose();
   };
 
-  useEffect(() => {
-    // Only run this once the router is ready
-    if (!router.isReady) return;
+ // At the top of your component
+
+useEffect(() => {
+  // Only run this once the router is ready
+  if (!router.isReady) return;
+  
+  try {
+    const skPersonnel = sessionStorage.getItem('skPersonnel');
     
-    try {
-      const skPersonnel = sessionStorage.getItem('skPersonnel');
-      
-      if (!skPersonnel) {
-        console.log("No session found, redirecting to login");
-        router.push('/sk_personel_login');
-        return;
-      }
-      
-      const parsedData = JSON.parse(skPersonnel);
-      
-      // Set both userData and userId for consistency
-      setUserData({
-        id: parsedData.id,
-        fullname: parsedData.fullname
-      });
-      setUserId(parsedData.id);
-      
-      // Only redirect if there's an ID mismatch in the URL
-      if (router.query.id && parsedData.id.toString() !== router.query.id.toString()) {
-        console.log("ID mismatch, redirecting to correct profile");
-        router.push(`/sk_personel/${parsedData.id}`);
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Session verification error:", error);
+    if (!skPersonnel) {
+      console.log("No session found, redirecting to login");
       router.push('/sk_personel_login');
+      return;
     }
-  }, [router.isReady]);
+    
+    const parsedData = JSON.parse(skPersonnel);
+    
+    // Set both userData and userId for consistency
+    setUserData({
+      id: parsedData.id,
+      fullname: parsedData.fullname
+    });
+    setUserId(parsedData.id);
+    
+    // Only redirect if there's an ID mismatch in the URL
+    if (id && parsedData.id.toString() !== id.toString()) {
+      console.log("ID mismatch, redirecting to correct profile");
+      router.push(`/sk_personel/${parsedData.id}`);
+    }
+    
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Session verification error:", error);
+    router.push('/sk_personel_login');
+  }
+}, [router.isReady, id]);
 
   // Fetch complaints assigned to SK personnel
   useEffect(() => {

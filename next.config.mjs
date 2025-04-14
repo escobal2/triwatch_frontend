@@ -31,15 +31,7 @@ const nextConfig = {
       },
     ];
   },
-  // Add rewrites to handle dynamic routes better
-  async rewrites() {
-    return [
-      {
-        source: '/sk_personel/:path*',
-        destination: '/sk_personel/[id]',
-      }
-    ];
-  }
+  // Remove the rewrites section that was causing problems
 };
 
 export default nextConfig;
