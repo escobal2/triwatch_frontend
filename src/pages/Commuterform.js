@@ -98,24 +98,12 @@ const ReportButton = styled(Button)({
   fontSize: '18px',
   fontWeight: 'bold',
   borderRadius: '4px',
-  marginBottom: '20px', // Add spacing between buttons
   '&:hover': {
     backgroundColor: '#B71C1C',
   },
 });
 
 const LogoutButton = styled(Button)({
-  color: 'white',
-  backgroundColor: '#555',
-  padding: '8px 20px',
-  fontSize: '16px',
-  borderRadius: '4px',
-  '&:hover': {
-    backgroundColor: '#333',
-  },
-});
-
-const EditProfileButton = styled(Button)({
   color: 'white',
   position: 'absolute',
   top: '20px',
@@ -227,11 +215,9 @@ const CommuterForm = () => {
       <BackgroundImage />
       <BlueOverlay />
       <ContentContainer>
-        <Link href="/edit-profile" passHref>
-          <EditProfileButton>
-            Edit Profile
-          </EditProfileButton>
-        </Link>
+        <LogoutButton onClick={handleLogout}>
+          Logout
+        </LogoutButton>
 
         <HeaderText variant="h6">
           Seguridad Kaayusan Katranguilohan Kauswagan
@@ -259,10 +245,6 @@ const CommuterForm = () => {
             Report an Incident
           </ReportButton>
         </Link>
-
-        <LogoutButton onClick={handleLogout}>
-          Logout
-        </LogoutButton>
       </ContentContainer>
     </RootContainer>
   );

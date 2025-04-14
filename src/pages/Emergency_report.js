@@ -264,7 +264,7 @@ const EmergencyReports = () => {
 
   const handleDialogClose = () => {
     setOpenDialog(false);
-    router.push('/Commuterform');
+    router.push('/index');
   };
 
   return (
