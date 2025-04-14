@@ -63,6 +63,9 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [admin, setAdmin] = useState({ id: null, name: '' });
+  const [adminName, setAdminName] = useState('Loading...');
+  const [isLoading, setIsLoading] = useState(true);
   
   // Loading States
   const [loadingReports, setLoadingReports] = useState(true);
@@ -206,7 +209,13 @@ toggleAccountsMenu: () => {
   setExpandedAccountsMenu(!expandedAccountsMenu);
   // Don't change activeView here - just toggle the menu
 },
-    logout: () => router.push('/Admin_Login'),
+logout: () => {
+  // Clear ALL session storage to ensure complete logout
+  sessionStorage.clear();
+  
+  // Replace the current history entry with the login page
+  router.replace('/Admin_Login');
+},
     toggleMenu: () => setExpandedMenu(!expandedMenu),
     toggleDrawer: () => setMobileDrawerOpen(!mobileDrawerOpen),
     toggleMenu: () => setExpandedMenu(!expandedMenu),
@@ -286,6 +295,45 @@ toggleAccountsMenu: () => {
     setSuccessMessage(null);
     setErrorMessage(null);
   };
+// Authentication check
+// Authentication check
+useEffect(() => {
+  // Check if we're in the browser environment
+  if (typeof window !== 'undefined') {
+    const storedAdmin = sessionStorage.getItem('admin');
+    
+    if (!storedAdmin) {
+      // No session found, redirect to login
+      router.replace('/Admin_Login');
+      return;
+    }
+    
+    try {
+      const parsedAdmin = JSON.parse(storedAdmin);
+      setAdmin(parsedAdmin); // Set the admin state
+      setAdminName(parsedAdmin.name || parsedAdmin.username); // Set admin name
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error parsing admin data:", error);
+      router.replace('/Admin_Login');
+    }
+  }
+}, [router]);
+
+// Prevent back button from going to login page
+useEffect(() => {
+  const handlePopState = (event) => {
+    // If the user is authenticated and tries to go back
+    if (sessionStorage.getItem('admin')) {
+      // Push them forward to this page again
+      router.replace('/Admin_Form'); // Your admin dashboard route
+      event.preventDefault();
+    }
+  };
+
+  window.addEventListener('popstate', handlePopState);
+  return () => window.removeEventListener('popstate', handlePopState);
+}, [router]);
 
   useEffect(() => {
     if (!searchTerm.trim()) {

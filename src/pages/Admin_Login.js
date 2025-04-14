@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Box, Button, TextField, Typography, InputAdornment, IconButton, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, TextField, Typography, InputAdornment, IconButton, Checkbox, FormControlLabel, useMediaQuery, useTheme } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import axios from 'axios';
@@ -14,11 +14,37 @@ const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberUsername, setRememberUsername] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Check for saved username in localStorage
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('rememberedAdminUsername');
+    if (savedUsername) {
+      setUsername(savedUsername);
+      setRememberUsername(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check if admin is already logged in
+    const admin = sessionStorage.getItem('admin');
+    if (admin) {
+      // Admin is already logged in, redirect to dashboard
+      router.replace('/Admin_Form');
+    }
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage("");
+    
+    if (rememberUsername) {
+      localStorage.setItem('rememberedAdminUsername', username);
+    } else {
+      localStorage.removeItem('rememberedAdminUsername');
+    }
+    
     try {
       const response = await axios.post(`${API_BASE_URL}/adminlogin`, {
         username,
@@ -26,12 +52,29 @@ const AdminLogin = () => {
       });
 
       if (response.status === 200) {
-        sessionStorage.setItem('admin', JSON.stringify(response.data));
-        router.push('/Admin_Form');
+        const admin = response.data;
+        
+        // Check if admin account is verified (if you want this feature)
+        if (admin.verified === false) {
+          setErrorMessage("Your account is pending approval. Please wait for verification.");
+          return;
+        }
+        
+        // Store the admin data in sessionStorage
+        sessionStorage.setItem('admin', JSON.stringify(admin));
+        
+        // Replace (not push) the current history entry with the dashboard page
+        // This will prevent going back to login when hitting back button
+        router.replace('/Admin_Form');
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Invalid username or password');
     }
+  };
+
+  const handleForgotPassword = () => {
+    // Implement password recovery functionality
+    router.push('/admin-forgot-password');
   };
 
   return (
@@ -212,7 +255,7 @@ const AdminLogin = () => {
                 'aria-label': 'Password',
                 'aria-required': 'true'
               }}
-              sx={{ marginBottom: '15px' }}
+              sx={{ marginBottom: '10px' }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -243,24 +286,60 @@ const AdminLogin = () => {
               </Typography>
             )}
             
-            <Box sx={{ display: 'flex', gap: '10px', width: '100%', marginTop: '5px' }}>
-              <Button
-                type="submit"
-                variant="contained"
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: 'row',
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '15px',
+                width: '100%'
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={rememberUsername}
+                    onChange={(e) => setRememberUsername(e.target.checked)}
+                    size="small"
+                    inputProps={{ 'aria-label': 'Remember username' }}
+                  />
+                }
+                label={<Typography variant="body2">Remember Username</Typography>}
+              />
+              
+              <Button 
+                variant="text" 
+                onClick={handleForgotPassword}
                 sx={{ 
-                  backgroundColor: '#1976D2', 
-                  color: 'white',
-                  padding: '10px',
-                  fontSize: '16px',
-                  flexGrow: 1,
-                  '&:hover': {
-                    backgroundColor: '#003d52',
-                  },
+                  color: '#004d66', 
+                  textTransform: 'none', 
+                  fontWeight: 'normal',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  padding: isMobile ? '2px 4px' : '6px 8px',
+                  marginLeft: 'auto'
                 }}
               >
-                SIGN IN
+                Forgot Password
               </Button>
             </Box>
+            
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ 
+                backgroundColor: '#1976D2', 
+                color: 'white',
+                padding: '10px',
+                fontSize: '16px',
+                '&:hover': {
+                  backgroundColor: '#003d52',
+                },
+              }}
+            >
+              SIGN IN
+            </Button>
           </Box>
         </Box>
         
