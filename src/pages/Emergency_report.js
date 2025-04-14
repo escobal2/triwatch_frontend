@@ -428,22 +428,6 @@ const EmergencyReports = () => {
               </SubmitButton>
             </div>
           </form>
-          <Box sx={{ textAlign: 'center', mt: 1, mb: 3 }}>
-            <Link href="/" passHref legacyBehavior>
-              <a style={{ textDecoration: 'none' }}>
-                <Button 
-                  variant="text" 
-                  sx={{ 
-                    color: 'white',
-                    textTransform: 'none',
-                    fontSize: getFontSize(14)
-                  }}
-                >
-                  Back to Home
-                </Button>
-              </a>
-            </Link>
-          </Box>
         </FormContainer>
       </ContentContainer>
 
