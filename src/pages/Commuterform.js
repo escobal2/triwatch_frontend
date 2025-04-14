@@ -8,6 +8,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import API_BASE_URL from '@/config/apiConfig';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const RootContainer = styled('div')({
   width: '100vw',
@@ -103,12 +105,32 @@ const ReportButton = styled(Button)({
   },
 });
 
-const LogoutButton = styled(Button)({
-  color: 'white',
+const AccountInfoContainer = styled('div')({
   position: 'absolute',
   top: '20px',
   right: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+});
+
+const UserInfo = styled('div')({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  padding: '8px 12px',
+  borderRadius: '20px',
+});
+
+const LogoutButton = styled(Button)({
+  color: 'white',
   backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  borderRadius: '50%',
+  minWidth: '40px',
+  width: '40px',
+  height: '40px',
+  padding: '8px',
   '&:hover': {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
@@ -210,14 +232,25 @@ const CommuterForm = () => {
     return null;
   }
 
+  // Adapt layout based on screen size
+  const displayUserInfo = !isMobile;
+
   return (
     <RootContainer>
       <BackgroundImage />
       <BlueOverlay />
       <ContentContainer>
-        <LogoutButton onClick={handleLogout}>
-          Logout
-        </LogoutButton>
+        <AccountInfoContainer>
+          {displayUserInfo && (
+            <UserInfo>
+              <AccountCircleIcon />
+              <Typography variant="body2">{commuterName || 'Guest'}</Typography>
+            </UserInfo>
+          )}
+          <LogoutButton onClick={handleLogout} aria-label="Logout">
+            <LogoutIcon />
+          </LogoutButton>
+        </AccountInfoContainer>
 
         <HeaderText variant="h6">
           Seguridad Kaayusan Katranguilohan Kauswagan
