@@ -445,30 +445,6 @@ const WelcomePage = () => {
           </ListItem>
           
           <Divider sx={{ margin: '16px 0' }} />
-          
-          <ListItem sx={{ padding: '8px 0' }}>
-            <Link href="/" passHref legacyBehavior>
-              <a style={{ textDecoration: 'none', width: '100%' }}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth
-                  sx={{ 
-                    fontSize: getFontSize(14), 
-                    padding: '8px',
-                    color: '#555',
-                    borderColor: '#ccc',
-                    textTransform: 'none',
-                    '&:hover': {
-                      borderColor: '#999',
-                      backgroundColor: '#f9f9f9'
-                    }
-                  }}
-                >
-                  Home
-                </Button>
-              </a>
-            </Link>
-          </ListItem>
         </List>
       </Drawer>
     </div>

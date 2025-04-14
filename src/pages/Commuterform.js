@@ -4,11 +4,6 @@ import Link from 'next/link';
 import { styled } from '@mui/system';
 import Image from 'next/image';
 import Typography from '@mui/material/Typography';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -103,21 +98,36 @@ const ReportButton = styled(Button)({
   fontSize: '18px',
   fontWeight: 'bold',
   borderRadius: '4px',
+  marginBottom: '20px', // Add spacing between buttons
   '&:hover': {
     backgroundColor: '#B71C1C',
   },
 });
 
-const NavButton = styled(Button)({
+const LogoutButton = styled(Button)({
+  color: 'white',
+  backgroundColor: '#555',
+  padding: '8px 20px',
+  fontSize: '16px',
+  borderRadius: '4px',
+  '&:hover': {
+    backgroundColor: '#333',
+  },
+});
+
+const EditProfileButton = styled(Button)({
   color: 'white',
   position: 'absolute',
   top: '20px',
   right: '20px',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
 });
 
 const CommuterForm = () => {
   const [commuterName, setCommuterName] = useState('Loading...');
-  const [openDrawer, setOpenDrawer] = useState(false);
   const [commuterId, setCommuterId] = useState(null);
   const [commuter, setCommuter] = useState({ id: null, name: '' });
   const [isLoading, setIsLoading] = useState(true);
@@ -184,9 +194,6 @@ const CommuterForm = () => {
     fetchCommuterData();
   }, [commuterId]);
 
-  const handleDrawerOpen = () => setOpenDrawer(true);
-  const handleDrawerClose = () => setOpenDrawer(false);
-
   const handleLogout = () => {
     // Clear ALL session storage to ensure complete logout
     sessionStorage.clear();
@@ -220,9 +227,11 @@ const CommuterForm = () => {
       <BackgroundImage />
       <BlueOverlay />
       <ContentContainer>
-        <NavButton onClick={handleDrawerOpen}>
-          <MenuIcon />
-        </NavButton>
+        <Link href="/edit-profile" passHref>
+          <EditProfileButton>
+            Edit Profile
+          </EditProfileButton>
+        </Link>
 
         <HeaderText variant="h6">
           Seguridad Kaayusan Katranguilohan Kauswagan
@@ -250,20 +259,11 @@ const CommuterForm = () => {
             Report an Incident
           </ReportButton>
         </Link>
-      </ContentContainer>
 
-      <Drawer anchor="right" open={openDrawer} onClose={handleDrawerClose}>
-        <List sx={{ width: 250, padding: 2 }}>
-          <ListItem button>
-            <Link href="/edit-profile" passHref style={{ width: '100%' }}>
-              <ListItemText primary="Edit Account" />
-            </Link>
-          </ListItem>
-          <ListItem button onClick={handleLogout} sx={{ cursor: 'pointer' }}>
-            <ListItemText primary="Logout" />
-          </ListItem>
-        </List>
-      </Drawer>
+        <LogoutButton onClick={handleLogout}>
+          Logout
+        </LogoutButton>
+      </ContentContainer>
     </RootContainer>
   );
 };
