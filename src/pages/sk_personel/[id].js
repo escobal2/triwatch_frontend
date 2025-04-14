@@ -184,7 +184,14 @@ useEffect(() => {
       setIsProcessing(false);
     }
   };
-
+  const handleImageChange = (e, complaintId) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setSelectedComplaintId(complaintId);
+      setExtractedText(null); // Reset extracted text when a new image is uploaded
+    }
+  };
   // Resolve Complaint with enhanced ticket extraction
   const resolveComplaint = async (complaintId, personnelId) => {
     const resolution = prompt("Enter resolution for this complaint:");
