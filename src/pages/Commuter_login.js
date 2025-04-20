@@ -55,11 +55,12 @@ const CommuterLogin = () => {
 
     // After successful login
     if (response.status === 200) {
-      // Store user info including name in session storage
+      // Store user info including name and contact number in session storage
       sessionStorage.setItem('commuter', JSON.stringify({
         id: response.data.user.id,
         name: response.data.user.name,
         username: response.data.user.username,
+        contactnum: response.data.user.contactnum, // Adding contact number
         verified: response.data.verified
       }));
       
