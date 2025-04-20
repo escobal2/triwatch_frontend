@@ -219,6 +219,34 @@ const VerifyCommuterAccs = () => {
               </Box>
             </Grid>
 
+            {/* Added Email Field */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  minWidth: { xs: '40px', sm: '50px' },
+                  flexShrink: 0,
+                  pt: 0.1
+                }}>
+                  Email:
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  fontWeight="medium" 
+                  sx={{ 
+                    wordBreak: 'break-word',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    width: '100%'
+                  }}
+                >
+                  {commuter.email || 'Not provided'}
+                </Typography>
+              </Box>
+            </Grid>
+
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ 
