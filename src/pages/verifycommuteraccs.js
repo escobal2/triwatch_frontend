@@ -35,8 +35,11 @@ const VerifyCommuterAccs = () => {
   const fetchPendingAccounts = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/pending_accounts`);
-      setPendingAccounts(res.data);
+      // Make sure we're handling the response correctly - Extract the pending_accounts array
+      const accounts = res.data.pending_accounts || [];
+      setPendingAccounts(accounts);
     } catch (err) {
+      console.error("Error fetching pending accounts:", err);
       setError("Failed to fetch pending accounts.");
     } finally {
       setLoading(false);
@@ -332,7 +335,13 @@ const VerifyCommuterAccs = () => {
 
   return (
     <Grid container spacing={2}>
-      {pendingAccounts.length === 0 ? (
+      {Array.isArray(pendingAccounts) && pendingAccounts.length > 0 ? (
+        pendingAccounts.map((commuter) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={commuter.id}>
+            <CommuterCard commuter={commuter} />
+          </Grid>
+        ))
+      ) : (
         <Grid item xs={12}>
           <Box sx={{ 
             display: 'flex', 
@@ -349,12 +358,6 @@ const VerifyCommuterAccs = () => {
             </Typography>
           </Box>
         </Grid>
-      ) : (
-        pendingAccounts.map((commuter) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={commuter.id}>
-            <CommuterCard commuter={commuter} />
-          </Grid>
-        ))
       )}
     </Grid>
   );
