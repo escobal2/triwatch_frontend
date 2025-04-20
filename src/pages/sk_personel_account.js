@@ -118,19 +118,6 @@ const SKPersonnelAccountForm = () => {
             Account successfully created!
           </Alert>
         )}
-        
-        <Typography 
-          component="h1" 
-          variant="h5" 
-          align="center" 
-          sx={{ 
-            marginBottom: { xs: '16px', sm: '24px' },
-            fontWeight: 600
-          }}
-        >
-          Create SK Personnel Account
-        </Typography>
-        
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <Grid container spacing={2}>
             {/* First row */}

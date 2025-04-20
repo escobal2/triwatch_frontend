@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardContent, Typography, Button, Grid, Box, Divider, Alert } from '@mui/material';
+import { Card, CardContent, Typography, Button, Grid, Box, Divider, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -41,11 +41,7 @@ const SKPersonnelList = () => {
   };
 
   return (
-    <Container maxWidth={false} sx={{ 
-      paddingTop: { xs: 1, sm: 2 },
-      paddingX: { xs: 0.5, sm: 1 },
-      width: '100%'
-    }}>
+    <>
       {errorMessage && (
         <Alert severity="error" sx={{ marginBottom: 1 }}>
           {errorMessage}
@@ -292,7 +288,7 @@ const SKPersonnelList = () => {
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </>
   );
 };
 
