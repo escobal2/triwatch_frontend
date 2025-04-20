@@ -55,11 +55,12 @@ const CommuterLogin = () => {
 
     // After successful login
     if (response.status === 200) {
-      // Store basic user info in session storage
+      // Store user info including name in session storage
       sessionStorage.setItem('commuter', JSON.stringify({
-        username: username,
-        verified: true,
-        // Add any other info you need
+        id: response.data.user.id,
+        name: response.data.user.name,
+        username: response.data.user.username,
+        verified: response.data.verified
       }));
       
       // Replace (not push) the current history entry with the dashboard page
@@ -68,7 +69,7 @@ const CommuterLogin = () => {
   } catch (error) {
     setErrorMessage(error.response?.data?.message || 'Invalid username or password');
   }
-};;
+};
 
   return (
     <Box
