@@ -37,7 +37,7 @@ const CommuterLogin = () => {
 
  // In your CommuterLogin component, modify the login success handler:
 
-const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   setErrorMessage("");
   
@@ -54,24 +54,21 @@ const handleSubmit = async (e) => {
     });
 
     // After successful login
-if (response.status === 200) {
-  const commuter = response.data;
-  if (!commuter.verified) {
-    setErrorMessage("Your account is pending admin approval. Please wait for verification.");
-    return;
-  }
-  
-  // Store the commuter data in sessionStorage
-  sessionStorage.setItem('commuter', JSON.stringify(commuter));
-  
-  // Replace (not push) the current history entry with the dashboard page
-  // This will prevent going back to login when hitting back button
-  router.replace('/Commuterform');
-}
+    if (response.status === 200) {
+      // Store basic user info in session storage
+      sessionStorage.setItem('commuter', JSON.stringify({
+        username: username,
+        verified: true,
+        // Add any other info you need
+      }));
+      
+      // Replace (not push) the current history entry with the dashboard page
+      router.replace('/Commuterform');
+    }
   } catch (error) {
     setErrorMessage(error.response?.data?.message || 'Invalid username or password');
   }
-};
+};;
 
   return (
     <Box
