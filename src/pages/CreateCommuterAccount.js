@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import ReCAPTCHA from 'react-google-recaptcha';
+import ReCAPTCHA from 'react-google-recaptcha';  // Restored ReCAPTCHA import
 import {
   Container,
   Card,
@@ -34,6 +34,7 @@ const CreateCommuterAccount = () => {
   const [commuterData, setCommuterData] = useState({
     name: '',
     contactnum: '',
+    email: '', // Added email field
     username: '',
     password: '',
     validId: null,
@@ -43,7 +44,7 @@ const CreateCommuterAccount = () => {
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaValue, setCaptchaValue] = useState(null);  // Restored captchaValue state
   const [fileName, setFileName] = useState('');
 
   // Responsive styling
@@ -84,7 +85,7 @@ const CreateCommuterAccount = () => {
     }
   };
 
-  const handleCaptchaChange = (value) => {
+  const handleCaptchaChange = (value) => {  // Restored captcha handler
     setCaptchaValue(value);
   };
 
@@ -93,6 +94,7 @@ const CreateCommuterAccount = () => {
     setLoading(true);
     setError(null);
 
+    // Restored captcha validation check
     if (!captchaValue) {
       alert('Please verify the reCAPTCHA');
       setLoading(false);
@@ -102,10 +104,11 @@ const CreateCommuterAccount = () => {
     const formData = new FormData();
     formData.append('name', commuterData.name);
     formData.append('contactnum', commuterData.contactnum);
+    formData.append('email', commuterData.email); // Added email to form data
     formData.append('username', commuterData.username);
     formData.append('password', commuterData.password);
     formData.append('valid_id', commuterData.validId);
-    formData.append('g-recaptcha-response', captchaValue);
+    formData.append('g-recaptcha-response', captchaValue);  // Restored captchaValue
 
     try {
       const response = await axios.post(`${API_BASE_URL}/commuter_create_account`, formData, {
@@ -114,7 +117,7 @@ const CreateCommuterAccount = () => {
 
       if (response.status === 201) {
         setDialogOpen(true);
-        setCommuterData({ name: '', username: '', password: '', contactnum: '', validId: null });
+        setCommuterData({ name: '', username: '', password: '', contactnum: '', email: '', validId: null }); // Reset email too
         setFileName('');
       } else {
         alert('Something went wrong, please try again.');
@@ -297,6 +300,22 @@ const CreateCommuterAccount = () => {
                       }}
                     />
                   </Grid>
+                  {/* Added Email field */}
+                  <Grid item xs={12}>
+                    <TextField 
+                      fullWidth 
+                      label="Email Address" 
+                      name="email" 
+                      type="email"
+                      value={commuterData.email} 
+                      onChange={handleChange} 
+                      required
+                      variant="outlined"
+                      InputProps={{
+                        sx: { borderRadius: '8px' }
+                      }}
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <TextField 
                       fullWidth 
@@ -359,6 +378,7 @@ const CreateCommuterAccount = () => {
                     </Box>
                   </Grid>
 
+                  {/* ReCAPTCHA component restored */}
                   <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
                     <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
                       <ReCAPTCHA 
