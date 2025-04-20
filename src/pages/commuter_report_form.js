@@ -203,36 +203,44 @@ const ReportForm = () => {
   useEffect(() => {
     const storedCommuter = sessionStorage.getItem("commuter");
     if (storedCommuter) {
-      const parsedCommuter = JSON.parse(storedCommuter);
-      setCommuterId(parsedCommuter?.id || null);
-      
-      // Pre-fill form with stored commuter data
-      setFormData(prev => ({
-        ...prev,
-        fullName: parsedCommuter?.name?.trim() || "Unknown",
-        contactNumber: parsedCommuter?.contactnum?.trim() || "N/A",
-      }));
+      try {
+        const parsedCommuter = JSON.parse(storedCommuter);
+        setCommuterId(parsedCommuter?.id || null);
+        
+        // Pre-fill form with stored commuter data
+        setFormData(prev => ({
+          ...prev,
+          fullName: parsedCommuter?.name || "Unknown",
+          contactNumber: parsedCommuter?.contactnum || "", // Empty string instead of N/A
+        }));
+      } catch (error) {
+        console.error("Error parsing commuter data:", error);
+      }
     }
   }, []);
 
   // Fetch commuter data from API if needed
   useEffect(() => {
     if (!commuterId) return;
-
+  
     const fetchCommuterData = async () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
         
-        setFormData(prev => ({
-          ...prev,
-          fullName: data?.name || "Unknown",
-          contactNumber: data?.contactnum || "N/A",
-        }));
+        // Only update if we actually received data
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            fullName: data.name || prev.fullName,
+            contactNumber: data.contactnum || prev.contactNumber,
+          }));
+        }
       } catch (error) {
         console.error("API Error:", error);
+        // Keep the existing values if API fails
       }
     };
-
+  
     fetchCommuterData();
   }, [commuterId]);
 
