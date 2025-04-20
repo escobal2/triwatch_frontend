@@ -45,9 +45,13 @@ const CommuterLogin = () => {
       localStorage.removeItem('rememberedUsernameOrEmail');
     }
     
+    // Check if input is email or username
+    const isEmail = usernameOrEmail.includes('@');
+    
     try {
       const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
-        username: usernameOrEmail, // Backend will handle either username or email
+        username: isEmail ? '' : usernameOrEmail, // Send username if it's not an email
+        email: isEmail ? usernameOrEmail : '', // Send email if it looks like an email
         password,
       });
 
