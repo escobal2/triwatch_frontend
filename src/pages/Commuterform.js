@@ -139,6 +139,7 @@ const LogoutButton = styled(Button)({
 const CommuterForm = () => {
   const [commuterName, setCommuterName] = useState('Loading...');
   const [commuterId, setCommuterId] = useState(null);
+  const [commuter, setCommuter] = useState({ id: null, name: '' });
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useMediaQuery('(max-width:600px)');
   const router = useRouter();
@@ -157,16 +158,9 @@ const CommuterForm = () => {
       
       try {
         const parsedCommuter = JSON.parse(storedCommuter);
-        
-        // Ensure we have the name field from the stored data
-        if (parsedCommuter && parsedCommuter.name) {
-          setCommuterName(parsedCommuter.name);
-        }
-        
-        if (parsedCommuter && parsedCommuter.id) {
-          setCommuterId(parsedCommuter.id);
-        }
-        
+        setCommuter(parsedCommuter);
+        setCommuterId(parsedCommuter.id);
+        setCommuterName(parsedCommuter.name); // Set name from session immediately
         setIsLoading(false);
       } catch (error) {
         console.error("Error parsing commuter data:", error);
@@ -175,7 +169,21 @@ const CommuterForm = () => {
     }
   }, [router]);
 
-  // Fetch commuter data from API if needed
+  // Prevent back button from going to login page
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // If the user is authenticated and tries to go back
+      if (sessionStorage.getItem('commuter')) {
+        // Push them forward to this page again
+        router.replace('/Commuterform'); // Replace with your actual route
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [router]);
+
   useEffect(() => {
     if (!commuterId) {
       return;
@@ -184,14 +192,10 @@ const CommuterForm = () => {
     const fetchCommuterData = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/commuter/${commuterId}`);
-        
-        // Only update name if the API returned a valid name
-        if (response.data && response.data.name) {
-          setCommuterName(response.data.name);
-        }
+        setCommuterName(response.data.name);
       } catch (error) {
         console.error("API Error:", error);
-        // Keep using the name from session storage if API fails
+        // Don't reset to "Unknown" - keep the name from session
       } finally {
         setIsLoading(false);
       }
@@ -199,21 +203,6 @@ const CommuterForm = () => {
 
     fetchCommuterData();
   }, [commuterId]);
-
-  // Prevent back button from going to login page
-  useEffect(() => {
-    const handlePopState = (event) => {
-      // If the user is authenticated and tries to go back
-      if (sessionStorage.getItem('commuter')) {
-        // Push them forward to this page again
-        router.replace('/Commuterform');
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [router]);
 
   const handleLogout = () => {
     // Clear ALL session storage to ensure complete logout
