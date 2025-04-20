@@ -11,18 +11,18 @@ const CommuterLogin = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  const [username, setUsername] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberUsername, setRememberUsername] = useState(false);
+  const [rememberUsernameOrEmail, setRememberUsernameOrEmail] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Check for saved username in localStorage
+  // Check for saved username/email in localStorage
   useEffect(() => {
-    const savedUsername = localStorage.getItem('rememberedUsername');
-    if (savedUsername) {
-      setUsername(savedUsername);
-      setRememberUsername(true);
+    const savedUsernameOrEmail = localStorage.getItem('rememberedUsernameOrEmail');
+    if (savedUsernameOrEmail) {
+      setUsernameOrEmail(savedUsernameOrEmail);
+      setRememberUsernameOrEmail(true);
     }
   }, []);
 
@@ -35,42 +35,40 @@ const CommuterLogin = () => {
     }
   }, [router]);
 
- // In your CommuterLogin component, modify the login success handler:
-
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setErrorMessage("");
-  
-  if (rememberUsername) {
-    localStorage.setItem('rememberedUsername', username);
-  } else {
-    localStorage.removeItem('rememberedUsername');
-  }
-  
-  try {
-    const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
-      username,
-      password,
-    });
-
-    // After successful login
-    if (response.status === 200) {
-      // Store user info including name and contact number in session storage
-      sessionStorage.setItem('commuter', JSON.stringify({
-        id: response.data.user.id,
-        name: response.data.user.name,
-        username: response.data.user.username,
-        contactnum: response.data.user.contactnum, // Ensure this matches your backend field name
-        verified: response.data.verified
-      }));
-      
-      // Replace (not push) the current history entry with the dashboard page
-      router.replace('/Commuterform');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    
+    if (rememberUsernameOrEmail) {
+      localStorage.setItem('rememberedUsernameOrEmail', usernameOrEmail);
+    } else {
+      localStorage.removeItem('rememberedUsernameOrEmail');
     }
-  } catch (error) {
-    setErrorMessage(error.response?.data?.message || 'Invalid username or password');
-  }
-};
+    
+    try {
+      const response = await axios.post(`${API_BASE_URL}/commuterlogin`, {
+        username: usernameOrEmail, // Backend will handle either username or email
+        password,
+      });
+
+      // After successful login
+      if (response.status === 200) {
+        // Store user info including name and contact number in session storage
+        sessionStorage.setItem('commuter', JSON.stringify({
+          id: response.data.user.id,
+          name: response.data.user.name,
+          username: response.data.user.username,
+          contactnum: response.data.user.contactnum,
+          verified: response.data.verified
+        }));
+        
+        // Replace (not push) the current history entry with the dashboard page
+        router.replace('/Commuterform');
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Invalid username/email or password');
+    }
+  };
 
   return (
     <Box
@@ -214,13 +212,13 @@ const CommuterLogin = () => {
           >
             <TextField
               fullWidth
-              placeholder="USERNAME"
+              placeholder="USERNAME OR EMAIL"
               variant="outlined"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
               required
               inputProps={{
-                'aria-label': 'Username',
+                'aria-label': 'Username or Email',
                 'aria-required': 'true'
               }}
               sx={{ 
@@ -294,13 +292,13 @@ const CommuterLogin = () => {
               <FormControlLabel
                 control={
                   <Checkbox 
-                    checked={rememberUsername}
-                    onChange={(e) => setRememberUsername(e.target.checked)}
+                    checked={rememberUsernameOrEmail}
+                    onChange={(e) => setRememberUsernameOrEmail(e.target.checked)}
                     size="small"
-                    inputProps={{ 'aria-label': 'Remember username' }}
+                    inputProps={{ 'aria-label': 'Remember username or email' }}
                   />
                 }
-                label={<Typography variant="body2">Remember Username</Typography>}
+                label={<Typography variant="body2">Remember Username/Email</Typography>}
               />
             </Box>
             
