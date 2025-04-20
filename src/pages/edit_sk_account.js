@@ -129,67 +129,62 @@ const SKPersonnelList = () => {
                     Personal Information
                   </Typography>
                   
-                  <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                          <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ 
-                          width: { xs: '40px', sm: '50px' },
-                          flexShrink: 0,
-                          pt: 0.1
-                        }}>
-                          Name:
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          fontWeight="medium" 
-                          sx={{ 
-                            wordBreak: 'break-word',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: 'vertical',
-                            flexGrow: 1
-                          }}
-                        >
-                          {person.fullname}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                          <PhoneIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ 
-                          width: { xs: '40px', sm: '50px' },
-                          flexShrink: 0,
-                          pt: 0.1
-                        }}>
-                          Contact:
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          fontWeight="medium" 
-                          sx={{ 
-                            wordBreak: 'break-word',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: 'vertical',
-                            flexGrow: 1
-                          }}
-                        >
-                          {person.contactnum || 'Not provided'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
+                  {/* Removed nested Grid here */}
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                    <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                      <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      width: { xs: '40px', sm: '50px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      Name:
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      fontWeight="medium" 
+                      sx={{ 
+                        wordBreak: 'break-word',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        flexGrow: 1
+                      }}
+                    >
+                      {person.fullname}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                      <PhoneIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      width: { xs: '40px', sm: '50px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      Contact:
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      fontWeight="medium" 
+                      sx={{ 
+                        wordBreak: 'break-word',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        flexGrow: 1
+                      }}
+                    >
+                      {person.contactnum || 'Not provided'}
+                    </Typography>
+                  </Box>
                 </Box>
                 
                 <Divider />
@@ -203,71 +198,66 @@ const SKPersonnelList = () => {
                     Account Details
                   </Typography>
                   
-                  <Grid container spacing={1} sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                          <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ 
-                          width: { xs: '40px', sm: '50px' },
-                          flexShrink: 0,
-                          pt: 0.1
-                        }}>
-                          ID:
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          fontWeight="medium" 
-                          sx={{ 
-                            fontFamily: 'monospace',
-                            letterSpacing: '0.5px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            wordBreak: 'break-all',
-                            flexGrow: 1
-                          }}
-                        >
-                          {person.id}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Box sx={{ width: '0.9rem', flexShrink: 0, mr: 0.5 }}>
-                          {/* Spacer to align with icons above */}
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ 
-                          width: { xs: '40px', sm: '50px' },
-                          flexShrink: 0,
-                          pt: 0.1
-                        }}>
-                          Role:
-                        </Typography>
-                        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-                          <Typography 
-                            variant="caption" 
-                            fontWeight="medium"
-                            sx={{
-                              display: 'inline-block',
-                              bgcolor: 
-                                person.role === 'Admin' ? '#ffcdd2' : 
-                                person.role === 'Officer' ? '#c8e6c9' : '#e1f5fe',
-                              px: 0.5,
-                              py: 0.2,
-                              borderRadius: '4px',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              maxWidth: '100%'
-                            }}
-                          >
-                            {person.role}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
+                  {/* Removed nested Grid here too */}
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                    <Box sx={{ flexShrink: 0, mr: 0.5 }}>
+                      <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      width: { xs: '40px', sm: '50px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      ID:
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      fontWeight="medium" 
+                      sx={{ 
+                        fontFamily: 'monospace',
+                        letterSpacing: '0.5px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        wordBreak: 'break-all',
+                        flexGrow: 1
+                      }}
+                    >
+                      {person.id}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <Box sx={{ width: '0.9rem', flexShrink: 0, mr: 0.5 }}>
+                      {/* Spacer to align with icons above */}
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      width: { xs: '40px', sm: '50px' },
+                      flexShrink: 0,
+                      pt: 0.1
+                    }}>
+                      Role:
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                      <Typography 
+                        variant="caption" 
+                        fontWeight="medium"
+                        sx={{
+                          display: 'inline-block',
+                          bgcolor: 
+                            person.role === 'Admin' ? '#ffcdd2' : 
+                            person.role === 'Officer' ? '#c8e6c9' : '#e1f5fe',
+                          px: 0.5,
+                          py: 0.2,
+                          borderRadius: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '100%'
+                        }}
+                      >
+                        {person.role}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
                 
                 <Divider />
