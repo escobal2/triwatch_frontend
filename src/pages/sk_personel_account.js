@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   Container, Typography, TextField, Button, Box, CssBaseline, Alert,
-  MenuItem, InputLabel, FormControl, Select, Paper, useMediaQuery, useTheme
+  MenuItem, InputLabel, FormControl, Select, Paper, Grid
 } from "@mui/material";
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -19,10 +19,6 @@ const SubmitAcc = async (formData) => {
 
 const SKPersonnelAccountForm = () => {
   const router = useRouter();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  
   const [formData, setFormData] = useState({
     name: "",
     contactNumber: "",
@@ -90,53 +86,33 @@ const SKPersonnelAccountForm = () => {
     }
   };
 
-  // Custom styles to match the provided design
-  const inputStyle = {
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    width: '100%',
-    backgroundColor: 'white',
-    fontSize: isMobile ? '14px' : '16px',
-    height: '42px',
-    '&:focus': {
-      borderColor: '#2684FF',
-      boxShadow: '0 0 0 1px #2684FF',
-    }
-  };
-
-  const labelStyle = {
-    display: 'block',
-    marginBottom: '6px',
-    fontSize: isMobile ? '13px' : '14px',
-    color: '#333',
-    fontWeight: '500'
-  };
-
   return (
     <Container 
       component="main" 
-      maxWidth="md" 
-      sx={{ 
-        marginTop: { xs: 2, sm: 3, md: 4 }, 
-        marginBottom: { xs: 2, sm: 3, md: 4 },
-        px: { xs: 2, sm: 3 }
+      sx={{
+        width: '100%',
+        maxWidth: { xs: '100%', sm: '100%', md: '900px' },
+        margin: '0 auto',
+        padding: { xs: '16px', sm: '24px' },
       }}
     >
       <CssBaseline />
       <Paper 
+        elevation={2}
         sx={{ 
-          padding: { xs: 2, sm: 2.5, md: 3 },
+          padding: { xs: '16px', sm: '24px', md: '32px' },
           backgroundColor: '#f0f6fa',
           border: '1px solid #cfd8dc',
-          borderRadius: '4px'
+          borderRadius: '4px',
+          width: '100%'
         }}
       >
         {submissionStatus === "success" && (
           <Alert 
             severity="success" 
             sx={{ 
-              marginBottom: { xs: 2, sm: 3 },
-              fontSize: isMobile ? '14px' : '16px'
+              marginBottom: { xs: '16px', sm: '24px' },
+              width: '100%'
             }}
           >
             Account successfully created!
@@ -145,32 +121,31 @@ const SKPersonnelAccountForm = () => {
         
         <Typography 
           component="h1" 
-          variant={isMobile ? "h5" : "h4"} 
+          variant="h5" 
           align="center" 
           sx={{ 
-            mb: { xs: 2, sm: 3 },
+            marginBottom: { xs: '16px', sm: '24px' },
             fontWeight: 600
           }}
         >
           Create SK Personnel Account
         </Typography>
         
-        <form onSubmit={handleSubmit}>
-          {/* First row */}
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' },
-              flexWrap: 'wrap', 
-              gap: { xs: 1.5, sm: 2 }, 
-              mb: { xs: 1.5, sm: 2, md: 3 } 
-            }}
-          >
-            <Box sx={{ 
-              flex: 1, 
-              minWidth: { xs: '100%', sm: '45%' }
-            }}>
-              <InputLabel htmlFor="name" sx={labelStyle}>Full Name</InputLabel>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+          <Grid container spacing={2}>
+            {/* First row */}
+            <Grid item xs={12} sm={6}>
+              <InputLabel 
+                htmlFor="name" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Full Name
+              </InputLabel>
               <TextField
                 id="name"
                 name="name"
@@ -180,25 +155,28 @@ const SKPersonnelAccountForm = () => {
                 helperText={formErrors.name}
                 fullWidth
                 variant="outlined"
-                sx={{ 
+                placeholder="Enter full name"
+                size="small"
+                sx={{
                   '& .MuiOutlinedInput-root': {
-                    ...inputStyle
-                  },
-                  '& .MuiFormHelperText-root': {
-                    fontSize: '12px',
-                    marginLeft: 0
+                    backgroundColor: 'white',
                   }
                 }}
-                placeholder="Enter full name"
-                InputProps={{ sx: { height: '42px' } }}
               />
-            </Box>
+            </Grid>
             
-            <Box sx={{ 
-              flex: 1, 
-              minWidth: { xs: '100%', sm: '45%' }
-            }}>
-              <InputLabel htmlFor="contactNumber" sx={labelStyle}>Contact Number</InputLabel>
+            <Grid item xs={12} sm={6}>
+              <InputLabel 
+                htmlFor="contactNumber" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Contact Number
+              </InputLabel>
               <TextField
                 id="contactNumber"
                 name="contactNumber"
@@ -208,57 +186,56 @@ const SKPersonnelAccountForm = () => {
                 helperText={formErrors.contactNumber}
                 fullWidth
                 variant="outlined"
-                sx={{ 
+                placeholder="+63XXXXXXXXXX"
+                size="small"
+                sx={{
                   '& .MuiOutlinedInput-root': {
-                    ...inputStyle
-                  },
-                  '& .MuiFormHelperText-root': {
-                    fontSize: '12px',
-                    marginLeft: 0
+                    backgroundColor: 'white',
                   }
                 }}
-                placeholder="+63XXXXXXXXXX"
-                InputProps={{ sx: { height: '42px' } }}
               />
-            </Box>
-          </Box>
-          
-          {/* Second row */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', sm: 'row' },
-            flexWrap: 'wrap', 
-            gap: { xs: 1.5, sm: 2 }, 
-            mb: { xs: 1.5, sm: 2, md: 3 } 
-          }}>
-            <Box sx={{ 
-              flex: 1, 
-              minWidth: { xs: '100%', sm: '45%' }
-            }}>
-              <InputLabel htmlFor="role" sx={labelStyle}>Role</InputLabel>
-              <FormControl fullWidth variant="outlined">
+            </Grid>
+            
+            {/* Second row */}
+            <Grid item xs={12} sm={6}>
+              <InputLabel 
+                htmlFor="role" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Role
+              </InputLabel>
+              <FormControl fullWidth variant="outlined" size="small">
                 <Select
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  sx={{ 
-                    height: '42px',
-                    '& .MuiOutlinedInput-root': {
-                      ...inputStyle
-                    }
+                  sx={{
+                    backgroundColor: 'white',
                   }}
                 >
                   <MenuItem value="SK Personnel">SK Personnel</MenuItem>
                 </Select>
               </FormControl>
-            </Box>
+            </Grid>
             
-            <Box sx={{ 
-              flex: 1, 
-              minWidth: { xs: '100%', sm: '45%' }
-            }}>
-              <InputLabel htmlFor="location" sx={labelStyle}>Location</InputLabel>
+            <Grid item xs={12} sm={6}>
+              <InputLabel 
+                htmlFor="location" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Location
+              </InputLabel>
               <TextField
                 id="location"
                 name="location"
@@ -268,97 +245,104 @@ const SKPersonnelAccountForm = () => {
                 helperText={formErrors.location}
                 fullWidth
                 variant="outlined"
-                sx={{ 
+                placeholder="Enter location"
+                size="small"
+                sx={{
                   '& .MuiOutlinedInput-root': {
-                    ...inputStyle
-                  },
-                  '& .MuiFormHelperText-root': {
-                    fontSize: '12px',
-                    marginLeft: 0
+                    backgroundColor: 'white',
                   }
                 }}
-                placeholder="Enter location"
-                InputProps={{ sx: { height: '42px' } }}
               />
-            </Box>
-          </Box>
-          
-          {/* Third row */}
-          <Box sx={{ mb: { xs: 1.5, sm: 2, md: 3 } }}>
-            <InputLabel htmlFor="username" sx={labelStyle}>Username</InputLabel>
-            <TextField
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              error={Boolean(formErrors.username)}
-              helperText={formErrors.username}
-              fullWidth
-              variant="outlined"
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  ...inputStyle
-                },
-                '& .MuiFormHelperText-root': {
-                  fontSize: '12px',
-                  marginLeft: 0
-                }
-              }}
-              placeholder="Enter username"
-              InputProps={{ sx: { height: '42px' } }}
-            />
-          </Box>
-          
-          {/* Fourth row */}
-          <Box sx={{ mb: { xs: 3, sm: 3.5, md: 4 } }}>
-            <InputLabel htmlFor="password" sx={labelStyle}>Password</InputLabel>
-            <TextField
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              error={Boolean(formErrors.password)}
-              helperText={formErrors.password}
-              fullWidth
-              variant="outlined"
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  ...inputStyle
-                },
-                '& .MuiFormHelperText-root': {
-                  fontSize: '12px',
-                  marginLeft: 0
-                }
-              }}
-              placeholder="Enter password"
-              InputProps={{ sx: { height: '42px' } }}
-            />
-          </Box>
-          
-          {/* Submit button */}
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{
-                backgroundColor: '#dc3545',
-                color: 'white',
-                padding: { xs: '8px 16px', sm: '10px 24px' },
-                fontSize: { xs: '14px', sm: '16px' },
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                borderRadius: '4px',
-                '&:hover': {
-                  backgroundColor: '#c82333',
-                },
-              }}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </Button>
-          </Box>
-          
+            </Grid>
+            
+            {/* Third row */}
+            <Grid item xs={12}>
+              <InputLabel 
+                htmlFor="username" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Username
+              </InputLabel>
+              <TextField
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                error={Boolean(formErrors.username)}
+                helperText={formErrors.username}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter username"
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white',
+                  }
+                }}
+              />
+            </Grid>
+            
+            {/* Fourth row */}
+            <Grid item xs={12}>
+              <InputLabel 
+                htmlFor="password" 
+                sx={{ 
+                  marginBottom: '6px',
+                  fontSize: { xs: '13px', sm: '14px' },
+                  color: '#333',
+                  fontWeight: '500'
+                }}
+              >
+                Password
+              </InputLabel>
+              <TextField
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                error={Boolean(formErrors.password)}
+                helperText={formErrors.password}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter password"
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white',
+                  }
+                }}
+              />
+            </Grid>
+            
+            {/* Submit button */}
+            <Grid item xs={12} sx={{ textAlign: 'center', marginTop: '16px' }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  padding: { xs: '8px 16px', sm: '10px 24px' },
+                  fontSize: { xs: '14px', sm: '16px' },
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: '#c82333',
+                  },
+                }}
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </Button>
+            </Grid>
+          </Grid>
         </form>
         
         {submissionStatus === "error" && (
@@ -366,9 +350,9 @@ const SKPersonnelAccountForm = () => {
             color="error" 
             variant="body2" 
             sx={{ 
-              mt: 2, 
+              marginTop: '16px', 
               textAlign: 'center',
-              fontSize: isMobile ? '14px' : '16px'
+              width: '100%'
             }}
           >
             Failed to create account. Please try again.

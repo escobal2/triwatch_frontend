@@ -42,30 +42,30 @@ const SKPersonnelList = () => {
 
   return (
     <Container maxWidth={false} sx={{ 
-      paddingTop: { xs: 2, sm: 3, md: 4 },
-      paddingX: { xs: 1, sm: 2, md: 3 },
+      paddingTop: { xs: 1, sm: 2 },
+      paddingX: { xs: 0.5, sm: 1 },
       width: '100%'
     }}>
       {errorMessage && (
-        <Alert severity="error" sx={{ marginBottom: 2 }}>
+        <Alert severity="error" sx={{ marginBottom: 1 }}>
           {errorMessage}
         </Alert>
       )}
       {successMessage && (
-        <Alert severity="success" sx={{ marginBottom: 2 }}>
+        <Alert severity="success" sx={{ marginBottom: 1 }}>
           {successMessage}
         </Alert>
       )}
 
-      <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
+      <Grid container spacing={{ xs: 0.5, sm: 1 }}>
         {skPersonnel.map((person) => (
           <Grid item xs={12} sm={6} lg={4} xl={3} key={person.id}>
             <Card sx={{ 
               height: '100%', 
               display: 'flex', 
               flexDirection: 'column', 
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-              borderRadius: { xs: '8px', sm: '12px' },
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
+              borderRadius: { xs: '6px', sm: '8px' },
               overflow: 'hidden',
               width: '100%'
             }}>
@@ -73,20 +73,20 @@ const SKPersonnelList = () => {
               <Box sx={{ 
                 bgcolor: '#FF6A00', 
                 color: 'white', 
-                py: { xs: 0.5, sm: 0.75 }, 
-                px: { xs: 1, sm: 1.5 },
+                py: { xs: 0.25, sm: 0.5 }, 
+                px: { xs: 0.75, sm: 1 },
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: 0.5
+                gap: 0.25
               }}>
                 <Typography 
                   noWrap 
                   variant="subtitle1" 
                   fontWeight="bold" 
                   sx={{ 
-                    fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
+                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
                     flexGrow: 1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
@@ -100,11 +100,11 @@ const SKPersonnelList = () => {
                     sx={{ 
                       bgcolor: '#81c784',
                       color: '#2e7d32',
-                      px: 1,
-                      py: 0.25,
-                      borderRadius: '12px',
+                      px: 0.75,
+                      py: 0.15,
+                      borderRadius: '10px',
                       fontWeight: 'bold',
-                      fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                      fontSize: { xs: '0.55rem', sm: '0.65rem' },
                       whiteSpace: 'nowrap',
                       display: 'inline-block'
                     }}
@@ -117,25 +117,23 @@ const SKPersonnelList = () => {
               <CardContent sx={{ 
                 flexGrow: 1, 
                 p: 0, 
-                "&:last-child": { pb: 0 },
-                overflowY: 'auto'
+                "&:last-child": { pb: 0 }
               }}>
                 {/* Personnel Information Section */}
-                <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#f9f9f9' }}>
+                <Box sx={{ p: { xs: 0.75, sm: 1.25 }, bgcolor: '#f9f9f9' }}>
                   <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
                     mb: 0.5
                   }}>
                     Personal Information
                   </Typography>
                   
-                  {/* Removed nested Grid here */}
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.75 }}>
                     <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                      <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                      <PersonIcon sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 0.1 }} />
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      width: { xs: '40px', sm: '50px' },
+                      width: { xs: '36px', sm: '42px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -160,10 +158,10 @@ const SKPersonnelList = () => {
                   
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                     <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                      <PhoneIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                      <PhoneIcon sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 0.1 }} />
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      width: { xs: '40px', sm: '50px' },
+                      width: { xs: '36px', sm: '42px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -190,21 +188,20 @@ const SKPersonnelList = () => {
                 <Divider />
                 
                 {/* Account Details */}
-                <Box sx={{ p: { xs: 1, sm: 1.5 }, bgcolor: '#e3f2fd' }}>
+                <Box sx={{ p: { xs: 0.75, sm: 1.25 }, bgcolor: '#e3f2fd' }}>
                   <Typography variant="subtitle2" color="#0384fc" fontWeight="bold" sx={{ 
-                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
                     mb: 0.5
                   }}>
                     Account Details
                   </Typography>
                   
-                  {/* Removed nested Grid here too */}
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.75 }}>
                     <Box sx={{ flexShrink: 0, mr: 0.5 }}>
-                      <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mt: 0.1 }} />
+                      <BadgeIcon sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 0.1 }} />
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      width: { xs: '40px', sm: '50px' },
+                      width: { xs: '36px', sm: '42px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -215,11 +212,11 @@ const SKPersonnelList = () => {
                       fontWeight="medium" 
                       sx={{ 
                         fontFamily: 'monospace',
-                        letterSpacing: '0.5px',
+                        letterSpacing: '0.25px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         wordBreak: 'break-all',
-                        flexGrow: 1
+                        maxWidth: '100%'
                       }}
                     >
                       {person.id}
@@ -227,11 +224,11 @@ const SKPersonnelList = () => {
                   </Box>
                   
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <Box sx={{ width: '0.9rem', flexShrink: 0, mr: 0.5 }}>
+                    <Box sx={{ width: '0.85rem', flexShrink: 0, mr: 0.5 }}>
                       {/* Spacer to align with icons above */}
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ 
-                      width: { xs: '40px', sm: '50px' },
+                      width: { xs: '36px', sm: '42px' },
                       flexShrink: 0,
                       pt: 0.1
                     }}>
@@ -247,8 +244,8 @@ const SKPersonnelList = () => {
                             person.role === 'Admin' ? '#ffcdd2' : 
                             person.role === 'Officer' ? '#c8e6c9' : '#e1f5fe',
                           px: 0.5,
-                          py: 0.2,
-                          borderRadius: '4px',
+                          py: 0.1,
+                          borderRadius: '3px',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           maxWidth: '100%'
@@ -264,24 +261,24 @@ const SKPersonnelList = () => {
                 
                 {/* Action button */}
                 <Box sx={{ 
-                  p: { xs: 0.75, sm: 1 },
+                  p: { xs: 0.5, sm: 0.75 },
                   display: 'flex', 
                   justifyContent: 'center',
                   bgcolor: '#f5f5f5',
                   width: '100%'
                 }}>
                   <Button
-                    startIcon={<DeleteIcon sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }} />}
+                    startIcon={<DeleteIcon sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }} />}
                     onClick={() => deleteAccount(person.username)}
                     variant="contained"
                     size="small"
                     sx={{
                       backgroundColor: '#DB0606',
-                      borderRadius: '16px',
+                      borderRadius: '12px',
                       '&:hover': { backgroundColor: '#b20000' },
                       width: '100%',
-                      fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                      py: { xs: 0.5, sm: 0.75 },
+                      fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                      py: { xs: 0.25, sm: 0.5 },
                       textOverflow: 'ellipsis',
                       overflow: 'hidden',
                       whiteSpace: 'nowrap'
