@@ -60,7 +60,7 @@ const CommuterLogin = () => {
         id: response.data.user.id,
         name: response.data.user.name,
         username: response.data.user.username,
-        contactnum: response.data.user.contactnum, // Adding contact number
+        contactnum: response.data.user.contactnum, // Ensure this matches your backend field name
         verified: response.data.verified
       }));
       
